@@ -3,7 +3,8 @@ name: Add task
 description: A person can add a new, incomplete task to the todo list.
 trigger: A person starts composing a task in the New task field.
 paths:
-  - name: Task added
+  - id: task-added
+    name: Task added
     when: The field contains at least one non-whitespace character.
     steps:
       - The person activates Add task.
@@ -16,8 +17,12 @@ paths:
         role: Accepts the nonblank draft, adds the task, and clears the input.
       - function: todo-interface
         role: Renders the task list and remaining count.
+    verifiedBy:
+      - test: add-task-trims-input
+        checks: A new incomplete task has trimmed text, the count rises, and the input clears.
 
-  - name: Blank task
+  - id: blank-task
+    name: Blank task
     when: The field is empty or contains only whitespace.
     steps:
       - Add task remains unavailable.
@@ -26,3 +31,6 @@ paths:
     implementedBy:
       - function: todo-interface
         role: Disables Add task when the trimmed draft is empty.
+    verifiedBy:
+      - test: add-task-blocks-blank-input
+        checks: Empty and whitespace-only input disable Add task and leave the list and count unchanged.

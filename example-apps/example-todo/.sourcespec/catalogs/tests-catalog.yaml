@@ -1,0 +1,28 @@
+# Hand-authored catalog of automated tests in this app.
+# Each entry follows ../../../../schema/tests.yaml; the tests list itself
+# does not have a catalog schema yet. Locations are relative to the app root.
+# A catalog entry does not record whether the test currently passes.
+tests:
+  - id: add-task-trims-input
+    name: adds a task with trimmed text and clears the input
+    description: Checks the new task is incomplete, has trimmed text, increases the remaining count, and clears the input.
+    kind: component
+    location: src/App.test.tsx
+
+  - id: add-task-blocks-blank-input
+    name: does not allow a blank task
+    description: Checks empty and whitespace-only input leave Add task disabled, with no task added or remaining-count change.
+    kind: component
+    location: src/App.test.tsx
+
+  - id: complete-task-updates-count
+    name: marks a task complete and updates the remaining count
+    description: Checks marking a task complete checks its box and reduces the remaining count.
+    kind: component
+    location: src/App.test.tsx
+
+  - id: remove-task-clears-list
+    name: removes a task from the list
+    description: Checks removing a task restores the empty list and zero remaining count.
+    kind: component
+    location: src/App.test.tsx

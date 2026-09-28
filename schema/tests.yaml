@@ -1,0 +1,30 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: Test
+description: A test or check that can provide evidence for intended behavior.
+type: object
+required:
+  - id
+  - name
+  - description
+  - kind
+properties:
+  id:
+    type: string
+    minLength: 1
+    description: A unique identifier within the application that stays stable across test moves or renames.
+  name:
+    type: string
+    minLength: 1
+    description: The human-readable name of the test.
+  description:
+    type: string
+    minLength: 1
+    description: What this test checks.
+  kind:
+    type: string
+    minLength: 1
+    description: The style of check, such as unit, component, integration, or end-to-end.
+  location:
+    type: string
+    minLength: 1
+    description: The source file for an implemented test, when available.

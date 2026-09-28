@@ -1,5 +1,5 @@
 # Hand-authored catalog of named functions declared in src/App.tsx.
-# Each entry follows ../../../schema/functions.yaml; the functions list itself
+# Each entry follows ../../../../schema/functions.yaml; the functions list itself
 # does not have a catalog schema yet. Locations are relative to this app root.
 # Anonymous callbacks and imported functions are outside this first pass.
 functions:
