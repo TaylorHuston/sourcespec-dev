@@ -1,0 +1,59 @@
+:root {
+  font-family: system-ui, sans-serif;
+  color: #203047;
+  background: #f5f7fa;
+  font-synthesis: none;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; }
+button, input { font: inherit; }
+
+.app {
+  width: min(100% - 2rem, 38rem);
+  margin: 4rem auto;
+  padding: 2rem;
+  background: white;
+  border: 1px solid #d7e0e8;
+  border-radius: 0.75rem;
+}
+
+h1 { margin: 0; font-size: 1.75rem; }
+.intro { color: #526479; line-height: 1.5; }
+.add-form { margin-top: 2rem; }
+.add-form > label { display: block; margin-bottom: 0.5rem; font-weight: 600; }
+.add-controls { display: flex; gap: 0.5rem; }
+.add-controls input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.7rem;
+  border: 1px solid #8899ac;
+  border-radius: 0.4rem;
+}
+button {
+  padding: 0.7rem 0.9rem;
+  border: 1px solid #315a89;
+  border-radius: 0.4rem;
+  background: #315a89;
+  color: white;
+  cursor: pointer;
+}
+button:disabled { opacity: 0.55; cursor: not-allowed; }
+button:focus-visible, input:focus-visible { outline: 3px solid #e5a742; outline-offset: 2px; }
+.list-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-top: 2rem; }
+h2 { margin: 0 0 0.75rem; font-size: 1.1rem; }
+.list-heading span { color: #526479; }
+.empty { margin-bottom: 0; color: #526479; }
+.todo-list { list-style: none; margin: 0; padding: 0; }
+.todo-list li { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.7rem 0; border-top: 1px solid #e3e9ee; }
+.todo-label { display: flex; align-items: center; gap: 0.7rem; min-width: 0; cursor: pointer; }
+.todo-label span { overflow-wrap: anywhere; }
+.todo-label input { width: 1.1rem; height: 1.1rem; margin: 0; flex: none; accent-color: #315a89; }
+.completed { color: #65758a; text-decoration: line-through; }
+button.remove { flex: none; padding: 0.4rem 0.65rem; color: #315a89; border-color: #b8c8d8; background: white; }
+button.remove:hover { background: #eff4f9; }
+
+@media (max-width: 34rem) {
+  .app { margin: 1rem auto; padding: 1.25rem; }
+  .add-controls { flex-direction: column; }
+}

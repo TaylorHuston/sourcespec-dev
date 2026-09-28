@@ -1,0 +1,52 @@
+# Hand-authored catalog of named functions declared in src/App.tsx.
+# Each entry follows ../../../schema/functions.yaml; the functions list itself
+# does not have a catalog schema yet. Locations are relative to this app root.
+# Anonymous callbacks and imported functions are outside this first pass.
+functions:
+  - id: todo-interface
+    name: App
+    description: Renders the todo interface and manages the in-memory task list and draft input.
+    location: 'src/App.tsx#App'
+    parameters: []
+    return:
+      type: React.JSX.Element
+      description: The rendered todo interface.
+
+  - id: add-task-submission
+    name: addTodo
+    description: Prevents the form from reloading the page. Adds a task from the trimmed draft when nonempty, then clears the input.
+    location: 'src/App.tsx#App.addTodo'
+    parameters:
+      - name: event
+        type: FormEvent<HTMLFormElement>
+        description: The add-task form submission event.
+        required: true
+    return:
+      type: void
+      description: No return value.
+
+  - id: toggle-task-completion
+    name: toggleTodo
+    description: Flips the completed status of the task with the given ID in component state.
+    location: 'src/App.tsx#App.toggleTodo'
+    parameters:
+      - name: id
+        type: string
+        description: The ID of the task whose completed state should change.
+        required: true
+    return:
+      type: void
+      description: No return value.
+
+  - id: remove-task
+    name: removeTodo
+    description: Removes the task with the given ID from component state.
+    location: 'src/App.tsx#App.removeTodo'
+    parameters:
+      - name: id
+        type: string
+        description: The ID of the task to remove.
+        required: true
+    return:
+      type: void
+      description: No return value.
