@@ -1,0 +1,52 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: Function
+type: object
+required:
+  - name
+  - parameters
+  - return
+properties:
+  name:
+    type: string
+    description: The name of the function
+  location:
+    type: string
+    description: The location of the function, when implemented
+  parameters:
+    type: array
+    description: The parameters of the function, in order
+    items:
+      type: object
+      required:
+        - name
+        - type
+        - description
+        - required
+      properties:
+        name:
+          type: string
+          description: The name of the parameter
+        type:
+          type: string
+          description: The type of the parameter
+        description:
+          type: string
+          description: The description of the parameter
+        default:
+          type: string
+          description: The default value of the parameter
+        required:
+          type: boolean
+          description: Whether the parameter is required when calling the function
+  return:
+    type: object
+    required:
+      - type
+      - description
+    properties:
+      type:
+        type: string
+        description: The return type of the function
+      description:
+        type: string
+        description: The description of the return value
