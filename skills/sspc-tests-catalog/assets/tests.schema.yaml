@@ -1,0 +1,38 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: Test
+description: A test or check that can provide evidence for intended behavior.
+type: object
+required:
+  - id
+  - name
+  - description
+  - kind
+properties:
+  id:
+    type: string
+    minLength: 1
+    description: A unique identifier within the application that stays stable across test moves or renames.
+  name:
+    type: string
+    minLength: 1
+    description: The human-readable name of the test declaration, without its enclosing suite names.
+  suite:
+    type: array
+    description: Enclosing suite names, outermost first; omitted for a top-level test.
+    items:
+      type: string
+      minLength: 1
+  description:
+    type: string
+    minLength: 1
+    description: What this test checks.
+  kind:
+    type: string
+    minLength: 1
+    description: >-
+      The check level, such as unit, component, api, integration, contract, or end-to-end.
+      Use unclassified only when source evidence is insufficient and request review.
+  location:
+    type: string
+    minLength: 1
+    description: The source file for an implemented test, when available.

@@ -15,7 +15,13 @@ properties:
   name:
     type: string
     minLength: 1
-    description: The human-readable name of the test.
+    description: The human-readable name of the test declaration, without its enclosing suite names.
+  suite:
+    type: array
+    description: Enclosing suite names, outermost first; omitted for a top-level test.
+    items:
+      type: string
+      minLength: 1
   description:
     type: string
     minLength: 1
@@ -23,7 +29,9 @@ properties:
   kind:
     type: string
     minLength: 1
-    description: The style of check, such as unit, component, integration, or end-to-end.
+    description: >-
+      The check level, such as unit, component, api, integration, contract, or end-to-end.
+      Use unclassified only when source evidence is insufficient and request review.
   location:
     type: string
     minLength: 1

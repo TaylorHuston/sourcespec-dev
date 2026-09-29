@@ -122,6 +122,15 @@ function conciseType(type, node, checker) {
   return 'object'
 }
 
+// This adapter classifies source ownership, not whether a callable is itself a test.
+// Ambiguous paths stay visible for review instead of silently becoming application code.
+function sourceScopeFor(location) {
+  if (/(?:^|\/)(?:__tests__|tests?)\//.test(location) || /\.(?:test|spec)\.[cm]?[jt]sx?$/.test(location)) return 'test'
+  if (/(?:^|\/)(?:scripts|tools)\//.test(location) || /(?:^|\/)[^/]+\.config\.[cm]?[jt]sx?$/.test(location)) return 'tooling'
+  if (/^(?:src|server|app|lib)\//.test(location)) return 'application'
+  return 'unclassified'
+}
+
 function legacyLocation(node, file, source) {
   if (declaredName(node)) {
     const names = []
@@ -195,6 +204,7 @@ for (const absoluteFile of files) {
         name,
         ...(old?.description ? { description: old.description } : {}),
         location: file,
+        sourceScope: old?.sourceScope ?? sourceScopeFor(file),
         ...(context ? { context } : {}),
         parameters,
         return: {
@@ -206,6 +216,13 @@ for (const absoluteFile of files) {
     ts.forEachChild(node, visit)
   }
   visit(source)
+}
+
+function hasSeparatedEntries(text, count) {
+  const lines = text.split(/\r?\n/)
+  const starts = lines.flatMap((line, index) => line.startsWith('  - id:') ? [index] : [])
+  return starts.length === count && starts.every((index, position) => position === 0 ||
+    (lines[index - 1] === '' && lines[index - 2] !== ''))
 }
 
 const missing = previous.filter((entry) => !usedIds.has(entry.id))
@@ -221,8 +238,9 @@ if (missing.length && prune) {
   if (stillLinked.length) throw new Error(`Cannot retire behavior-linked function IDs: ${stillLinked.map((item) => item.id).join(', ')}`)
 }
 if (mode === '--check') {
-  if (!isDeepStrictEqual(previous, records)) {
-    console.error('Function catalog differs from the app-owned function inventory. Run npm run catalog:refresh and review the diff.')
+  if (!isDeepStrictEqual(previous, records) || !existsSync(catalogFile) ||
+      !hasSeparatedEntries(readFileSync(catalogFile, 'utf8'), records.length)) {
+    console.error('Function catalog differs from the app-owned inventory or lacks a blank line between entries. Run npm run catalog:refresh and review the diff.')
     process.exitCode = 1
   } else {
     console.log(`Function catalog covers all ${records.length} app-owned function definitions in ${files.length} source files.`)
