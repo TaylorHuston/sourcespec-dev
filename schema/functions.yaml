@@ -1,6 +1,7 @@
 $schema: https://json-schema.org/draft/2020-12/schema
 title: Function
 type: object
+additionalProperties: false
 required:
   - id
   - name
@@ -10,16 +11,23 @@ properties:
   id:
     type: string
     minLength: 1
-    description: A unique identifier within the application that stays stable across moves or renames while the function keeps the same responsibility
+    description: Unique application identifier, independent of source position; preserve across moves or renames only after confirming the responsibility is unchanged
   name:
-    type: string
-    description: The name of the function
+    type:
+      - string
+      - 'null'
+    description: The declared name, or null for an anonymous function or callback
   description:
     type: string
     description: One or two sentences describing what the function does
   location:
     type: string
-    description: The location of the function, when implemented
+    minLength: 1
+    description: Path to the owning source file, relative to the application root; no line or character offset
+  context:
+    type: string
+    minLength: 1
+    description: Optional searchable enclosing symbol or call-site hint, especially for anonymous functions; not an execution trace
   parameters:
     type: array
     description: The parameters of the function, in order
@@ -28,7 +36,6 @@ properties:
       required:
         - name
         - type
-        - description
         - required
       properties:
         name:
@@ -50,11 +57,10 @@ properties:
     type: object
     required:
       - type
-      - description
     properties:
       type:
         type: string
-        description: The return type of the function
+        description: Concise TypeScript-facing call return type; preserve promises, arrays, unions, nullability and useful named types, but summarize anonymous structural objects as object instead of storing expanded compiler output
       description:
         type: string
         description: The description of the return value

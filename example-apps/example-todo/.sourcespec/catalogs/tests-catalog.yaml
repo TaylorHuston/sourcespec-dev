@@ -3,9 +3,15 @@
 # does not have a catalog schema yet. Locations are relative to the app root.
 # A catalog entry does not record whether the test currently passes.
 tests:
+  - id: load-existing-tasks
+    name: loads existing tasks
+    description: Checks that a task returned from the local API appears with its saved completion state.
+    kind: component
+    location: src/App.test.tsx
+
   - id: add-task-trims-input
     name: adds a task with trimmed text and clears the input
-    description: Checks the new task is incomplete, has trimmed text, increases the remaining count, and clears the input.
+    description: Checks submission trims the draft and displays the new incomplete task, updated count, and cleared input.
     kind: component
     location: src/App.test.tsx
 
@@ -17,12 +23,42 @@ tests:
 
   - id: complete-task-updates-count
     name: marks a task complete and updates the remaining count
-    description: Checks marking a task complete checks its box and reduces the remaining count.
+    description: Checks that updating completion through the API changes the checkbox and remaining count.
     kind: component
     location: src/App.test.tsx
 
   - id: remove-task-clears-list
     name: removes a task from the list
-    description: Checks removing a task restores the empty list and zero remaining count.
+    description: Checks that a successful API deletion restores the empty list and zero remaining count.
     kind: component
     location: src/App.test.tsx
+
+  - id: add-task-save-failure
+    name: keeps the draft when saving fails
+    description: Checks a failed create request reports an error without losing the draft or showing an unsaved task.
+    kind: component
+    location: src/App.test.tsx
+
+  - id: sqlite-tasks-survive-reopen
+    name: keeps tasks and completion state after reopening the SQLite database
+    description: Checks a task and its completion state persist in the SQLite file across connections.
+    kind: integration
+    location: server/todo-api.test.ts
+
+  - id: api-validates-and-persists-tasks
+    name: validates and persists create, list, update, and delete requests
+    description: Checks the local HTTP API rejects blank text and writes and reads task changes through SQLite.
+    kind: integration
+    location: server/todo-api.test.ts
+
+  - id: openapi-contract-valid
+    name: validates the local OpenAPI contract and its operation IDs
+    description: Validates the root OpenAPI document and its four unique HTTP operation IDs.
+    kind: contract
+    location: server/openapi.test.ts
+
+  - id: behavior-catalog-links-resolve
+    name: resolves behavior case links against the app catalogs
+    description: Checks Add task case function and test links resolve to catalog entries without implying an execution sequence.
+    kind: contract
+    location: server/behavior.test.ts

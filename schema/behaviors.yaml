@@ -1,6 +1,6 @@
 $schema: https://json-schema.org/draft/2020-12/schema
-title: Flow
-description: An intended path from a trigger to observable outcomes, with optional links to the current implementation.
+title: Behavior
+description: Intended behavior cases and outcomes, with optional debugging and test pointers; no execution order or completeness is implied.
 type: object
 additionalProperties: false
 required:
@@ -8,12 +8,12 @@ required:
   - name
   - description
   - trigger
-  - paths
+  - cases
 properties:
   id:
     type: string
     minLength: 1
-    description: A stable identifier for this flow within the application.
+    description: A stable identifier for this behavior within the application.
   name:
     type: string
     minLength: 1
@@ -21,15 +21,15 @@ properties:
   description:
     type: string
     minLength: 1
-    description: The goal this flow supports.
+    description: The goal this behavior supports.
   trigger:
     type: string
     minLength: 1
-    description: The user or system event that starts the flow.
-  paths:
+    description: The user or system event relevant to this behavior.
+  cases:
     type: array
     minItems: 1
-    description: The meaningful alternatives from the trigger to an outcome.
+    description: Distinct conditions and expected outcomes; the cases do not prescribe an execution sequence.
     items:
       type: object
       additionalProperties: false
@@ -37,39 +37,31 @@ properties:
         - id
         - name
         - when
-        - steps
         - outcomes
       properties:
         id:
           type: string
           minLength: 1
-          description: A stable identifier for this path within its flow.
+          description: A stable identifier for this case within its behavior.
         name:
           type: string
           minLength: 1
-          description: A human-readable name for this path.
+          description: A human-readable name for this case.
         when:
           type: string
           minLength: 1
-          description: The condition under which this path applies, in plain language.
-        steps:
-          type: array
-          minItems: 1
-          description: Ordered, meaningful actions or observable checkpoints; not function calls.
-          items:
-            type: string
-            minLength: 1
+          description: The condition under which this case applies, in plain language.
         outcomes:
           type: array
           minItems: 1
-          description: Observable results expected when this path finishes.
+          description: Observable results expected for this case.
           items:
             type: string
             minLength: 1
         implementedBy:
           type: array
           minItems: 1
-          description: Current implementation pointers for this path; these do not define its intended behavior.
+          description: Curated function IDs useful for investigating this case; not an exhaustive call trace or an ordered sequence.
           items:
             type: object
             additionalProperties: false
@@ -84,11 +76,11 @@ properties:
               role:
                 type: string
                 minLength: 1
-                description: Why this function is relevant to the path.
+                description: Why this function is relevant to the case.
         verifiedBy:
           type: array
           minItems: 1
-          description: Tests intended to check this path; passing status belongs to test runs, not this link.
+          description: Tests intended to check this case; passing status belongs to test runs, not this link.
           items:
             type: object
             additionalProperties: false
@@ -103,4 +95,4 @@ properties:
               checks:
                 type: string
                 minLength: 1
-                description: What this test checks for this path.
+                description: What this test checks for this case.

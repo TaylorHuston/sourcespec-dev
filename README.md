@@ -3,7 +3,7 @@
 This is a private playground for experimenting with SourceSpec. Initial work targets TypeScript/React apps while exploring a format that could work across languages and frameworks. This repo is not a commitment to a production or deployment home.
 
 - `schema/` - Early drafts of schemas for SourceSpec's concepts.
-- `example-apps/example-todo/` - A basic in-memory Vite/React todo app with tests and hand-authored specs under `.sourcespec/`.
+- `example-apps/example-todo/` - A local SQLite-backed Vite/React todo app with an `openapi.yaml` HTTP contract, tests, a complete generated function inventory, and hand-authored behavior cases/test records under `.sourcespec/`.
 
 YAML filenames use kebab-case (for example, `functions-catalog.yaml`, `tests-catalog.yaml`, and `add-task.yaml`); schema-defined field names keep their existing casing.
 

@@ -1,0 +1,155 @@
+openapi: 3.1.1
+info:
+  title: Local Todo API
+  version: 0.1.0
+  description: Same-origin API backed by a local SQLite file. Intended for this single-user scratch app, not a deployed service.
+servers:
+  - url: /
+    description: The local Vite development or preview server.
+paths:
+  /api/todos:
+    get:
+      operationId: listTodos
+      summary: List saved tasks
+      responses:
+        '200':
+          description: Saved tasks in insertion order.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Todo'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      operationId: createTodo
+      summary: Create a task
+      description: Trims surrounding whitespace before saving. Request bodies larger than 16 KiB are rejected.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTodoInput'
+      responses:
+        '201':
+          description: Created task.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '413':
+          $ref: '#/components/responses/TooLarge'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/todos/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID of the saved task.
+        schema:
+          type: string
+    patch:
+      operationId: setTodoCompleted
+      summary: Change a task's completion state
+      description: Request bodies larger than 16 KiB are rejected.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTodoInput'
+      responses:
+        '200':
+          description: Updated task.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '413':
+          $ref: '#/components/responses/TooLarge'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      operationId: removeTodo
+      summary: Remove a task
+      responses:
+        '204':
+          description: Task removed; no response body.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+components:
+  schemas:
+    Todo:
+      type: object
+      additionalProperties: false
+      required: [id, text, completed]
+      properties:
+        id:
+          type: string
+          format: uuid
+        text:
+          type: string
+          minLength: 1
+          description: Task text after trimming surrounding whitespace.
+        completed:
+          type: boolean
+    CreateTodoInput:
+      type: object
+      required: [text]
+      properties:
+        text:
+          type: string
+          minLength: 1
+          pattern: '\S'
+          description: Must contain a non-whitespace character; surrounding whitespace is trimmed before saving.
+    UpdateTodoInput:
+      type: object
+      required: [completed]
+      properties:
+        completed:
+          type: boolean
+    Error:
+      type: object
+      additionalProperties: false
+      required: [error]
+      properties:
+        error:
+          type: string
+  responses:
+    BadRequest:
+      description: Invalid JSON or invalid task input.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Task not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    TooLarge:
+      description: Request body is too large.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    ServerError:
+      description: Local API could not process the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

@@ -1,52 +1,731 @@
-# Hand-authored catalog of named functions declared in src/App.tsx.
-# Each entry follows ../../../../schema/functions.yaml; the functions list itself
-# does not have a catalog schema yet. Locations are relative to this app root.
-# Anonymous callbacks and imported functions are outside this first pass.
+# Generated function inventory. IDs and prose are preserved when identities match.
+# Includes app-owned runtime, config, and test functions (including anonymous callbacks).
+# Location is a file path; context is a search hint, not a guaranteed identity across refactors.
 functions:
+  - id: auto-server-behavior-test-ts-10-61
+    name: null
+    location: server/behavior.test.ts
+    context: it(resolves behavior case links against the app catalogs)
+    parameters: []
+    return:
+      type: void
+
+  - id: auto-server-behavior-test-ts-20-125
+    name: null
+    location: server/behavior.test.ts
+    context: it(resolves behavior case links against the app catalogs) > functionIds variable > new Set >
+      parse(readFileSync(functionsFile, utf8)).functions.map
+    parameters:
+      - name: entry
+        type: "{ id: string; }"
+        required: true
+    return:
+      type: string
+
+  - id: auto-server-behavior-test-ts-21-109
+    name: null
+    location: server/behavior.test.ts
+    context: it(resolves behavior case links against the app catalogs) > testIds variable > new Set >
+      parse(readFileSync(testsFile, utf8)).tests.map
+    parameters:
+      - name: entry
+        type: "{ id: string; }"
+        required: true
+    return:
+      type: string
+
+  - id: auto-server-behavior-test-ts-24-37
+    name: null
+    location: server/behavior.test.ts
+    context: it(resolves behavior case links against the app catalogs) > expect > new Set > behavior.cases.map
+    parameters:
+      - name: entry
+        type: "{ id: string; implementedBy: { function: string; role: string; }[]; verifiedBy: { test: string; checks:
+          string; }[]; steps?: unknown; apiOperations?: unknown; }"
+        required: true
+    return:
+      type: string
+
+  - id: auto-server-openapi-test-ts-11-1
+    name: validatedApi
+    location: server/openapi.test.ts
+    parameters: []
+    return:
+      type: Promise<ApiDocument>
+
+  - id: auto-server-openapi-test-ts-15-66
+    name: null
+    location: server/openapi.test.ts
+    context: it(validates the local OpenAPI contract and its operation IDs)
+    parameters: []
+    return:
+      type: Promise<void>
+
+  - id: auto-server-openapi-test-ts-19-56
+    name: null
+    location: server/openapi.test.ts
+    context: it(validates the local OpenAPI contract and its operation IDs) > operations variable >
+      Object.entries(api.paths).flatMap
+    parameters:
+      - name: "[path, item]"
+        type: "[string, Record<string, { operationId?: string; }>]"
+        required: true
+    return:
+      type: object[]
+
+  - id: auto-server-openapi-test-ts-20-39
+    name: null
+    location: server/openapi.test.ts
+    context: it(validates the local OpenAPI contract and its operation IDs) > operations variable >
+      Object.entries(api.paths).flatMap > Object.entries(item ?? {}).filter
+    parameters:
+      - name: "[method]"
+        type: "[string, { operationId?: string; }]"
+        required: true
+    return:
+      type: boolean
+
+  - id: auto-server-openapi-test-ts-21-12
+    name: null
+    location: server/openapi.test.ts
+    context: it(validates the local OpenAPI contract and its operation IDs) > operations variable >
+      Object.entries(api.paths).flatMap > Object.entries(item ?? {}).filter().map
+    parameters:
+      - name: "[method, value]"
+        type: "[string, { operationId?: string; }]"
+        required: true
+    return:
+      type: object
+
+  - id: auto-server-openapi-test-ts-29-33
+    name: null
+    location: server/openapi.test.ts
+    context: it(validates the local OpenAPI contract and its operation IDs) > expect > new Set > operations.map
+    parameters:
+      - name: item
+        type: "{ path: string; method: string; id: string | undefined; }"
+        required: true
+    return:
+      type: undefined | string
+
+  - id: auto-server-todo-api-test-ts-9-76
+    name: null
+    location: server/todo-api.test.ts
+    context: it(keeps tasks and completion state after reopening the SQLite database)
+    parameters: []
+    return:
+      type: void
+
+  - id: auto-server-todo-api-test-ts-25-72
+    name: null
+    location: server/todo-api.test.ts
+    context: it(validates and persists create, list, update, and delete requests)
+    parameters: []
+    return:
+      type: Promise<void>
+
+  - id: auto-server-todo-api-test-ts-28-27
+    name: null
+    location: server/todo-api.test.ts
+    context: it(validates and persists create, list, update, and delete requests) > new Promise > invokes
+      server.listen
+    parameters:
+      - name: resolve
+        type: "(value: void | PromiseLike<void>) => void"
+        required: true
+    return:
+      type: Server
+
+  - id: auto-server-todo-api-test-ts-58-29
+    name: null
+    location: server/todo-api.test.ts
+    context: it(validates and persists create, list, update, and delete requests) > new Promise > invokes server.close
+    parameters:
+      - name: resolve
+        type: "(value: void | PromiseLike<void>) => void"
+        required: true
+      - name: reject
+        type: "(reason?: any) => void"
+        required: true
+    return:
+      type: Server
+
+  - id: auto-server-todo-api-test-ts-58-63
+    name: null
+    location: server/todo-api.test.ts
+    context: it(validates and persists create, list, update, and delete requests) > new Promise > server.close
+    parameters:
+      - name: error
+        type: Error | undefined
+        required: true
+    return:
+      type: void
+
+  - id: auto-server-todo-api-ts-5-3
+    name: constructor
+    location: server/todo-api.ts
+    context: RequestError
+    parameters:
+      - name: status
+        type: number
+        required: true
+      - name: message
+        type: string
+        required: true
+    return:
+      type: RequestError
+
+  - id: auto-server-todo-api-ts-10-1
+    name: sendJson
+    location: server/todo-api.ts
+    parameters:
+      - name: response
+        type: ServerResponse<IncomingMessage>
+        required: true
+      - name: status
+        type: number
+        required: true
+      - name: body
+        type: unknown
+        required: true
+    return:
+      type: void
+
+  - id: auto-server-todo-api-ts-18-1
+    name: readJson
+    location: server/todo-api.ts
+    parameters:
+      - name: request
+        type: IncomingMessage
+        required: true
+    return:
+      type: Promise<unknown>
+
+  - id: auto-server-todo-api-ts-33-1
+    name: createTodoHandler
+    location: server/todo-api.ts
+    parameters:
+      - name: store
+        type: '{ listTodos: () =>
+          import("/Users/taylor/src/my-life/spaces/sourcespec/example-apps/example-todo/server/todo-store").Todo[];
+          createTodo: (text: string) =>
+          import("/Users/taylor/src/my-life/spaces/sourcespec/example-apps/example-todo/server/todo-store").Todo;
+          setTodoCompleted: (id: string, completed: boolean) =>
+          import("/Users/taylor/src/my-life/spaces/sourcespec/example-apps/example-todo/server/todo-store").Todo
+          | null; removeTodo: (id: string) => boolean; close: () => void; }'
+        required: true
+    return:
+      type: "(request: IncomingMessage, response: ServerResponse) => Promise<void>"
+
+  - id: local-api-handler
+    name: handleTodoRequest
+    description: Validates local todo requests and routes them to the SQLite-backed store.
+    location: server/todo-api.ts
+    context: createTodoHandler > return
+    parameters:
+      - name: request
+        type: IncomingMessage
+        description: The incoming API request.
+        required: true
+      - name: response
+        type: ServerResponse<IncomingMessage>
+        description: The response to write.
+        required: true
+    return:
+      type: Promise<void>
+      description: Resolves after the request has been handled.
+
+  - id: open-todo-store
+    name: openTodoStore
+    description: Opens a local SQLite database and creates the todos table if needed.
+    location: server/todo-store.ts
+    parameters:
+      - name: filename
+        type: string
+        description: "The SQLite file path or :memory: for tests."
+        required: true
+    return:
+      type: TodoStore
+      description: Operations for working with the opened database.
+
+  - id: auto-server-todo-store-ts-19-3
+    name: toTodo
+    location: server/todo-store.ts
+    context: openTodoStore
+    parameters:
+      - name: row
+        type: Record<string, unknown>
+        required: true
+    return:
+      type: Todo
+
+  - id: store-list-tasks
+    name: listTodos
+    description: Reads the saved tasks from SQLite in insertion order.
+    location: server/todo-store.ts
+    context: openTodoStore
+    parameters: []
+    return:
+      type: Todo[]
+      description: The saved tasks.
+
+  - id: store-create-task
+    name: createTodo
+    description: Inserts a new incomplete task in SQLite with a generated ID.
+    location: server/todo-store.ts
+    context: openTodoStore
+    parameters:
+      - name: text
+        type: string
+        description: The validated, trimmed task text.
+        required: true
+    return:
+      type: Todo
+      description: The task that was saved.
+
+  - id: store-update-task
+    name: setTodoCompleted
+    description: Updates the completion state of a saved task.
+    location: server/todo-store.ts
+    context: openTodoStore
+    parameters:
+      - name: id
+        type: string
+        description: The task ID.
+        required: true
+      - name: completed
+        type: boolean
+        description: The desired completion state.
+        required: true
+    return:
+      type: Todo | null
+      description: The updated task, or null if it does not exist.
+
+  - id: store-delete-task
+    name: removeTodo
+    description: Deletes a saved task by ID.
+    location: server/todo-store.ts
+    context: openTodoStore
+    parameters:
+      - name: id
+        type: string
+        description: The task ID.
+        required: true
+    return:
+      type: boolean
+      description: Whether a task was deleted.
+
+  - id: auto-server-todo-store-ts-43-72
+    name: null
+    location: server/todo-store.ts
+    context: openTodoStore > return > close property
+    parameters: []
+    return:
+      type: void
+
+  - id: auto-src-app-test-tsx-9-23
+    name: null
+    location: src/App.test.tsx
+    context: vi.mock(./todo-api)
+    parameters: []
+    return:
+      type: object
+
+  - id: auto-src-app-test-tsx-16-12
+    name: null
+    location: src/App.test.tsx
+    context: beforeEach
+    parameters: []
+    return:
+      type: void
+
+  - id: auto-src-app-test-tsx-19-44
+    name: null
+    location: src/App.test.tsx
+    context: beforeEach > vi.mocked(createTodo).mockImplementation
+    parameters:
+      - name: text
+        type: string
+        required: true
+    return:
+      type: Promise<object>
+
+  - id: auto-src-app-test-tsx-20-50
+    name: null
+    location: src/App.test.tsx
+    context: beforeEach > vi.mocked(setTodoCompleted).mockImplementation
+    parameters:
+      - name: id
+        type: string
+        required: true
+      - name: completed
+        type: boolean
+        required: true
+    return:
+      type: Promise<object>
+
+  - id: auto-src-app-test-tsx-25-28
+    name: null
+    location: src/App.test.tsx
+    context: it(loads existing tasks)
+    parameters: []
+    return:
+      type: Promise<void>
+
+  - id: auto-src-app-test-tsx-33-58
+    name: null
+    location: src/App.test.tsx
+    context: it(adds a task with trimmed text and clears the input)
+    parameters: []
+    return:
+      type: Promise<void>
+
+  - id: auto-src-app-test-tsx-48-35
+    name: null
+    location: src/App.test.tsx
+    context: it(does not allow a blank task)
+    parameters: []
+    return:
+      type: Promise<void>
+
+  - id: auto-src-app-test-tsx-63-61
+    name: null
+    location: src/App.test.tsx
+    context: it(marks a task complete and updates the remaining count)
+    parameters: []
+    return:
+      type: Promise<void>
+
+  - id: auto-src-app-test-tsx-73-17
+    name: null
+    location: src/App.test.tsx
+    context: it(marks a task complete and updates the remaining count) > waitFor
+    parameters: []
+    return:
+      type: void
+
+  - id: auto-src-app-test-tsx-78-36
+    name: null
+    location: src/App.test.tsx
+    context: it(removes a task from the list)
+    parameters: []
+    return:
+      type: Promise<void>
+
+  - id: auto-src-app-test-tsx-88-17
+    name: null
+    location: src/App.test.tsx
+    context: it(removes a task from the list) > waitFor
+    parameters: []
+    return:
+      type: void
+
+  - id: auto-src-app-test-tsx-94-41
+    name: null
+    location: src/App.test.tsx
+    context: it(keeps the draft when saving fails)
+    parameters: []
+    return:
+      type: Promise<void>
+
   - id: todo-interface
     name: App
-    description: Renders the todo interface and manages the in-memory task list and draft input.
-    location: 'src/App.tsx#App'
+    description: Loads saved tasks and renders the form, task list, counts, and request errors.
+    location: src/App.tsx
     parameters: []
     return:
       type: React.JSX.Element
       description: The rendered todo interface.
 
+  - id: auto-src-app-tsx-17-34
+    name: null
+    location: src/App.tsx
+    context: App > remaining variable > todos.filter
+    parameters:
+      - name: todo
+        type: Todo
+        required: true
+    return:
+      type: boolean
+
+  - id: auto-src-app-tsx-19-13
+    name: null
+    location: src/App.tsx
+    context: App > useEffect
+    parameters: []
+    return:
+      type: () => void
+
+  - id: auto-src-app-tsx-21-22
+    name: null
+    location: src/App.tsx
+    context: App > useEffect > listTodos().then
+    parameters:
+      - name: items
+        type: Todo[]
+        required: true
+    return:
+      type: void
+
+  - id: auto-src-app-tsx-23-14
+    name: null
+    location: src/App.tsx
+    context: App > useEffect > listTodos().then().catch
+    parameters: []
+    return:
+      type: void
+
+  - id: auto-src-app-tsx-28-16
+    name: null
+    location: src/App.tsx
+    context: App > useEffect > listTodos().then().catch().finally
+    parameters: []
+    return:
+      type: void
+
+  - id: auto-src-app-tsx-31-12
+    name: null
+    location: src/App.tsx
+    context: App > useEffect > return
+    parameters: []
+    return:
+      type: void
+
   - id: add-task-submission
     name: addTodo
-    description: Prevents the form from reloading the page. Adds a task from the trimmed draft when nonempty, then clears the input.
-    location: 'src/App.tsx#App.addTodo'
+    description: Submits a nonblank draft for persistence and adds the saved task to the displayed list. Keeps the
+      draft when saving fails.
+    location: src/App.tsx
+    context: App
     parameters:
       - name: event
         type: FormEvent<HTMLFormElement>
         description: The add-task form submission event.
         required: true
     return:
-      type: void
-      description: No return value.
+      type: Promise<void>
+      description: Resolves when the submission attempt finishes.
+
+  - id: auto-src-app-tsx-43-16
+    name: null
+    location: src/App.tsx
+    context: App > addTodo > setTodos
+    parameters:
+      - name: current
+        type: Todo[]
+        required: true
+    return:
+      type: Todo[]
 
   - id: toggle-task-completion
     name: toggleTodo
-    description: Flips the completed status of the task with the given ID in component state.
-    location: 'src/App.tsx#App.toggleTodo'
+    description: Persists a task's new completion state and displays the updated task after success.
+    location: src/App.tsx
+    context: App
     parameters:
       - name: id
         type: string
-        description: The ID of the task whose completed state should change.
+        description: The ID of the task whose completion state should change.
         required: true
     return:
-      type: void
-      description: No return value.
+      type: Promise<void>
+      description: Resolves when the update attempt finishes.
+
+  - id: auto-src-app-tsx-53-29
+    name: null
+    location: src/App.tsx
+    context: App > toggleTodo > todo variable > todos.find
+    parameters:
+      - name: item
+        type: Todo
+        required: true
+    return:
+      type: boolean
+
+  - id: auto-src-app-tsx-59-16
+    name: null
+    location: src/App.tsx
+    context: App > toggleTodo > setTodos
+    parameters:
+      - name: current
+        type: Todo[]
+        required: true
+    return:
+      type: Todo[]
+
+  - id: auto-src-app-tsx-59-41
+    name: null
+    location: src/App.tsx
+    context: App > toggleTodo > setTodos > current.map
+    parameters:
+      - name: item
+        type: Todo
+        required: true
+    return:
+      type: Todo
 
   - id: remove-task
     name: removeTodo
-    description: Removes the task with the given ID from component state.
-    location: 'src/App.tsx#App.removeTodo'
+    description: Deletes a task through the local API and removes it from the displayed list after success.
+    location: src/App.tsx
+    context: App
     parameters:
       - name: id
         type: string
         description: The ID of the task to remove.
         required: true
     return:
+      type: Promise<void>
+      description: Resolves when the deletion attempt finishes.
+
+  - id: auto-src-app-tsx-73-16
+    name: null
+    location: src/App.tsx
+    context: App > removeTodo > setTodos
+    parameters:
+      - name: current
+        type: Todo[]
+        required: true
+    return:
+      type: Todo[]
+
+  - id: auto-src-app-tsx-73-44
+    name: null
+    location: src/App.tsx
+    context: App > removeTodo > setTodos > current.filter
+    parameters:
+      - name: todo
+        type: Todo
+        required: true
+    return:
+      type: boolean
+
+  - id: auto-src-app-tsx-93-23
+    name: null
+    location: src/App.tsx
+    context: App > return > onChange attribute
+    parameters:
+      - name: event
+        type: import("/Users/taylor/src/my-life/spaces/sourcespec/example-apps/example-todo/node_modules/@types/react/index").ChangeEvent<HTMLInputElement,
+          HTMLInputElement>
+        required: true
+    return:
       type: void
-      description: No return value.
+
+  - id: auto-src-app-tsx-111-24
+    name: null
+    location: src/App.tsx
+    context: App > return > todos.map
+    parameters:
+      - name: todo
+        type: Todo
+        required: true
+    return:
+      type: React.JSX.Element
+
+  - id: auto-src-app-tsx-117-31
+    name: null
+    location: src/App.tsx
+    context: App > return > todos.map > onChange attribute
+    parameters: []
+    return:
+      type: Promise<void>
+
+  - id: auto-src-app-tsx-122-67
+    name: null
+    location: src/App.tsx
+    context: App > return > todos.map > onClick attribute
+    parameters: []
+    return:
+      type: Promise<void>
+
+  - id: auto-src-todo-api-ts-3-1
+    name: request
+    location: src/todo-api.ts
+    parameters:
+      - name: path
+        type: string
+        required: true
+      - name: options
+        type: RequestInit | undefined
+        required: false
+    return:
+      type: Promise<T>
+
+  - id: client-list-tasks
+    name: listTodos
+    description: Fetches the saved tasks from the local API.
+    location: src/todo-api.ts
+    parameters: []
+    return:
+      type: Promise<Todo[]>
+      description: The saved tasks in list order.
+
+  - id: client-create-task
+    name: createTodo
+    description: Requests creation of a task through the local API.
+    location: src/todo-api.ts
+    parameters:
+      - name: text
+        type: string
+        description: The text of the new task.
+        required: true
+    return:
+      type: Promise<Todo>
+      description: The task created by the API.
+
+  - id: client-update-task
+    name: setTodoCompleted
+    description: Requests a change to a task's completion state.
+    location: src/todo-api.ts
+    parameters:
+      - name: id
+        type: string
+        description: The task ID.
+        required: true
+      - name: completed
+        type: boolean
+        description: The desired completion state.
+        required: true
+    return:
+      type: Promise<Todo>
+      description: The updated task returned by the API.
+
+  - id: client-delete-task
+    name: removeTodo
+    description: Requests deletion of a task through the local API.
+    location: src/todo-api.ts
+    parameters:
+      - name: id
+        type: string
+        description: The task ID.
+        required: true
+    return:
+      type: Promise<void>
+      description: Resolves when the deletion succeeds.
+
+  - id: auto-vite-config-ts-7-1
+    name: localTodoApi
+    location: vite.config.ts
+    parameters: []
+    return:
+      type: Plugin
+
+  - id: auto-vite-config-ts-8-3
+    name: attach
+    location: vite.config.ts
+    context: localTodoApi
+    parameters:
+      - name: server
+        type: PreviewServer | ViteDevServer
+        required: true
+    return:
+      type: void
+
+  - id: auto-vite-config-ts-11-38
+    name: null
+    location: vite.config.ts
+    context: localTodoApi > attach > server.httpServer.once(close)
+    parameters: []
+    return:
+      type: void

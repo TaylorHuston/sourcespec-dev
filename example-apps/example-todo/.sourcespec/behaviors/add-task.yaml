@@ -1,0 +1,62 @@
+id: add-task
+name: Add task
+description: A person can add a new, incomplete task to the todo list.
+trigger: A person starts composing a task in the New task field.
+cases:
+  - id: task-added
+    name: Task added
+    when: The field contains at least one non-whitespace character and saving succeeds.
+    outcomes:
+      - A new, incomplete task appears in the list with surrounding whitespace removed from its text.
+      - The remaining count increases by one.
+      - The New task field is cleared.
+      - The task remains available after a reload or local server restart.
+    implementedBy:
+      - function: add-task-submission
+        role: Displays the saved task and clears the input only after a successful request.
+      - function: todo-interface
+        role: Loads saved tasks and renders the task list and remaining count.
+      - function: client-create-task
+        role: Sends the task to the local API.
+      - function: local-api-handler
+        role: Validates and routes the create request.
+      - function: store-create-task
+        role: Inserts the task into SQLite.
+      - function: client-list-tasks
+        role: Fetches saved tasks after a reload.
+      - function: store-list-tasks
+        role: Reads saved tasks from SQLite after a reload.
+    verifiedBy:
+      - test: add-task-trims-input
+        checks: The UI submits trimmed text and displays the new task, count, and cleared input.
+      - test: api-validates-and-persists-tasks
+        checks: The API stores trimmed task text and returns it from the list endpoint.
+      - test: sqlite-tasks-survive-reopen
+        checks: Task contents remain saved after reopening the database.
+
+  - id: blank-task
+    name: Blank task
+    when: The field is empty or contains only whitespace.
+    outcomes:
+      - No task is added; the list and remaining count stay unchanged.
+    implementedBy:
+      - function: todo-interface
+        role: Disables Add task when the trimmed draft is empty.
+    verifiedBy:
+      - test: add-task-blocks-blank-input
+        checks: Empty and whitespace-only input disable Add task and leave the list and count unchanged.
+
+  - id: save-failed
+    name: Save failed
+    when: The field contains valid text but the save request fails.
+    outcomes:
+      - An error is shown and the draft remains available to retry.
+      - No unsaved task appears in the list.
+    implementedBy:
+      - function: add-task-submission
+        role: Reports the failure and leaves the draft and task list unchanged.
+      - function: client-create-task
+        role: Sends the save request that may fail.
+    verifiedBy:
+      - test: add-task-save-failure
+        checks: A failed save reports an error without clearing the draft or adding a task.
