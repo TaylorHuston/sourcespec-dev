@@ -27,9 +27,21 @@ tests:
     kind: component
     location: src/App.test.tsx
 
+  - id: reopen-task-restores-count
+    name: reopens a completed task and restores the remaining count
+    description: Checks that turning off completion through the API restores the unchecked checkbox and remaining count.
+    kind: component
+    location: src/App.test.tsx
+
   - id: remove-task-clears-list
     name: removes a task from the list
     description: Checks that a successful API deletion restores the empty list and zero remaining count.
+    kind: component
+    location: src/App.test.tsx
+
+  - id: remove-task-failure-keeps-task
+    name: keeps a task visible when removal fails
+    description: Checks a failed delete reports an error and leaves the task and remaining count intact.
     kind: component
     location: src/App.test.tsx
 
@@ -40,25 +52,61 @@ tests:
     location: src/App.test.tsx
 
   - id: sqlite-tasks-survive-reopen
-    name: keeps tasks and completion state after reopening the SQLite database
-    description: Checks a task and its completion state persist in the SQLite file across connections.
+    name: scopes tasks to users and persists them across SQLite connections
+    description: Checks user ownership, cross-user write refusal, and session/task persistence across connections.
     kind: integration
     location: server/todo-api.test.ts
 
   - id: api-validates-and-persists-tasks
-    name: validates and persists create, list, update, and delete requests
-    description: Checks the local HTTP API rejects blank text and writes and reads task changes through SQLite.
+    name: requires a session and keeps HTTP tasks private to their owner
+    description: Checks signup, login, logout, blank-text validation, ownership for all task routes, and cross-origin mutation refusal.
     kind: integration
     location: server/todo-api.test.ts
 
+  - id: legacy-tasks-claimed
+    name: preserves old single-user tasks and assigns them to the first registered user
+    description: Checks the additive legacy SQLite migration preserves old tasks without exposing them to later accounts.
+    kind: integration
+    location: server/todo-api.test.ts
+
+  - id: data-model-links-match-sqlite
+    name: maps every documented table and relationship to SQLite foreign keys
+    description: Compares SourceSpec data-model table and relationship references with SQLite's actual schema.
+    kind: contract
+    location: server/data-model.test.ts
+
+  - id: data-model-representations-resolve
+    name: resolves data-model representations to TypeScript and OpenAPI definitions
+    description: Checks data-model links point to existing exported types and HTTP schemas.
+    kind: contract
+    location: server/data-model.test.ts
+
+  - id: sign-in-gates-tasks
+    name: gates tasks behind sign in and clears them on sign out
+    description: Checks the UI keeps tasks private until signup and clears them when signing out.
+    kind: component
+    location: src/App.test.tsx
+
+  - id: sign-in-shows-error
+    name: reports incorrect credentials without loading tasks
+    description: Checks invalid login reports an accessible error and does not load private tasks.
+    kind: component
+    location: src/App.test.tsx
+
   - id: openapi-contract-valid
     name: validates the local OpenAPI contract and its operation IDs
-    description: Validates the root OpenAPI document and its four unique HTTP operation IDs.
+    description: Validates the root OpenAPI document and its eight unique HTTP operation IDs.
     kind: contract
     location: server/openapi.test.ts
 
+  - id: operation-map-links-resolve
+    name: resolves every HTTP operation to its mount, handler, and intended tests
+    description: Checks the operation map covers every OpenAPI operation and its mount prefix, with valid function and test IDs; it does not prove live server routing.
+    kind: contract
+    location: server/operations.test.ts
+
   - id: behavior-catalog-links-resolve
     name: resolves behavior case links against the app catalogs
-    description: Checks Add task case function and test links resolve to catalog entries without implying an execution sequence.
+    description: Checks every behavior case's function and test links resolve to catalog entries without implying an execution sequence.
     kind: contract
     location: server/behavior.test.ts

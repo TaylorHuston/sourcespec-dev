@@ -2,6 +2,79 @@
 # Includes app-owned runtime, config, and test functions (including anonymous callbacks).
 # Location is a file path; context is a search hint, not a guaranteed identity across refactors.
 functions:
+  - id: validate-credentials
+    name: credentials
+    location: server/auth-api.ts
+    parameters:
+      - name: body
+        type: unknown
+        required: true
+    return:
+      type: object
+
+  - id: fn-320ad921-0657-4708-b9a2-deea03b2c082
+    name: null
+    location: server/auth-api.ts
+    context: credentials > Object.keys(body).some
+    parameters:
+      - name: key
+        type: string
+        required: true
+    return:
+      type: boolean
+
+  - id: set-auth-cookie
+    name: setSessionCookie
+    location: server/auth-api.ts
+    parameters:
+      - name: response
+        type: ServerResponse<IncomingMessage>
+        required: true
+      - name: token
+        type: string
+        required: true
+      - name: secure
+        type: boolean
+        required: true
+    return:
+      type: void
+
+  - id: create-auth-handler
+    name: createAuthHandler
+    location: server/auth-api.ts
+    parameters:
+      - name: store
+        type: '{ register: (username: string, password: string) =>
+          import("/Users/taylor/src/my-life/spaces/sourcespec/example-apps/example-todo/server/todo-store").User
+          | null; authenticate: (username: string, password: string) =>
+          import("/Users/taylor/src/my-life/spaces/sourcespec/example-apps/example-todo/server/todo-store").User
+          | null; createSession: (userId: string) => string; sessionUser: (token: string) =>
+          import("/Users/taylor/src/my-life/spaces/sourcespec/example-apps/example-todo/server/todo-store").User
+          | null; endSession: (token: string) => void; listTodos: (userId: string) =>
+          import("/Users/taylor/src/my-life/spaces/sourcespec/example-apps/example-todo/server/todo-store").Todo[];
+          createTodo: (userId: string, text: string) =>
+          import("/Users/taylor/src/my-life/spaces/sourcespec/example-apps/example-todo/server/todo-store").Todo;
+          setTodoCompleted: (userId: string, id: string, completed: boolean) =>
+          import("/Users/taylor/src/my-life/spaces/sourcespec/example-apps/example-todo/server/todo-store").Todo
+          | null; removeTodo: (userId: string, id: string) => boolean; close: () => void; }'
+        required: true
+    return:
+      type: "(request: IncomingMessage, response: ServerResponse) => Promise<void>"
+
+  - id: local-auth-handler
+    name: handleAuthRequest
+    location: server/auth-api.ts
+    context: createAuthHandler > return
+    parameters:
+      - name: request
+        type: IncomingMessage
+        required: true
+      - name: response
+        type: ServerResponse<IncomingMessage>
+        required: true
+    return:
+      type: Promise<void>
+
   - id: auto-server-behavior-test-ts-10-61
     name: null
     location: server/behavior.test.ts
@@ -34,6 +107,17 @@ functions:
     return:
       type: string
 
+  - id: fn-c92e59fa-c41b-420b-8e6b-35ed819ed440
+    name: null
+    location: server/behavior.test.ts
+    context: it(resolves behavior case links against the app catalogs) > readdirSync(behaviorDirectory).filter
+    parameters:
+      - name: name
+        type: string
+        required: true
+    return:
+      type: boolean
+
   - id: auto-server-behavior-test-ts-24-37
     name: null
     location: server/behavior.test.ts
@@ -45,6 +129,93 @@ functions:
         required: true
     return:
       type: string
+
+  - id: fn-ac39b9e7-cfa1-44ce-837d-ae2f82a3e98c
+    name: null
+    location: server/data-model.test.ts
+    context: it(maps every documented table and relationship to SQLite foreign keys)
+    parameters: []
+    return:
+      type: void
+
+  - id: fn-aaee039d-e7b0-4576-a457-28dec895e731
+    name: null
+    location: server/data-model.test.ts
+    context: it(maps every documented table and relationship to SQLite foreign keys) > actual variable >
+      db.prepare(SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%').all().map
+    parameters:
+      - name: row
+        type: Record<string, import("node:sqlite").SQLOutputValue>
+        required: true
+    return:
+      type: null | string | number | bigint | NonSharedUint8Array
+
+  - id: fn-3512cfb1-5669-4d7e-ac12-4ffca1806f53
+    name: null
+    location: server/data-model.test.ts
+    context: it(maps every documented table and relationship to SQLite foreign keys) > expect > model.tables.map
+    parameters:
+      - name: table
+        type: "{ name: string; definedIn: string; }"
+        required: true
+    return:
+      type: string
+
+  - id: fn-706de048-2738-4bda-90dc-a0247822c8d9
+    name: null
+    location: server/data-model.test.ts
+    context: it(maps every documented table and relationship to SQLite foreign keys) > actualRelations variable >
+      model.tables.flatMap
+    parameters:
+      - name: table
+        type: "{ name: string; definedIn: string; }"
+        required: true
+    return:
+      type: string[]
+
+  - id: fn-3847bf2a-b5b2-4401-8239-82059465dd7b
+    name: null
+    location: server/data-model.test.ts
+    context: it(maps every documented table and relationship to SQLite foreign keys) > actualRelations variable >
+      model.tables.flatMap > db.prepare(`PRAGMA foreign_key_list(${table.name})`).all().map
+    parameters:
+      - name: row
+        type: Record<string, import("node:sqlite").SQLOutputValue>
+        required: true
+    return:
+      type: string
+
+  - id: fn-bfe8373a-1a45-49f7-a76a-a0d71b162da7
+    name: null
+    location: server/data-model.test.ts
+    context: it(maps every documented table and relationship to SQLite foreign keys) > expect >
+      model.relationships.map
+    parameters:
+      - name: link
+        type: "{ from: string; to: string; enforcedBy: string; }"
+        required: true
+    return:
+      type: string
+
+  - id: fn-bc297476-743c-4b1e-9912-307d54ed584d
+    name: null
+    location: server/data-model.test.ts
+    context: it(maps every documented table and relationship to SQLite foreign keys) > expect >
+      model.relationships.every
+    parameters:
+      - name: link
+        type: "{ from: string; to: string; enforcedBy: string; }"
+        required: true
+    return:
+      type: boolean
+
+  - id: fn-f43d5721-7c90-4e6d-8ef7-bc22d7d2ebfc
+    name: null
+    location: server/data-model.test.ts
+    context: it(resolves data-model representations to TypeScript and OpenAPI definitions)
+    parameters: []
+    return:
+      type: void
 
   - id: auto-server-openapi-test-ts-11-1
     name: validatedApi
@@ -68,7 +239,7 @@ functions:
       Object.entries(api.paths).flatMap
     parameters:
       - name: "[path, item]"
-        type: "[string, Record<string, { operationId?: string; }>]"
+        type: "[string, Record<string, { operationId?: string; security?: Record<string, unknown>[]; }>]"
         required: true
     return:
       type: object[]
@@ -80,7 +251,7 @@ functions:
       Object.entries(api.paths).flatMap > Object.entries(item ?? {}).filter
     parameters:
       - name: "[method]"
-        type: "[string, { operationId?: string; }]"
+        type: "[string, { operationId?: string; security?: Record<string, unknown>[]; }]"
         required: true
     return:
       type: boolean
@@ -92,7 +263,7 @@ functions:
       Object.entries(api.paths).flatMap > Object.entries(item ?? {}).filter().map
     parameters:
       - name: "[method, value]"
-        type: "[string, { operationId?: string; }]"
+        type: "[string, { operationId?: string; security?: Record<string, unknown>[]; }]"
         required: true
     return:
       type: object
@@ -108,27 +279,199 @@ functions:
     return:
       type: undefined | string
 
-  - id: auto-server-todo-api-test-ts-9-76
+  - id: fn-7ae1482b-eff9-498c-8053-06f496e5c7a3
     name: null
-    location: server/todo-api.test.ts
-    context: it(keeps tasks and completion state after reopening the SQLite database)
+    location: server/operations.test.ts
+    context: fromApp variable
+    parameters:
+      - name: path
+        type: string
+        required: true
+    return:
+      type: any
+
+  - id: fn-58bdfda7-2f16-4365-92c5-af3ac86fca0f
+    name: null
+    location: server/operations.test.ts
+    context: it(resolves every HTTP operation to its mount, handler, and intended tests)
     parameters: []
     return:
       type: void
 
-  - id: auto-server-todo-api-test-ts-25-72
+  - id: fn-5293139a-1dd5-4133-9213-5e2012aa050e
+    name: null
+    location: server/operations.test.ts
+    context: it(resolves every HTTP operation to its mount, handler, and intended tests) > functionIds variable >
+      new Set > fromApp(.sourcespec/catalogs/functions-catalog.yaml).functions.map
+    parameters:
+      - name: entry
+        type: "{ id: string; }"
+        required: true
+    return:
+      type: string
+
+  - id: fn-1af5bc27-1f44-4936-a978-529800ced0fd
+    name: null
+    location: server/operations.test.ts
+    context: it(resolves every HTTP operation to its mount, handler, and intended tests) > testIds variable > new
+      Set > fromApp(.sourcespec/catalogs/tests-catalog.yaml).tests.map
+    parameters:
+      - name: entry
+        type: "{ id: string; }"
+        required: true
+    return:
+      type: string
+
+  - id: fn-e4197297-14e1-498d-a66f-871b73b6dd74
+    name: null
+    location: server/operations.test.ts
+    context: it(resolves every HTTP operation to its mount, handler, and intended tests) > contractOperations
+      variable > Object.entries(api.paths).flatMap
+    parameters:
+      - name: "[path, pathItem]"
+        type: "[string, Record<string, { operationId?: string; }>]"
+        required: true
+    return:
+      type: object[]
+
+  - id: fn-7771a8e2-7758-4795-8865-a207f1e569e8
+    name: null
+    location: server/operations.test.ts
+    context: it(resolves every HTTP operation to its mount, handler, and intended tests) > contractOperations
+      variable > Object.entries(api.paths).flatMap > Object.entries(pathItem).filter
+    parameters:
+      - name: "[method]"
+        type: "[string, { operationId?: string; }]"
+        required: true
+    return:
+      type: boolean
+
+  - id: fn-1bfcd102-60b3-4e42-ace8-09ee563a460c
+    name: null
+    location: server/operations.test.ts
+    context: it(resolves every HTTP operation to its mount, handler, and intended tests) > contractOperations
+      variable > Object.entries(api.paths).flatMap > Object.entries(pathItem).filter().map
+    parameters:
+      - name: "[, operation]"
+        type: "[string, { operationId?: string; }]"
+        required: true
+    return:
+      type: object
+
+  - id: fn-97c1799d-2fb3-4c0a-a6c1-aa957f2ab8d8
+    name: null
+    location: server/operations.test.ts
+    context: it(resolves every HTTP operation to its mount, handler, and intended tests) > contractIds variable >
+      contractOperations.map
+    parameters:
+      - name: entry
+        type: "{ path: string; id: string | undefined; }"
+        required: true
+    return:
+      type: undefined | string
+
+  - id: fn-862874e9-9334-471f-a58a-6f2da95eee28
+    name: null
+    location: server/operations.test.ts
+    context: it(resolves every HTTP operation to its mount, handler, and intended tests) > mappedIds variable >
+      map.operations.map
+    parameters:
+      - name: entry
+        type: "{ operationId: string; mount: string; implementedBy: FunctionLink[]; verifiedBy?: TestLink[]; }"
+        required: true
+    return:
+      type: string
+
+  - id: fn-af5ed432-8482-4c78-933c-1dde11429bda
+    name: null
+    location: server/operations.test.ts
+    context: it(resolves every HTTP operation to its mount, handler, and intended tests) > expect > contractIds.every
+    parameters:
+      - name: id
+        type: string | undefined
+        required: true
+    return:
+      type: boolean
+
+  - id: fn-1a8d71de-aab9-4cdb-b040-740c2b600f55
+    name: null
+    location: server/operations.test.ts
+    context: it(resolves every HTTP operation to its mount, handler, and intended tests) > expect > new Set >
+      map.mounts.map
+    parameters:
+      - name: mount
+        type: "{ id: string; prefix: string; function: string; role: string; }"
+        required: true
+    return:
+      type: string
+
+  - id: fn-e3dfe831-ccd1-4696-945a-fdff503b4a90
+    name: null
+    location: server/operations.test.ts
+    context: it(resolves every HTTP operation to its mount, handler, and intended tests) > mount variable >
+      map.mounts.find
+    parameters:
+      - name: entry
+        type: "{ id: string; prefix: string; function: string; role: string; }"
+        required: true
+    return:
+      type: boolean
+
+  - id: fn-d5c08d14-77e8-4f5a-999e-9521e86c0160
+    name: null
+    location: server/operations.test.ts
+    context: it(resolves every HTTP operation to its mount, handler, and intended tests) > contractPath variable >
+      contractOperations.find
+    parameters:
+      - name: entry
+        type: "{ path: string; id: string | undefined; }"
+        required: true
+    return:
+      type: boolean
+
+  - id: fn-4a714910-4ad1-4e4c-bf53-be5a5fdbb5e8
     name: null
     location: server/todo-api.test.ts
-    context: it(validates and persists create, list, update, and delete requests)
+    context: it(scopes tasks to users and persists them across SQLite connections)
+    parameters: []
+    return:
+      type: void
+
+  - id: fn-75446f16-d362-4708-8f4d-c8f311a5a121
+    name: null
+    location: server/todo-api.test.ts
+    context: it(preserves old single-user tasks and assigns them to the first registered user)
+    parameters: []
+    return:
+      type: void
+
+  - id: fn-87e44a7f-4fb2-4e42-a6b3-a9086273229a
+    name: null
+    location: server/todo-api.test.ts
+    context: it(requires a session and keeps HTTP tasks private to their owner)
     parameters: []
     return:
       type: Promise<void>
 
-  - id: auto-server-todo-api-test-ts-28-27
+  - id: fn-b35c0629-7fb6-4332-a7e9-5be226097f65
     name: null
     location: server/todo-api.test.ts
-    context: it(validates and persists create, list, update, and delete requests) > new Promise > invokes
-      server.listen
+    context: it(requires a session and keeps HTTP tasks private to their owner) > server variable > createServer
+    parameters:
+      - name: request
+        type: import("node:http").IncomingMessage
+        required: true
+      - name: response
+        type: 'import("node:http").ServerResponse<import("node:http").IncomingMessage> & { req:
+          import("node:http").IncomingMessage; }'
+        required: true
+    return:
+      type: void
+
+  - id: fn-31b202aa-9b24-4c7f-b7ed-afd4fdcc2019
+    name: null
+    location: server/todo-api.test.ts
+    context: it(requires a session and keeps HTTP tasks private to their owner) > new Promise > invokes server.listen
     parameters:
       - name: resolve
         type: "(value: void | PromiseLike<void>) => void"
@@ -136,10 +479,41 @@ functions:
     return:
       type: Server
 
-  - id: auto-server-todo-api-test-ts-58-29
+  - id: fn-49613bed-7916-44c9-925d-1780ae636fde
     name: null
     location: server/todo-api.test.ts
-    context: it(validates and persists create, list, update, and delete requests) > new Promise > invokes server.close
+    context: it(requires a session and keeps HTTP tasks private to their owner) > post variable
+    parameters:
+      - name: path
+        type: string
+        required: true
+      - name: body
+        type: unknown
+        required: true
+      - name: cookie
+        type: string | undefined
+        required: false
+    return:
+      type: Promise<Response>
+
+  - id: fn-1999e378-149f-49bb-aaf7-a0e9e38b841a
+    name: null
+    location: server/todo-api.test.ts
+    context: it(requires a session and keeps HTTP tasks private to their owner) > patch variable
+    parameters:
+      - name: cookie
+        type: string
+        required: true
+      - name: completed
+        type: unknown
+        required: true
+    return:
+      type: Promise<Response>
+
+  - id: fn-c92d4ee1-4a3e-40ef-9443-916f622b5bc7
+    name: null
+    location: server/todo-api.test.ts
+    context: it(requires a session and keeps HTTP tasks private to their owner) > new Promise > invokes server.close
     parameters:
       - name: resolve
         type: "(value: void | PromiseLike<void>) => void"
@@ -150,10 +524,10 @@ functions:
     return:
       type: Server
 
-  - id: auto-server-todo-api-test-ts-58-63
+  - id: fn-5c1629cf-343e-4690-a803-3814e9267733
     name: null
     location: server/todo-api.test.ts
-    context: it(validates and persists create, list, update, and delete requests) > new Promise > server.close
+    context: it(requires a session and keeps HTTP tasks private to their owner) > new Promise > server.close
     parameters:
       - name: error
         type: Error | undefined
@@ -201,18 +575,79 @@ functions:
     return:
       type: Promise<unknown>
 
+  - id: fn-26d46830-6e02-443c-b16f-df84e46c651d
+    name: checkOrigin
+    location: server/todo-api.ts
+    parameters:
+      - name: request
+        type: IncomingMessage
+        required: true
+    return:
+      type: void
+
+  - id: fn-76d841ca-11da-4c44-901e-810555351830
+    name: sendError
+    location: server/todo-api.ts
+    parameters:
+      - name: response
+        type: ServerResponse<IncomingMessage>
+        required: true
+      - name: error
+        type: unknown
+        required: true
+    return:
+      type: void
+
+  - id: fn-96f79f61-66f1-4db4-85b3-ccbbd22d22b5
+    name: sessionToken
+    location: server/todo-api.ts
+    parameters:
+      - name: request
+        type: IncomingMessage
+        required: true
+    return:
+      type: null | string
+
+  - id: fn-b656a82a-cca1-4896-b316-007b3066a1dd
+    name: null
+    location: server/todo-api.ts
+    context: sessionToken > cookie variable > request.headers.cookie.split(;).map
+    parameters:
+      - name: part
+        type: string
+        required: true
+    return:
+      type: string
+
+  - id: fn-a7c2fcaa-f025-47dc-a655-8ba440945022
+    name: null
+    location: server/todo-api.ts
+    context: sessionToken > cookie variable > request.headers.cookie.split(;).map().find
+    parameters:
+      - name: part
+        type: string
+        required: true
+    return:
+      type: boolean
+
   - id: auto-server-todo-api-ts-33-1
     name: createTodoHandler
     location: server/todo-api.ts
     parameters:
       - name: store
-        type: '{ listTodos: () =>
+        type: '{ register: (username: string, password: string) =>
+          import("/Users/taylor/src/my-life/spaces/sourcespec/example-apps/example-todo/server/todo-store").User
+          | null; authenticate: (username: string, password: string) =>
+          import("/Users/taylor/src/my-life/spaces/sourcespec/example-apps/example-todo/server/todo-store").User
+          | null; createSession: (userId: string) => string; sessionUser: (token: string) =>
+          import("/Users/taylor/src/my-life/spaces/sourcespec/example-apps/example-todo/server/todo-store").User
+          | null; endSession: (token: string) => void; listTodos: (userId: string) =>
           import("/Users/taylor/src/my-life/spaces/sourcespec/example-apps/example-todo/server/todo-store").Todo[];
-          createTodo: (text: string) =>
+          createTodo: (userId: string, text: string) =>
           import("/Users/taylor/src/my-life/spaces/sourcespec/example-apps/example-todo/server/todo-store").Todo;
-          setTodoCompleted: (id: string, completed: boolean) =>
+          setTodoCompleted: (userId: string, id: string, completed: boolean) =>
           import("/Users/taylor/src/my-life/spaces/sourcespec/example-apps/example-todo/server/todo-store").Todo
-          | null; removeTodo: (id: string) => boolean; close: () => void; }'
+          | null; removeTodo: (userId: string, id: string) => boolean; close: () => void; }'
         required: true
     return:
       type: "(request: IncomingMessage, response: ServerResponse) => Promise<void>"
@@ -235,6 +670,42 @@ functions:
       type: Promise<void>
       description: Resolves after the request has been handled.
 
+  - id: fn-d545ebc3-7cc8-437e-9111-adef2c71ce2e
+    name: passwordHash
+    location: server/todo-store.ts
+    parameters:
+      - name: password
+        type: string
+        required: true
+      - name: salt
+        type: string
+        required: false
+    return:
+      type: string
+
+  - id: fn-42845836-23bf-4020-9971-b8107d130747
+    name: validPassword
+    location: server/todo-store.ts
+    parameters:
+      - name: password
+        type: string
+        required: true
+      - name: stored
+        type: string
+        required: true
+    return:
+      type: boolean
+
+  - id: fn-4aa62499-4354-41d9-a497-3670b27396ce
+    name: tokenHash
+    location: server/todo-store.ts
+    parameters:
+      - name: token
+        type: string
+        required: true
+    return:
+      type: string
+
   - id: open-todo-store
     name: openTodoStore
     description: Opens a local SQLite database and creates the todos table if needed.
@@ -248,6 +719,17 @@ functions:
       type: TodoStore
       description: Operations for working with the opened database.
 
+  - id: fn-f8a79aa6-7d55-4f37-a29a-e16ad8522d56
+    name: null
+    location: server/todo-store.ts
+    context: openTodoStore > db.prepare(PRAGMA table_info(todos)).all().some
+    parameters:
+      - name: column
+        type: Record<string, import("node:sqlite").SQLOutputValue>
+        required: true
+    return:
+      type: boolean
+
   - id: auto-server-todo-store-ts-19-3
     name: toTodo
     location: server/todo-store.ts
@@ -259,12 +741,76 @@ functions:
     return:
       type: Todo
 
+  - id: store-register-user
+    name: register
+    location: server/todo-store.ts
+    context: openTodoStore
+    parameters:
+      - name: username
+        type: string
+        required: true
+      - name: password
+        type: string
+        required: true
+    return:
+      type: null | User
+
+  - id: store-authenticate-user
+    name: authenticate
+    location: server/todo-store.ts
+    context: openTodoStore
+    parameters:
+      - name: username
+        type: string
+        required: true
+      - name: password
+        type: string
+        required: true
+    return:
+      type: null | User
+
+  - id: store-create-session
+    name: createSession
+    location: server/todo-store.ts
+    context: openTodoStore
+    parameters:
+      - name: userId
+        type: string
+        required: true
+    return:
+      type: string
+
+  - id: store-session-user
+    name: sessionUser
+    location: server/todo-store.ts
+    context: openTodoStore
+    parameters:
+      - name: token
+        type: string
+        required: true
+    return:
+      type: null | User
+
+  - id: fn-c00fc267-5ce6-4bb4-9912-3f6db0f3f1c4
+    name: endSession
+    location: server/todo-store.ts
+    context: openTodoStore
+    parameters:
+      - name: token
+        type: string
+        required: true
+    return:
+      type: void
+
   - id: store-list-tasks
     name: listTodos
     description: Reads the saved tasks from SQLite in insertion order.
     location: server/todo-store.ts
     context: openTodoStore
-    parameters: []
+    parameters:
+      - name: userId
+        type: string
+        required: true
     return:
       type: Todo[]
       description: The saved tasks.
@@ -275,6 +821,9 @@ functions:
     location: server/todo-store.ts
     context: openTodoStore
     parameters:
+      - name: userId
+        type: string
+        required: true
       - name: text
         type: string
         description: The validated, trimmed task text.
@@ -289,6 +838,9 @@ functions:
     location: server/todo-store.ts
     context: openTodoStore
     parameters:
+      - name: userId
+        type: string
+        required: true
       - name: id
         type: string
         description: The task ID.
@@ -307,6 +859,9 @@ functions:
     location: server/todo-store.ts
     context: openTodoStore
     parameters:
+      - name: userId
+        type: string
+        required: true
       - name: id
         type: string
         description: The task ID.
@@ -322,6 +877,14 @@ functions:
     parameters: []
     return:
       type: void
+
+  - id: fn-dc6961f7-2053-4862-bcb4-2812fcbd18e2
+    name: null
+    location: src/App.test.tsx
+    context: vi.mock(./auth-api)
+    parameters: []
+    return:
+      type: object
 
   - id: auto-src-app-test-tsx-9-23
     name: null
@@ -364,6 +927,22 @@ functions:
     return:
       type: Promise<object>
 
+  - id: fn-db1c434c-3462-4834-bdbd-9965380c1abe
+    name: null
+    location: src/App.test.tsx
+    context: it(gates tasks behind sign in and clears them on sign out)
+    parameters: []
+    return:
+      type: Promise<void>
+
+  - id: fn-e7177b31-2662-41b6-a6bb-94db3934fdc0
+    name: null
+    location: src/App.test.tsx
+    context: it(reports incorrect credentials without loading tasks)
+    parameters: []
+    return:
+      type: Promise<void>
+
   - id: auto-src-app-test-tsx-25-28
     name: null
     location: src/App.test.tsx
@@ -404,6 +983,22 @@ functions:
     return:
       type: void
 
+  - id: fn-d9fc0f9d-dd99-4597-9adb-15ce32c6f425
+    name: null
+    location: src/App.test.tsx
+    context: it(reopens a completed task and restores the remaining count)
+    parameters: []
+    return:
+      type: Promise<void>
+
+  - id: fn-20ea1da2-9b05-42f3-a44d-3238dddcadb5
+    name: null
+    location: src/App.test.tsx
+    context: it(reopens a completed task and restores the remaining count) > waitFor
+    parameters: []
+    return:
+      type: void
+
   - id: auto-src-app-test-tsx-78-36
     name: null
     location: src/App.test.tsx
@@ -419,6 +1014,14 @@ functions:
     parameters: []
     return:
       type: void
+
+  - id: fn-956df28a-f721-48ed-aa05-85f4290e5633
+    name: null
+    location: src/App.test.tsx
+    context: it(keeps a task visible when removal fails)
+    parameters: []
+    return:
+      type: Promise<void>
 
   - id: auto-src-app-test-tsx-94-41
     name: null
@@ -448,18 +1051,61 @@ functions:
     return:
       type: boolean
 
-  - id: auto-src-app-tsx-19-13
+  - id: fn-723fd5c8-07eb-46b8-a4c5-c93ab4039a7b
     name: null
     location: src/App.tsx
-    context: App > useEffect
+    context: App > useEffect dependencies []
     parameters: []
     return:
       type: () => void
 
-  - id: auto-src-app-tsx-21-22
+  - id: fn-ac388de5-6ff9-420e-be9e-e8076245e1f9
     name: null
     location: src/App.tsx
-    context: App > useEffect > listTodos().then
+    context: App > useEffect dependencies [] > currentUser().then
+    parameters:
+      - name: sessionUser
+        type: User | null
+        required: true
+    return:
+      type: void
+
+  - id: fn-cba02c07-521e-4977-8031-7d26848aaaa3
+    name: null
+    location: src/App.tsx
+    context: App > useEffect dependencies [] > currentUser().then().catch
+    parameters: []
+    return:
+      type: void
+
+  - id: fn-fc3fea0f-773d-473e-96bc-d20d10a7efbf
+    name: null
+    location: src/App.tsx
+    context: App > useEffect dependencies [] > currentUser().then().catch().finally
+    parameters: []
+    return:
+      type: void
+
+  - id: fn-1df9ecd4-758f-42e5-ba03-75b828ec94ed
+    name: null
+    location: src/App.tsx
+    context: App > useEffect dependencies [] > return
+    parameters: []
+    return:
+      type: void
+
+  - id: fn-3744bd77-8694-49c5-a87c-8db7fa6336c0
+    name: null
+    location: src/App.tsx
+    context: App > useEffect dependencies [user?.id]
+    parameters: []
+    return:
+      type: undefined | () => void
+
+  - id: fn-8f32e3cf-eca6-4bfd-97f6-fe6353a708d2
+    name: null
+    location: src/App.tsx
+    context: App > useEffect dependencies [user?.id] > listTodos().then
     parameters:
       - name: items
         type: Todo[]
@@ -467,29 +1113,48 @@ functions:
     return:
       type: void
 
-  - id: auto-src-app-tsx-23-14
+  - id: fn-57983a25-ff26-45a5-b77b-d60aefeee86e
     name: null
     location: src/App.tsx
-    context: App > useEffect > listTodos().then().catch
+    context: App > useEffect dependencies [user?.id] > listTodos().then().catch
     parameters: []
     return:
       type: void
 
-  - id: auto-src-app-tsx-28-16
+  - id: fn-083ec3ac-155b-4e02-ab78-01edd98a9ce0
     name: null
     location: src/App.tsx
-    context: App > useEffect > listTodos().then().catch().finally
+    context: App > useEffect dependencies [user?.id] > listTodos().then().catch().finally
     parameters: []
     return:
       type: void
 
-  - id: auto-src-app-tsx-31-12
+  - id: fn-e210014d-a590-4393-b4b7-162a32fb0a5a
     name: null
     location: src/App.tsx
-    context: App > useEffect > return
+    context: App > useEffect dependencies [user?.id] > return
     parameters: []
     return:
       type: void
+
+  - id: auth-submit
+    name: submitCredentials
+    location: src/App.tsx
+    context: App
+    parameters:
+      - name: event
+        type: FormEvent<HTMLFormElement>
+        required: true
+    return:
+      type: Promise<void>
+
+  - id: auth-sign-out
+    name: logOut
+    location: src/App.tsx
+    context: App
+    parameters: []
+    return:
+      type: Promise<void>
 
   - id: add-task-submission
     name: addTodo
@@ -600,10 +1265,42 @@ functions:
     return:
       type: boolean
 
-  - id: auto-src-app-tsx-93-23
+  - id: fn-bc2f91c9-a5cf-4072-80d7-f602003119b5
     name: null
     location: src/App.tsx
-    context: App > return > onChange attribute
+    context: App > return > onChange attribute#username
+    parameters:
+      - name: event
+        type: import("/Users/taylor/src/my-life/spaces/sourcespec/example-apps/example-todo/node_modules/@types/react/index").ChangeEvent<HTMLInputElement,
+          HTMLInputElement>
+        required: true
+    return:
+      type: void
+
+  - id: fn-27f7c3b2-f637-457f-b5ff-3764a07a1e9c
+    name: null
+    location: src/App.tsx
+    context: App > return > onChange attribute#password
+    parameters:
+      - name: event
+        type: import("/Users/taylor/src/my-life/spaces/sourcespec/example-apps/example-todo/node_modules/@types/react/index").ChangeEvent<HTMLInputElement,
+          HTMLInputElement>
+        required: true
+    return:
+      type: void
+
+  - id: fn-62952604-4fa4-463b-8896-b6c55c6537b8
+    name: null
+    location: src/App.tsx
+    context: App > return > onClick attribute
+    parameters: []
+    return:
+      type: void
+
+  - id: fn-ebcaded2-d24a-4522-a917-7f82f7387533
+    name: null
+    location: src/App.tsx
+    context: App > return > onChange attribute#new-todo
     parameters:
       - name: event
         type: import("/Users/taylor/src/my-life/spaces/sourcespec/example-apps/example-todo/node_modules/@types/react/index").ChangeEvent<HTMLInputElement,
@@ -635,6 +1332,72 @@ functions:
     name: null
     location: src/App.tsx
     context: App > return > todos.map > onClick attribute
+    parameters: []
+    return:
+      type: Promise<void>
+
+  - id: fn-fce40967-9a9a-4318-a2a5-5de11ed7a316
+    name: authRequest
+    location: src/auth-api.ts
+    parameters:
+      - name: path
+        type: string
+        required: true
+      - name: options
+        type: RequestInit | undefined
+        required: false
+    return:
+      type: Promise<object>
+
+  - id: client-current-user
+    name: currentUser
+    location: src/auth-api.ts
+    parameters: []
+    return:
+      type: Promise<null | User>
+
+  - id: fn-3b1821e9-ef22-4194-aa87-f7fe11398183
+    name: null
+    location: src/auth-api.ts
+    context: currentUser > return > authRequest(/session).then
+    parameters:
+      - name: body
+        type: "{ user: User | null; }"
+        required: true
+    return:
+      type: null | User
+
+  - id: client-sign-in
+    name: signIn
+    location: src/auth-api.ts
+    parameters:
+      - name: username
+        type: string
+        required: true
+      - name: password
+        type: string
+        required: true
+      - name: register
+        type: boolean
+        required: true
+    return:
+      type: Promise<User>
+
+  - id: fn-dad1eec4-8d05-4f1f-824f-763a9fc41726
+    name: null
+    location: src/auth-api.ts
+    context: "signIn > return > authRequest(register ? '/register' : '/login', { method: 'POST', headers: {
+      'Content-Type': 'application/json' }, body: JSON.stringify({ username, ).then"
+    parameters:
+      - name: "{ user }"
+        type: "{ user: User | null; }"
+        required: true
+    return:
+      type: User
+
+  - id: client-sign-out
+    name: signOut
+    location: src/auth-api.ts
     parameters: []
     return:
       type: Promise<void>

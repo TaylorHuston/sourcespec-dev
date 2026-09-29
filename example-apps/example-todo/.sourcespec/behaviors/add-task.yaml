@@ -1,7 +1,7 @@
 id: add-task
 name: Add task
 description: A person can add a new, incomplete task to the todo list.
-trigger: A person starts composing a task in the New task field.
+trigger: A signed-in person starts composing a task in the New task field.
 cases:
   - id: task-added
     name: Task added
@@ -10,7 +10,7 @@ cases:
       - A new, incomplete task appears in the list with surrounding whitespace removed from its text.
       - The remaining count increases by one.
       - The New task field is cleared.
-      - The task remains available after a reload or local server restart.
+      - The task remains available to that person after a reload or local server restart, but not to another account.
     implementedBy:
       - function: add-task-submission
         role: Displays the saved task and clears the input only after a successful request.
@@ -19,20 +19,16 @@ cases:
       - function: client-create-task
         role: Sends the task to the local API.
       - function: local-api-handler
-        role: Validates and routes the create request.
+        role: Requires the current session and validates and routes the create request.
       - function: store-create-task
-        role: Inserts the task into SQLite.
-      - function: client-list-tasks
-        role: Fetches saved tasks after a reload.
-      - function: store-list-tasks
-        role: Reads saved tasks from SQLite after a reload.
+        role: Inserts the task into SQLite for the signed-in user.
     verifiedBy:
       - test: add-task-trims-input
         checks: The UI submits trimmed text and displays the new task, count, and cleared input.
       - test: api-validates-and-persists-tasks
-        checks: The API stores trimmed task text and returns it from the list endpoint.
+        checks: The API stores trimmed task text for the current user and refuses another user's access.
       - test: sqlite-tasks-survive-reopen
-        checks: Task contents remain saved after reopening the database.
+        checks: Task contents remain saved for the owner after reopening the database.
 
   - id: blank-task
     name: Blank task

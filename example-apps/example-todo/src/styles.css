@@ -40,6 +40,15 @@ button {
 }
 button:disabled { opacity: 0.55; cursor: not-allowed; }
 button:focus-visible, input:focus-visible { outline: 3px solid #e5a742; outline-offset: 2px; }
+.app-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+.app-header .intro { margin-bottom: 0; }
+.auth-form { display: grid; gap: 0.65rem; margin-top: 1.5rem; }
+.auth-form h2 { margin: 0 0 0.5rem; }
+.auth-form label { font-weight: 600; }
+.auth-form input { width: 100%; min-width: 0; padding: 0.7rem; border: 1px solid #8899ac; border-radius: 0.4rem; }
+.auth-form [role="alert"], .app > [role="alert"] { color: #9a2431; }
+button.text-button { padding: 0.5rem; border: 0; background: transparent; color: #315a89; text-align: left; text-decoration: underline; }
+button.text-button:hover { color: #203047; }
 .list-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-top: 2rem; }
 h2 { margin: 0 0 0.75rem; font-size: 1.1rem; }
 .list-heading span { color: #526479; }
@@ -56,4 +65,5 @@ button.remove:hover { background: #eff4f9; }
 @media (max-width: 34rem) {
   .app { margin: 1rem auto; padding: 1.25rem; }
   .add-controls { flex-direction: column; }
+  .app-header { flex-direction: column; }
 }

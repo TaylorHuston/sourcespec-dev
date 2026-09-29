@@ -11,7 +11,10 @@ const ts = requireFromApp('typescript')
 const YAML = requireFromApp('yaml')
 const catalogFile = join(appRoot, '.sourcespec/catalogs/functions-catalog.yaml')
 const mode = process.argv[2]
-if (mode !== '--check' && mode !== '--write') throw new Error('Use --check or --write from an example app root')
+const prune = mode === '--write' && process.argv[3] === '--prune'
+if (!['--check', '--write'].includes(mode) || process.argv.length > (prune ? 4 : 3)) {
+  throw new Error('Use --check, --write, or --write --prune from an example app root')
+}
 
 function sourceFiles(directory = appRoot) {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -57,9 +60,17 @@ function contextFor(node, source) {
       const literal = parent.arguments.find((argument) => ts.isStringLiteral(argument))
       const bodyCall = ts.isNewExpression(parent) && ts.isCallExpression(node.body)
         ? ` > invokes ${expressionLabel(node.body.expression, source)}` : ''
-      labels.push(`${ts.isNewExpression(parent) ? 'new ' : ''}${expressionLabel(parent.expression, source)}${literal ? `(${literal.text})` : ''}${bodyCall}`)
+      const dependencies = ts.isCallExpression(parent) && expressionLabel(parent.expression, source) === 'useEffect'
+        ? ` dependencies ${parent.arguments[1]?.getText(source) ?? 'unknown'}` : ''
+      labels.push(`${ts.isNewExpression(parent) ? 'new ' : ''}${expressionLabel(parent.expression, source)}${literal ? `(${literal.text})` : ''}${dependencies}${bodyCall}`)
     } else if (ts.isJsxAttribute(parent) && parent.initializer === child) {
-      labels.push(`${parent.name.getText(source)} attribute`)
+      const element = parent.parent?.parent
+      const id = (ts.isJsxSelfClosingElement(element) || ts.isJsxOpeningElement(element))
+        ? element.attributes.properties.find((attribute) => ts.isJsxAttribute(attribute) &&
+          attribute.name.getText(source) === 'id') : undefined
+      const idHint = id && ts.isJsxAttribute(id) && id.initializer && ts.isStringLiteral(id.initializer)
+        ? `#${id.initializer.text}` : ''
+      labels.push(`${parent.name.getText(source)} attribute${idHint}`)
     } else if (ts.isPropertyAssignment(parent) && parent.initializer === child) {
       labels.push(`${parent.name.getText(source)} property`)
     } else if (ts.isVariableDeclaration(parent) && parent.initializer === child) {
@@ -198,8 +209,16 @@ for (const absoluteFile of files) {
 }
 
 const missing = previous.filter((entry) => !usedIds.has(entry.id))
-if (missing.length && mode === '--write') {
-  throw new Error(`Unmatched existing function IDs: ${missing.map((entry) => entry.id).join(', ')}. Reconcile renames, moves, or removed functions before refreshing.`)
+if (missing.length && mode === '--write' && !prune) {
+  throw new Error(`Unmatched existing function IDs: ${missing.map((entry) => entry.id).join(', ')}. Reconcile moved functions, or use --write --prune after reviewing removed IDs and behavior links.`)
+}
+if (missing.length && prune) {
+  const behaviorDir = join(appRoot, '.sourcespec/behaviors')
+  const linked = existsSync(behaviorDir) ? readdirSync(behaviorDir).filter((file) => file.endsWith('.yaml'))
+    .flatMap((file) => (YAML.parse(readFileSync(join(behaviorDir, file), 'utf8')).cases ?? [])
+      .flatMap((entry) => (entry.implementedBy ?? []).map((link) => link.function))) : []
+  const stillLinked = missing.filter((item) => linked.includes(item.id))
+  if (stillLinked.length) throw new Error(`Cannot retire behavior-linked function IDs: ${stillLinked.map((item) => item.id).join(', ')}`)
 }
 if (mode === '--check') {
   if (!isDeepStrictEqual(previous, records)) {
@@ -221,5 +240,6 @@ if (mode === '--check') {
     return `\n${line}`
   })
   writeFileSync(catalogFile, header + body)
+  if (missing.length) console.log(`Retired unmatched IDs: ${missing.map((entry) => entry.id).join(', ')}`)
   console.log(`Wrote ${records.length} function records to ${relative(appRoot, catalogFile)}.`)
 }

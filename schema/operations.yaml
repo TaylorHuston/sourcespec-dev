@@ -1,0 +1,91 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: HTTP operation navigation
+description: Maps canonical OpenAPI operation IDs to curated implementation and test pointers; OpenAPI remains authoritative for HTTP methods, paths, payloads, and responses.
+type: object
+additionalProperties: false
+required: [id, name, contract, mounts, operations]
+properties:
+  id:
+    type: string
+    minLength: 1
+  name:
+    type: string
+    minLength: 1
+  contract:
+    type: string
+    minLength: 1
+    description: Path to the canonical OpenAPI document, relative to the application root.
+  mounts:
+    type: array
+    minItems: 1
+    description: Shared runtime mounting points. An operation refers to one by ID rather than repeating its implementation link.
+    items:
+      type: object
+      additionalProperties: false
+      required: [id, prefix, function, role]
+      properties:
+        id:
+          type: string
+          minLength: 1
+        prefix:
+          type: string
+          pattern: '^/'
+          description: Runtime middleware prefix, distinct from OpenAPI's full operation paths.
+        function:
+          type: string
+          minLength: 1
+          description: ID of the function that mounts the API in the function catalog.
+        role:
+          type: string
+          minLength: 1
+  operations:
+    type: array
+    minItems: 1
+    description: Navigational links keyed by canonical OpenAPI operationId, not another HTTP contract or a call trace.
+    items:
+      type: object
+      additionalProperties: false
+      required: [operationId, mount, implementedBy]
+      properties:
+        operationId:
+          type: string
+          minLength: 1
+        mount:
+          type: string
+          minLength: 1
+          description: ID of a mount above.
+        implementedBy:
+          type: array
+          minItems: 1
+          description: Curated function IDs useful for investigating the operation, not every function called.
+          items:
+            $ref: '#/$defs/functionLink'
+        verifiedBy:
+          type: array
+          minItems: 1
+          description: Tests intended to cover this operation; passing status belongs to test runs.
+          items:
+            $ref: '#/$defs/testLink'
+$defs:
+  functionLink:
+    type: object
+    additionalProperties: false
+    required: [function, role]
+    properties:
+      function:
+        type: string
+        minLength: 1
+      role:
+        type: string
+        minLength: 1
+  testLink:
+    type: object
+    additionalProperties: false
+    required: [test, checks]
+    properties:
+      test:
+        type: string
+        minLength: 1
+      checks:
+        type: string
+        minLength: 1

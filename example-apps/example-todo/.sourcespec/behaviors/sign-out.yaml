@@ -1,0 +1,21 @@
+id: sign-out
+name: Sign out of a local account
+description: End the current session and hide private tasks from the signed-out browser.
+trigger: A signed-in person chooses Sign out.
+cases:
+  - id: signed-out
+    name: Session ended
+    when: The sign-out request succeeds.
+    outcomes:
+      - The server invalidates the session and clears the browser cookie.
+      - The UI discards the account's tasks and returns to the sign-in form.
+    implementedBy:
+      - function: auth-sign-out
+        role: Clears account and task state after the server confirms sign-out.
+      - function: local-auth-handler
+        role: Revokes the session and expires the cookie.
+    verifiedBy:
+      - test: sign-in-gates-tasks
+        checks: Signing out hides the previous account's tasks.
+      - test: api-validates-and-persists-tasks
+        checks: The old session token no longer authorizes task requests.

@@ -1,0 +1,76 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: Data model
+description: Human-readable purpose and relationships of one application's persisted tables; DDL remains the physical schema authority.
+type: object
+additionalProperties: false
+required: [id, name, description, tables, relationships]
+properties:
+  id:
+    type: string
+    minLength: 1
+  name:
+    type: string
+    minLength: 1
+  description:
+    type: string
+    minLength: 1
+  tables:
+    type: array
+    minItems: 1
+    items:
+      type: object
+      additionalProperties: false
+      required: [name, purpose, definedIn]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        purpose:
+          type: string
+          minLength: 1
+        definedIn:
+          type: string
+          minLength: 1
+          description: Relative path to the DDL or migration that defines the table.
+  relationships:
+    type: array
+    description: Meaningful table relationships, including those not enforced by a foreign key.
+    items:
+      type: object
+      additionalProperties: false
+      required: [from, to, cardinality, meaning, enforcedBy]
+      properties:
+        from:
+          type: string
+          minLength: 1
+          description: Source table and column, such as todos.user_id.
+        to:
+          type: string
+          minLength: 1
+          description: Target table and column, such as users.id.
+        cardinality:
+          enum: [many-to-one, one-to-one, many-to-many]
+        meaning:
+          type: string
+          minLength: 1
+        enforcedBy:
+          enum: [foreign-key, application]
+  representations:
+    type: array
+    description: Links to other representations of the concepts; these do not redefine their fields.
+    items:
+      type: object
+      additionalProperties: false
+      required: [concept, kind, reference]
+      properties:
+        concept:
+          type: string
+          minLength: 1
+        kind:
+          enum: [typescript, openapi]
+        reference:
+          type: string
+          minLength: 1
+        note:
+          type: string
+          minLength: 1

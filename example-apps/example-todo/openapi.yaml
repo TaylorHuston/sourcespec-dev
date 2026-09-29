@@ -2,15 +2,105 @@ openapi: 3.1.1
 info:
   title: Local Todo API
   version: 0.1.0
-  description: Same-origin API backed by a local SQLite file. Intended for this single-user scratch app, not a deployed service.
+  description: Same-origin API backed by a local SQLite file with local accounts and cookie sessions. This is a scratch app, not a production authentication system.
 servers:
   - url: /
     description: The local Vite development or preview server.
 paths:
+  /api/auth/register:
+    post:
+      operationId: registerUser
+      summary: Create a local account and sign in
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Credentials'
+      responses:
+        '201':
+          description: Account created; sets an HTTP-only session cookie.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignedInUser'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/TooLarge'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/auth/login:
+    post:
+      operationId: loginUser
+      summary: Sign in to a local account
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Credentials'
+      responses:
+        '200':
+          description: Signed in; sets an HTTP-only session cookie.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignedInUser'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '413':
+          $ref: '#/components/responses/TooLarge'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/auth/session:
+    get:
+      operationId: getSession
+      summary: Identify the current user, if any
+      security: []
+      responses:
+        '200':
+          description: Current user or null; does not expose the session token.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [user]
+                properties:
+                  user:
+                    anyOf:
+                      - $ref: '#/components/schemas/User'
+                      - type: 'null'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/auth/logout:
+    post:
+      operationId: logoutUser
+      summary: End the current session
+      security: []
+      responses:
+        '204':
+          description: Session ended and cookie cleared. Also succeeds if no session exists.
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /api/todos:
     get:
       operationId: listTodos
-      summary: List saved tasks
+      summary: List the signed-in user's saved tasks
+      security:
+        - sessionCookie: []
       responses:
         '200':
           description: Saved tasks in insertion order.
@@ -20,11 +110,15 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Todo'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/ServerError'
     post:
       operationId: createTodo
-      summary: Create a task
+      summary: Create a task owned by the signed-in user
+      security:
+        - sessionCookie: []
       description: Trims surrounding whitespace before saving. Request bodies larger than 16 KiB are rejected.
       requestBody:
         required: true
@@ -41,6 +135,10 @@ paths:
                 $ref: '#/components/schemas/Todo'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         '413':
           $ref: '#/components/responses/TooLarge'
         '500':
@@ -55,7 +153,9 @@ paths:
           type: string
     patch:
       operationId: setTodoCompleted
-      summary: Change a task's completion state
+      summary: Change the signed-in user's task completion state
+      security:
+        - sessionCookie: []
       description: Request bodies larger than 16 KiB are rejected.
       requestBody:
         required: true
@@ -72,6 +172,10 @@ paths:
                 $ref: '#/components/schemas/Todo'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
         '413':
@@ -80,18 +184,62 @@ paths:
           $ref: '#/components/responses/ServerError'
     delete:
       operationId: removeTodo
-      summary: Remove a task
+      summary: Remove a task owned by the signed-in user
+      security:
+        - sessionCookie: []
       responses:
         '204':
           description: Task removed; no response body.
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
 components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: ss_session
+      description: Opaque 7-day HTTP-only SameSite=Strict cookie; Secure when using HTTPS.
   schemas:
+    User:
+      type: object
+      additionalProperties: false
+      required: [id, username]
+      properties:
+        id:
+          type: string
+          format: uuid
+        username:
+          type: string
+    SignedInUser:
+      type: object
+      additionalProperties: false
+      required: [user]
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+    Credentials:
+      type: object
+      additionalProperties: false
+      required: [username, password]
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 32
+          pattern: '^[a-zA-Z][a-zA-Z0-9_-]{2,31}$'
+        password:
+          type: string
+          format: password
+          minLength: 8
+          maxLength: 128
     Todo:
       type: object
       additionalProperties: false
@@ -129,6 +277,24 @@ components:
         error:
           type: string
   responses:
+    Unauthorized:
+      description: Missing or invalid session, or invalid sign-in credentials.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: Cross-origin mutation refused.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Conflict:
+      description: Username already taken.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
     BadRequest:
       description: Invalid JSON or invalid task input.
       content:

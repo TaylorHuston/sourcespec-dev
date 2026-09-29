@@ -1,0 +1,44 @@
+id: local-todo-data
+name: Local todo data model
+description: Local accounts own tasks; short-lived browser sessions identify the current account. The SQLite DDL in server/todo-store.ts is authoritative for columns and constraints.
+tables:
+  - name: users
+    purpose: Stores local account names and salted password hashes; passwords are never stored in plaintext.
+    definedIn: server/todo-store.ts
+  - name: todos
+    purpose: Stores tasks and completion state. New rows have an owner; migrated single-user rows temporarily have a null user_id until the first registered user claims them.
+    definedIn: server/todo-store.ts
+  - name: sessions
+    purpose: Stores expiring hashes of opaque browser session tokens; raw tokens exist only in cookies.
+    definedIn: server/todo-store.ts
+relationships:
+  - from: todos.user_id
+    to: users.id
+    cardinality: many-to-one
+    meaning: New tasks belong to one user and reads and writes are owner-scoped. During migration, preserved legacy rows remain unowned and inaccessible until the first registration claims them.
+    enforcedBy: foreign-key
+  - from: sessions.user_id
+    to: users.id
+    cardinality: many-to-one
+    meaning: A user can have multiple signed-in browser sessions, each with its own expiration.
+    enforcedBy: foreign-key
+representations:
+  - concept: User
+    kind: typescript
+    reference: server/todo-store.ts#User
+  - concept: User
+    kind: typescript
+    reference: src/auth-api.ts#User
+  - concept: User
+    kind: openapi
+    reference: '#/components/schemas/User'
+  - concept: Todo
+    kind: typescript
+    reference: server/todo-store.ts#Todo
+  - concept: Todo
+    kind: typescript
+    reference: src/todo-api.ts#Todo
+  - concept: Todo
+    kind: openapi
+    reference: '#/components/schemas/Todo'
+    note: The API exposes a boolean completed value; SQLite stores 0 or 1, converted by toTodo.

@@ -1,0 +1,84 @@
+id: local-http
+name: Local todo HTTP operations
+contract: openapi.yaml
+mounts:
+  - id: auth-api
+    prefix: /api/auth
+    function: auto-vite-config-ts-8-3
+    role: Mounts account routes in both the Vite dev and preview servers.
+  - id: todo-api
+    prefix: /api/todos
+    function: auto-vite-config-ts-8-3
+    role: Mounts task routes in both the Vite dev and preview servers.
+operations:
+  - operationId: registerUser
+    mount: auth-api
+    implementedBy:
+      - function: local-auth-handler
+        role: Handles account registration and session creation.
+    verifiedBy:
+      - test: api-validates-and-persists-tasks
+        checks: Registration returns a usable account session and refuses invalid or duplicate input.
+
+  - operationId: loginUser
+    mount: auth-api
+    implementedBy:
+      - function: local-auth-handler
+        role: Handles credential-based sign-in and creates a session.
+    verifiedBy:
+      - test: api-validates-and-persists-tasks
+        checks: Correct credentials sign in and incorrect credentials are refused.
+
+  - operationId: getSession
+    mount: auth-api
+    implementedBy:
+      - function: local-auth-handler
+        role: Looks up the current account from its session cookie.
+    verifiedBy:
+      - test: api-validates-and-persists-tasks
+        checks: A registered account's cookie retrieves its current session.
+
+  - operationId: logoutUser
+    mount: auth-api
+    implementedBy:
+      - function: local-auth-handler
+        role: Ends the current session and clears its cookie.
+    verifiedBy:
+      - test: api-validates-and-persists-tasks
+        checks: The prior cookie no longer grants task access after logout.
+
+  - operationId: listTodos
+    mount: todo-api
+    implementedBy:
+      - function: local-api-handler
+        role: Lists only the current account's tasks.
+    verifiedBy:
+      - test: api-validates-and-persists-tasks
+        checks: A valid session can list its own tasks, but not another account's.
+
+  - operationId: createTodo
+    mount: todo-api
+    implementedBy:
+      - function: local-api-handler
+        role: Handles creation of a task for the signed-in account.
+    verifiedBy:
+      - test: api-validates-and-persists-tasks
+        checks: Authenticated creation trims task text; invalid requests are refused.
+
+  - operationId: setTodoCompleted
+    mount: todo-api
+    implementedBy:
+      - function: local-api-handler
+        role: Handles completion updates for the current account's task.
+    verifiedBy:
+      - test: api-validates-and-persists-tasks
+        checks: Completion and reopening persist; another account cannot update the task.
+
+  - operationId: removeTodo
+    mount: todo-api
+    implementedBy:
+      - function: local-api-handler
+        role: Handles deletion of a task owned by the current account.
+    verifiedBy:
+      - test: api-validates-and-persists-tasks
+        checks: Own-task deletion succeeds and another account cannot delete the task.

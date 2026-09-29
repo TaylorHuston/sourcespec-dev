@@ -1,0 +1,40 @@
+id: create-account
+name: Create a local account
+description: A person creates an account to keep their tasks separate from other users.
+trigger: A person submits the Create account form.
+cases:
+  - id: account-created
+    name: Account created
+    when: The username is available and the credentials are valid.
+    outcomes:
+      - The user is saved with a salted password hash, not a plaintext password.
+      - The browser receives an HTTP-only session cookie and opens that user's task list.
+      - If this is the first account, it claims preserved tasks from the earlier single-user database.
+    implementedBy:
+      - function: auth-submit
+        role: Submits the form and opens the signed-in UI.
+      - function: local-auth-handler
+        role: Checks registration input and establishes a session.
+      - function: store-register-user
+        role: Saves the account and claims eligible legacy tasks.
+    verifiedBy:
+      - test: sign-in-gates-tasks
+        checks: Signup opens the account's task UI.
+      - test: api-validates-and-persists-tasks
+        checks: Registration issues a session and limits task access to that account.
+      - test: legacy-tasks-claimed
+        checks: Only the first account receives preserved single-user tasks.
+
+  - id: account-not-created
+    name: Invalid or unavailable username
+    when: The credentials are invalid or the username is already taken.
+    outcomes:
+      - No new account or session is created; the person can correct the input or choose another name.
+    implementedBy:
+      - function: local-auth-handler
+        role: Rejects invalid or duplicate registration.
+      - function: auth-submit
+        role: Shows the error without opening another account's tasks.
+    verifiedBy:
+      - test: api-validates-and-persists-tasks
+        checks: Invalid and duplicate registration requests are refused.
