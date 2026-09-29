@@ -1,0 +1,46 @@
+# Shared current-state Requirement referenced by both account-access and task-management Stories.
+# implementedBy locates code; verifiedBy names intended checks, not passing test runs.
+id: task-visibility
+name: See only tasks in the current account
+requirement: The app SHALL let a person read only tasks owned by their currently signed-in account and SHALL not expose saved tasks without a valid session.
+scenarios:
+  - id: signed-out-tasks-hidden
+    name: No tasks without a session
+    given:
+      - An account has saved tasks, but the person viewing the app has no valid session.
+    when:
+      - The person opens the app or requests the task list.
+    then:
+      - No saved tasks are shown in the UI.
+      - The task-list API refuses to return saved tasks without a valid session.
+    implementedBy:
+      - function: todo-interface
+        role: Shows the sign-in UI instead of tasks when there is no current user.
+      - function: local-api-handler
+        role: Refuses task-list requests without a valid session.
+    verifiedBy:
+      - test: sign-in-gates-tasks
+        checks: Tasks stay hidden before sign-in and after sign-out.
+      - test: api-validates-and-persists-tasks
+        checks: Requests without a session or with an ended session cannot list tasks.
+
+  - id: only-own-tasks-visible
+    name: Account-scoped list
+    given:
+      - Two accounts exist, and at least one has saved tasks.
+    when:
+      - A person signed in to one account views the task list.
+    then:
+      - Only tasks owned by that account are returned and shown; the other account's tasks are absent.
+    implementedBy:
+      - function: local-api-handler
+        role: Resolves the signed-in account before listing its tasks.
+      - function: store-list-tasks
+        role: Reads tasks scoped to that account in SQLite.
+      - function: todo-interface
+        role: Renders the task list returned for the current account.
+    verifiedBy:
+      - test: api-validates-and-persists-tasks
+        checks: Another account cannot read a task created by the first account.
+      - test: sqlite-tasks-survive-reopen
+        checks: Each account sees only its own persisted tasks.

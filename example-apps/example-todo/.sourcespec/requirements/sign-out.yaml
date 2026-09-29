@@ -1,0 +1,25 @@
+# Parallel format experiment; the existing behaviors/sign-out.yaml remains unchanged.
+# implementedBy locates code; verifiedBy names intended checks, not passing test runs.
+id: sign-out
+name: Sign out of a local account
+requirement: A signed-in person SHALL be able to end their current session so that it can no longer authorize requests.
+scenarios:
+  - id: signed-out
+    name: Session ended
+    given:
+      - A person is signed in and their task list is available.
+    when:
+      - The person chooses Sign out and the request succeeds.
+    then:
+      - The server invalidates the session and clears the browser cookie.
+      - The UI returns to the sign-in form.
+    implementedBy:
+      - function: auth-sign-out
+        role: Clears account and task state after the server confirms sign-out.
+      - function: local-auth-handler
+        role: Revokes the session and expires the cookie.
+    verifiedBy:
+      - test: sign-in-gates-tasks
+        checks: Signing out returns the UI to the sign-in form.
+      - test: api-validates-and-persists-tasks
+        checks: The old session token no longer authorizes task requests.

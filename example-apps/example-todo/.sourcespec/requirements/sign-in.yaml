@@ -1,0 +1,47 @@
+# Parallel format experiment; the existing behaviors/sign-in.yaml remains unchanged.
+# implementedBy locates code; verifiedBy names intended checks, not passing test runs.
+id: sign-in
+name: Sign in to a local account
+requirement: A returning person SHALL be able to sign in using valid account credentials and resume access to saved tasks. Incorrect credentials SHALL not establish a session or reveal which credential was wrong.
+scenarios:
+  - id: signed-in
+    name: Correct credentials
+    given:
+      - A registered person is signed out.
+    when:
+      - The person submits the Sign in form with the correct username and password.
+    then:
+      - A new session is created and the browser opens the saved task list.
+      - The session identifies that account for later requests.
+    implementedBy:
+      - function: auth-submit
+        role: Submits credentials and shows the signed-in task UI.
+      - function: local-auth-handler
+        role: Creates an HTTP-only session after authentication.
+      - function: store-authenticate-user
+        role: Verifies the salted password hash.
+    verifiedBy:
+      - test: api-validates-and-persists-tasks
+        checks: Correct credentials create a usable session for the returning account.
+      - test: sqlite-tasks-survive-reopen
+        checks: A valid session and its owner's tasks survive reopening SQLite.
+
+  - id: credentials-refused
+    name: Incorrect credentials
+    given:
+      - A person is signed out.
+    when:
+      - The person submits a username or password that does not match a registered account.
+    then:
+      - No session is created or saved task list opened.
+      - A recoverable error is shown without revealing which credential was wrong.
+    implementedBy:
+      - function: local-auth-handler
+        role: Refuses the login request.
+      - function: auth-submit
+        role: Displays the failure without opening the task UI.
+    verifiedBy:
+      - test: sign-in-shows-error
+        checks: The UI shows an accessible error and does not load tasks.
+      - test: api-validates-and-persists-tasks
+        checks: Wrong credentials return an unauthorized response.

@@ -1,14 +1,40 @@
-# SourceSpec agent guidance
+# SourceSpec repository guide
 
-This is a private scratch repository for SourceSpec experiments, not an SDD-managed application or a chosen production home.
+This public repository is an experimental, local-first SourceSpec playground. It is **not** an SDD-managed application or a production deployment. Read the root [`README.md`](README.md), then the [todo example README](example-apps/example-todo/README.md) and the files relevant to your task. Keep private workspace planning outside this repository; public docs should describe the project as it exists here.
 
-## Local workflow
+## Git and working-tree safety
 
-- This repository overrides the workspace's default `develop` / work-branch and SDD delivery policy. Local app, schema, and documentation changes may be committed directly to `main` when Taylor explicitly asks for a commit. Do not commit automatically.
-- Do not create branches, add remotes, push, merge, deploy, or release without separate explicit authorization.
-- Preserve unrelated work. Inspect the staged diff before committing; exclude secrets, `.env*`, `node_modules/`, build output, and other local state.
-- Verify changes proportionally. Keep experiments focused and do not add SDD configuration or dependencies unless explicitly requested.
-- Use kebab-case for YAML filenames. App specs live under `.sourcespec/`: one file per behavior in `behaviors/`, HTTP operation links in `operations/`, data-model maps in `data-models/`, and function/test catalogs in `catalogs/`. Preserve schema-defined YAML field names. Data-model records explain table purpose and relationships; DDL remains authoritative for columns and constraints.
-- Behaviors define conditions and intended outcomes, with curated `implementedBy` and `verifiedBy` links; they do not prescribe execution order or claim an exhaustive call trace. Leave `supportedBy` out until it has a distinct, agreed meaning.
-- Keep an app's HTTP contract at its root as `openapi.yaml`; do not duplicate request/response contracts in SourceSpec. Operation records link canonical OpenAPI `operationId`s to runtime mounts, curated handler function IDs, and tests intended to cover them. These links do not prove server routing or a passing test run.
-- The function catalog must include every function defined in the example app's own runtime, config, and test source, including anonymous callbacks and constructors. Run `npm run catalog:refresh` after code edits and `npm run catalog:check` before claiming completeness; review unmatched IDs instead of silently replacing them after moves or renames. Use `npm run catalog:refresh -- --prune` only after reviewing intentional deletions; behavior-linked IDs cannot be pruned. Catalog `location` is a file path and `context` is a searchable hint, never a line/offset; external dependencies and the repository-level generator are outside the app boundary.
+- `spaces/sourcespec/` is its own Git repository, separate from the parent workspace. Confirm the repository, branch, status, and relevant diffs before changing or reporting on files. Protect unrelated and untracked work.
+- `main` is the current working branch. This repository overrides the workspace's default `develop`/work-branch and SDD delivery policies. Changes may be made on `main`, but **do not commit unless Taylor explicitly requests it**; do not push, create branches, merge, deploy, or release without separate explicit authorization.
+- Before any approved commit, inspect the exact staged scope. Never include `.env*`, credentials, SQLite data, `node_modules/`, `dist/`, or other runtime state. Do not amend, rebase, or discard existing work without permission.
+- Keep experiments small and avoid adding SDD configuration, OpenSpec dependencies, publication steps, or broad architecture changes without an explicit request.
+
+## SourceSpec boundaries
+
+- `.sourcespec/` describes the **current app**, not planned or partially implemented changes. Methodology-specific planning and future work belong outside it. Absence from a SourceSpec record does **not** establish that code is absent or dead.
+- [`schema/requirements.yaml`](schema/requirements.yaml) defines current-state `SHALL` Requirements with stable kebab-case IDs and named GIVEN/WHEN/THEN Scenarios. Write `given`, `when`, and `then` as nonempty lists. Do not introduce `status` or an `implementation:` wrapper. A Requirement may be shared by multiple Stories; avoid copying the same normative guarantee into several Requirements just to satisfy Story boundaries.
+- [`example-apps/example-todo/docs/stories/`](example-apps/example-todo/docs/stories/) contains Markdown Stories. Start the body “As a … I should … so that …”, add natural-language context, and keep related Requirement, operation, and data-model references in structured frontmatter and bullets. Stories can group several Requirements; no one-to-one rule applies. They are not required to use SDD or OpenSpec.
+- [`example-apps/example-todo/.sourcespec/behaviors/`](example-apps/example-todo/.sourcespec/behaviors/) preserves the earlier behavior format for side-by-side comparison. Do not silently delete it, treat both formats as independently canonical, or automatically synchronize the two. Clarify the intended migration before consolidating them.
+- `implementedBy` is a **curated investigation pointer**, not an exhaustive call trace or proof of implementation. `verifiedBy` names **intended checks**, not evidence that they pass or fully cover the Scenario. Function catalog entries without Requirement links are not automatically unused; review behavior and code before making such claims.
+
+## Sources of truth and files
+
+| Concern | Owner and rule |
+| --- | --- |
+| Requirement/Scenario shape | Root `schema/requirements.yaml`; `tools/requirements-check.mjs` validates shape, IDs, catalog references, and linked test declarations. Link discovery is not semantic proof. |
+| HTTP contract | The app-root `example-apps/example-todo/openapi.yaml` owns methods, paths, payloads, and responses. `.sourcespec/operations/local-http.yaml` links operation IDs to runtime mounts, handlers, and tests without repeating the contract. |
+| Persistent storage | `example-apps/example-todo/server/todo-store.ts` owns SQLite DDL and access. `.sourcespec/data-models/local-todo.yaml` describes table purposes, relationships, and representations; do not duplicate every column. |
+| Function inventory | `.sourcespec/catalogs/functions-catalog.yaml` is generated by `tools/function-catalog.mjs` and covers **every app-owned function definition**, including anonymous callbacks in runtime, config, and tests. Imported dependencies and repository-level tools are outside its scope. |
+| Test inventory | `.sourcespec/catalogs/tests-catalog.yaml` is hand-authored; keep its IDs, names, and locations aligned with test declarations. Catalog links are not test-run results. |
+
+Function `location` is a file path, not an offset; `context` is a searchable hint for anonymous functions. Preserve stable IDs across unambiguous moves and renames; reconcile ambiguous identities manually. Do not edit the generated catalog by hand. Do not prune IDs until reviewing removed functions and references.
+
+## Change and verification workflow
+
+1. From `example-apps/example-todo/`, inspect the affected app source, tests, OpenAPI contract, SourceSpec records, and catalog entries. Prefer the smallest change consistent with current behavior. Schema-defined YAML field names keep their casing; filenames are kebab-case.
+2. After changing app-owned code, run `npm run catalog:refresh` and review its diff before `npm run catalog:check`. Use `npm run catalog:refresh -- --prune` only after reviewing intentional removals and linked IDs.
+3. After editing Requirements, run `npm run requirements:check`. It validates JSON Schema Draft 2020-12, file/ID and per-Requirement Scenario ID uniqueness, function/test references, and the presence of linked test declarations at cataloged locations. It cannot establish that prose is accurate or tests pass. Other draft schemas are not all wired into this check.
+4. For Stories, manually verify frontmatter IDs and relative Markdown links against the referenced records; there is no Story validator yet. Keep HTTP details in OpenAPI and physical storage details in DDL.
+5. Run `npm test` and `npm run build` for app/tooling changes; both include the catalog and Requirement checks. Use focused tests or manual runtime checks when making behavior claims. Node.js 26+ is required for `node:sqlite`; use the app's npm lockfile and scripts. Report checks not run and why.
+
+The example's `.data/todos.sqlite` is local, ignored state; do not print or commit its contents. Stop local processes you start when finished. Keep [`working-notes.md`](working-notes.md) as the author's informal notes rather than rewriting it into product documentation without a request.

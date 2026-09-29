@@ -1,0 +1,79 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: Requirement
+description: A current-state obligation and its observable Scenarios. Stories may share a Requirement; neither implementation links nor test links prove behavior or passing checks.
+type: object
+additionalProperties: false
+required: [id, name, requirement, scenarios]
+properties:
+  id:
+    $ref: '#/$defs/id'
+    description: Stable ID within the application; the filename is this ID plus .yaml.
+  name:
+    $ref: '#/$defs/text'
+  requirement:
+    type: string
+    pattern: '\bSHALL\b'
+    description: A present-tense normative obligation; planned work belongs outside .sourcespec/.
+  scenarios:
+    type: array
+    minItems: 1
+    description: Distinct GIVEN/WHEN/THEN cases; their IDs must be unique within the Requirement.
+    items:
+      type: object
+      additionalProperties: false
+      required: [id, name, given, when, then]
+      properties:
+        id:
+          $ref: '#/$defs/id'
+        name:
+          $ref: '#/$defs/text'
+        given:
+          $ref: '#/$defs/statements'
+        when:
+          $ref: '#/$defs/statements'
+        then:
+          $ref: '#/$defs/statements'
+        implementedBy:
+          type: array
+          minItems: 1
+          description: Optional curated investigation pointers, not an exhaustive call trace or proof of implementation.
+          items:
+            $ref: '#/$defs/functionLink'
+        verifiedBy:
+          type: array
+          minItems: 1
+          description: Optional intended test links; results belong to test runs, not this record.
+          items:
+            $ref: '#/$defs/testLink'
+$defs:
+  id:
+    type: string
+    pattern: '^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$'
+  text:
+    type: string
+    pattern: '\S'
+  statements:
+    type: array
+    minItems: 1
+    items:
+      $ref: '#/$defs/text'
+  functionLink:
+    type: object
+    additionalProperties: false
+    required: [function, role]
+    properties:
+      function:
+        $ref: '#/$defs/text'
+        description: ID in the application's function catalog.
+      role:
+        $ref: '#/$defs/text'
+  testLink:
+    type: object
+    additionalProperties: false
+    required: [test, checks]
+    properties:
+      test:
+        $ref: '#/$defs/text'
+        description: ID in the application's test catalog.
+      checks:
+        $ref: '#/$defs/text'

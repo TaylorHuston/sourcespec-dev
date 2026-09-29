@@ -1,0 +1,48 @@
+# Parallel format experiment; the existing behaviors/create-account.yaml remains unchanged.
+# implementedBy locates code; verifiedBy names intended checks, not passing test runs.
+id: create-account
+name: Create a local account
+requirement: A person SHALL be able to create a local account with valid, unused credentials. Successful registration SHALL start a private session; invalid or duplicate credentials SHALL not create an account.
+scenarios:
+  - id: account-created
+    name: Account created
+    given:
+      - A person is signed out and has a valid, unused username and password.
+    when:
+      - The person submits the Create account form.
+    then:
+      - A local user is created without storing the plaintext password.
+      - The browser receives an HTTP-only session cookie and opens the task-list view.
+      - If this is the first account, it claims tasks preserved from the earlier single-user database.
+    implementedBy:
+      - function: auth-submit
+        role: Submits the form and opens the signed-in UI.
+      - function: local-auth-handler
+        role: Checks registration input and establishes a session.
+      - function: store-register-user
+        role: Saves the account and claims eligible legacy tasks.
+    verifiedBy:
+      - test: sign-in-gates-tasks
+        checks: Signup opens the account's task UI.
+      - test: api-validates-and-persists-tasks
+        checks: Registration issues a usable session for the newly created account.
+      - test: legacy-tasks-claimed
+        checks: Only the first account receives preserved single-user tasks.
+
+  - id: account-not-created
+    name: Invalid or unavailable username
+    given:
+      - A person is signed out.
+    when:
+      - The person attempts to create an account with invalid credentials or an already-used username.
+    then:
+      - No new account or session is created.
+      - The person can correct the input or choose another name.
+    implementedBy:
+      - function: local-auth-handler
+        role: Rejects invalid or duplicate registration.
+      - function: auth-submit
+        role: Shows the error without opening the task UI.
+    verifiedBy:
+      - test: api-validates-and-persists-tasks
+        checks: Invalid and duplicate registration requests are refused.

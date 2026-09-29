@@ -1,0 +1,43 @@
+# Parallel format experiment; the existing behaviors/remove-task.yaml remains unchanged.
+# implementedBy locates code; verifiedBy names intended checks, not passing test runs.
+id: remove-task
+name: Remove a task
+requirement: A signed-in person SHALL be able to delete their own task without affecting another account. If deletion fails, the task SHALL remain visible and the person SHALL be able to retry.
+scenarios:
+  - id: task-removed
+    name: Task removed
+    given:
+      - A signed-in person has a task in their list.
+    when:
+      - The person chooses Remove and deletion succeeds.
+    then:
+      - The task disappears from the list and remains deleted after reload.
+      - The remaining count decreases if the task was incomplete.
+    implementedBy:
+      - function: remove-task
+        role: Removes the task from the UI after the server confirms deletion.
+      - function: local-api-handler
+        role: Requires the current session and routes the delete request.
+      - function: store-delete-task
+        role: Deletes only a task owned by the current user.
+    verifiedBy:
+      - test: remove-task-clears-list
+        checks: The UI removes the task and updates the remaining count.
+      - test: api-validates-and-persists-tasks
+        checks: Deleted tasks stay absent and another user cannot delete them.
+
+  - id: removal-failed
+    name: Delete request failed
+    given:
+      - A signed-in person's task is visible in the list.
+    when:
+      - The person chooses Remove but the delete request fails.
+    then:
+      - The task remains visible with its original completion state and the remaining count is unchanged.
+      - An error is shown so the person can retry.
+    implementedBy:
+      - function: remove-task
+        role: Keeps local task state and reports a failure when deletion is not confirmed.
+    verifiedBy:
+      - test: remove-task-failure-keeps-task
+        checks: The UI preserves the task and count after a failed request.
