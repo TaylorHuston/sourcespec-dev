@@ -48,6 +48,12 @@ test('readable lexical IDs expose ownership and fail closed when a range shifts'
     assert.equal(run('--check').status, 0)
     assert.equal(YAML.parse(readFileSync(catalog, 'utf8')).functions[0].description, 'Reviewed function responsibility.')
     const before = readFileSync(catalog, 'utf8')
+    first.source = { file: 'src/index.ts', start: 0 }
+    writeFileSync(catalog, YAML.stringify({ functions: entries }))
+    const noncurrent = run('--write')
+    assert.notEqual(noncurrent.status, 0)
+    assert.match(noncurrent.stderr, /Noncurrent function record/)
+    writeFileSync(catalog, before)
     writeFileSync(sourceFile, 'const unrelated = () => false;\n' + source)
     const stale = run('--check')
     assert.notEqual(stale.status, 0)

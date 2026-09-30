@@ -138,19 +138,6 @@ function lexicalId(file, name, context) {
   return `fn:${file}#${owner.join('.') || 'anonymous'}`
 }
 
-function legacyLocation(node, file, source) {
-  if (declaredName(node)) {
-    const names = []
-    for (let current = node; current; current = current.parent) {
-      if (ts.isClassDeclaration(current) && current.name) names.push(current.name.text)
-      else if (isFunction(current) && declaredName(current)) names.push(declaredName(current))
-    }
-    return `${file}#${names.reverse().join('.')}`
-  }
-  const { line, character } = source.getLineAndCharacterOfPosition(node.getStart(source))
-  return `${file}:${line + 1}:${character + 1}`
-}
-
 const config = ts.readConfigFile(join(appRoot, 'tsconfig.json'), ts.sys.readFile)
 if (config.error) throw new Error(ts.flattenDiagnosticMessageText(config.error.messageText, '\n'))
 const parsed = ts.parseJsonConfigFileContent(config.config, ts.sys, appRoot)
@@ -159,10 +146,9 @@ const files = sourceFiles()
 const program = ts.createProgram(files, { ...parsed.options, allowJs: true, noEmit: true })
 const checker = program.getTypeChecker()
 const previous = existsSync(catalogFile) ? YAML.parse(readFileSync(catalogFile, 'utf8')).functions : []
-const legacyBySource = new Map(previous.filter((item) => item.source)
-  .map((item) => [`${item.source.file}:${item.source.start}`, item]))
 const byIdentity = new Map()
-for (const item of previous.filter((entry) => !entry.source)) {
+for (const item of previous) {
+  if (item.source || !item.sourceScope) throw new Error(`Noncurrent function record ${item.id}; reconcile it with a one-off script before refreshing`)
   const key = JSON.stringify([item.location, item.name, item.context ?? ''])
   if (byIdentity.has(key)) throw new Error(`Ambiguous catalog identity for ${key}; reconcile the records before refreshing`)
   byIdentity.set(key, item)
@@ -202,10 +188,7 @@ for (const absoluteFile of files) {
       if (identities.has(key)) throw new Error(`Ambiguous functions at ${file} (${name ?? 'anonymous'}, ${breadcrumb}); review their call sites`)
       identities.add(key)
       const id = fallback ? `${base}@utf16:${node.getStart(source)}-${node.getEnd()}:${ts.SyntaxKind[node.kind]}` : base
-      const legacy = legacyBySource.get(`${file}:${node.getStart(source)}`)
-      // Only trust the old offset when the old displayed location also agrees. This is migration-only.
-      const old = legacy && legacy.name === name && legacy.location === legacyLocation(node, file, source)
-        ? legacy : byIdentity.get(key)
+      const old = byIdentity.get(key)
       if (old && old.id !== id) throw new Error(`Identity changed for ${file} (${name ?? breadcrumb}): ${old.id} -> ${id}. Review old and new definitions and links before replacing the catalog.`)
       if (old && usedIds.has(old.id)) throw new Error(`Multiple functions matched catalog ID ${old.id}`)
       usedIds.add(id)

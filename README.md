@@ -18,7 +18,7 @@ The [todo example](example-apps/example-todo/README.md) keeps these concerns sep
 
 For example, [`task-visibility.yaml`](example-apps/example-todo/.sourcespec/requirements/task-visibility.yaml) is shared by the [private account access](example-apps/example-todo/docs/stories/private-account-access.md) and [manage tasks](example-apps/example-todo/docs/stories/manage-tasks.md) Stories. Having an account is a prerequisite for managing tasks; seeing only the current account's saved tasks is a guarantee relevant to both goals. No one-to-one Story–Requirement rule is implied.
 
-Requirements and named Scenarios are the todo example's sole current-state behavior format; the earlier parallel Behaviors were retired. [`schema/`](schema/) contains the evolving YAML schemas, including the [Requirements schema](schema/requirements.yaml); [`tools/`](tools/) contains the catalog generator and Requirements checker. [`skills/`](skills/README.md) contains portable copies of the function- and test-catalog pilot skills. [`sourcespec-devlog.md`](sourcespec-devlog.md) is an informal experiment log, not normative documentation.
+Requirements and named Scenarios are the todo example's sole current-state behavior format; the earlier parallel Behaviors were retired. [`schema/`](schema/) contains the evolving YAML schemas, including the [Requirements schema](schema/requirements.yaml); [`tools/`](tools/) contains the catalog generator and Requirements checker. [`skills/`](skills/README.md) owns the function- and test-catalog skills. [`sourcespec-devlog.md`](sourcespec-devlog.md) is an informal experiment log, not normative documentation.
 
 ## Try the example
 

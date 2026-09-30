@@ -10,7 +10,7 @@ import YAML from 'yaml'
 const skill = fileURLToPath(new URL('../', import.meta.url))
 const runner = join(skill, 'node_modules/.bin/tsx')
 const script = join(skill, 'scripts/tests-catalog.ts')
-const run = (app: string, mode: '--write' | '--check' | '--identity-preview' | '--write-lexical' | '--check-lexical') =>
+const run = (app: string, mode: '--write' | '--check') =>
   spawnSync(runner, [script, '--app', app, mode], { encoding: 'utf8' })
 
 const fixture = `import { beforeEach, describe, it, test } from 'vitest'
@@ -26,7 +26,7 @@ describe.each([1, 2])('variant %s', () => {
 })
 `
 
-test('inventories declarations per app, preserves curated IDs, and rejects ambiguity/removals', () => {
+test('inventories declarations per app, preserves curated lexical IDs, and rejects ambiguity/removals', () => {
   const workspace = mkdtempSync(join(tmpdir(), 'sspc-tests-'))
   const app = join(workspace, 'apps/api')
   const catalog = join(app, '.sourcespec/catalogs/tests-catalog.yaml')
@@ -43,12 +43,6 @@ test('inventories declarations per app, preserves curated IDs, and rejects ambig
     writeFileSync(join(workspace, 'apps/web/other.test.ts'), "it('foreign', () => {})\n")
 
     assert.equal(run(app, '--check').status, 1)
-    const preview = run(app, '--identity-preview')
-    assert.equal(preview.status, 0, preview.stderr)
-    const previewIds = JSON.parse(preview.stdout).tests.map((entry: { id: string }) => entry.id)
-    assert.equal(previewIds[0], 'test:src/feature.test.ts#account.works')
-    assert.equal(previewIds[1], 'test:src/feature.test.ts#account.value-s')
-    assert.equal(previewIds[4], 'test:src/feature.test.ts#variant-s.works')
     const created = run(app, '--write')
     assert.equal(created.status, 0, created.stderr)
     const original = readFileSync(catalog, 'utf8')
@@ -64,9 +58,9 @@ test('inventories declarations per app, preserves curated IDs, and rejects ambig
     assert(entries.every((entry: { name: string }) => entry.name !== 'foreign'))
     assert.equal(run(app, '--check').status, 0)
     const ids = entries.map((entry: { id: string }) => entry.id)
-    assert.deepEqual(ids, previewIds)
-    assert.equal(run(app, '--check-lexical').status, 0)
-    assert.equal(run(app, '--write-lexical').status, 1, 'the initial-only writer must not replace linked entries')
+    assert.equal(ids[0], 'test:src/feature.test.ts#account.works')
+    assert.equal(ids[1], 'test:src/feature.test.ts#account.value-s')
+    assert.equal(ids[4], 'test:src/feature.test.ts#variant-s.works')
 
     writeFileSync(catalog, original.replace('\n\n  - id:', '\n  - id:'))
     assert.equal(run(app, '--check').status, 1)
@@ -82,7 +76,14 @@ test('inventories declarations per app, preserves curated IDs, and rejects ambig
     assert.equal(entries[0].description, 'Checks that the account view responds to a request.')
     assert.equal(entries[0].kind, 'component')
     assert.deepEqual(entries.map((entry: { id: string }) => entry.id), ids)
-    assert.equal(run(app, '--check-lexical').status, 0, 'curated fields remain valid in lexical mode')
+    assert.equal(run(app, '--check').status, 0, 'curated fields remain valid')
+    const curatedText = readFileSync(catalog, 'utf8')
+    entries[0].id = 'test:legacy-identity'
+    writeFileSync(catalog, YAML.stringify({ tests: entries }))
+    const nonlexical = run(app, '--write')
+    assert.notEqual(nonlexical.status, 0)
+    assert.match(nonlexical.stderr, /Test identity changed/)
+    writeFileSync(catalog, curatedText)
 
     const beforeRemoval = readFileSync(catalog, 'utf8')
     writeFileSync(source, fixture.replace("  it.skip('disabled', () => {})\n", ''))
@@ -107,7 +108,7 @@ test('inventories declarations per app, preserves curated IDs, and rejects ambig
   }
 })
 
-test('initial-only lexical generation refuses normalized title collisions and preserves reviewed fields', () => {
+test('normal generation refuses normalized title and path collisions', () => {
   const app = mkdtempSync(join(tmpdir(), 'sspc-tests-lexical-'))
   const source = join(app, 'src/cases.test.ts')
   const catalog = join(app, '.sourcespec/catalogs/tests-catalog.yaml')
@@ -116,10 +117,7 @@ test('initial-only lexical generation refuses normalized title collisions and pr
     writeFileSync(join(app, 'package.json'), '{"name":"lexical-tests","private":true}')
     writeFileSync(join(app, 'tsconfig.json'), '{"compilerOptions":{"target":"ES2022"}}')
     writeFileSync(source, "import { test } from 'vitest'\ntest('space title', () => {})\n")
-    const preview = run(app, '--identity-preview')
-    assert.equal(preview.status, 0, preview.stderr)
-    assert.equal(JSON.parse(preview.stdout).tests[0].id, 'test:src/cases.test.ts#space-title')
-    assert.equal(run(app, '--write-lexical').status, 0)
+    assert.equal(run(app, '--write').status, 0)
     let text = readFileSync(catalog, 'utf8')
     assert.match(text, /id: test:src\/cases\.test\.ts#space-title/)
     const curated = YAML.parse(text)
@@ -127,10 +125,9 @@ test('initial-only lexical generation refuses normalized title collisions and pr
     curated.tests[0].description = 'Reviewed test responsibility.'
     text = YAML.stringify(curated)
     writeFileSync(catalog, text)
-    assert.equal(run(app, '--check-lexical').status, 0, 'curated description and kind survive checking')
-    assert.equal(run(app, '--write-lexical').status, 1, 'existing curated catalog cannot be replaced')
+    assert.equal(run(app, '--check').status, 0, 'curated description and kind survive checking')
     writeFileSync(source, "import { test } from 'vitest'\ntest('space title', () => {})\ntest('space-title', () => {})\n")
-    const collision = run(app, '--identity-preview')
+    const collision = run(app, '--write')
     assert.notEqual(collision.status, 0)
     assert.match(collision.stderr, /Ambiguous readable test ID/)
     assert.equal(run(app, '--write').status, 1)
@@ -139,7 +136,7 @@ test('initial-only lexical generation refuses normalized title collisions and pr
     writeFileSync(source, "import { test } from 'vitest'\ntest('space title', () => {})\n")
     writeFileSync(join(app, 'src/alpha case.test.ts'), "test('Ａ', () => {})\n")
     writeFileSync(join(app, 'src/alpha-case.test.ts'), "test('A', () => {})\n")
-    const normalizedPath = run(app, '--identity-preview')
+    const normalizedPath = run(app, '--write')
     assert.notEqual(normalizedPath.status, 0)
     assert.match(normalizedPath.stderr, /Ambiguous readable test ID test:src\/alpha-case\.test\.ts#A/)
     assert.equal(readFileSync(catalog, 'utf8'), text)

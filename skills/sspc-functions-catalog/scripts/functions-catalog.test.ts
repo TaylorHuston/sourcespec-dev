@@ -19,7 +19,7 @@ function runScope(project: string, scope: string, mode: '--probe' | '--write' | 
   return spawnSync(runner, [script, '--project', project, '--scope', scope, mode], { encoding: 'utf8' })
 }
 
-test('inventories only one app, preserves IDs and annotations, and refuses silent removals', () => {
+test('inventories one app, preserves lexical IDs and annotations, and refuses silent removals', () => {
   const workspace = mkdtempSync(join(tmpdir(), 'sspc-functions-'))
   const app = join(workspace, 'apps/api')
   const catalog = join(app, '.sourcespec/catalogs/functions-catalog.yaml')
@@ -60,11 +60,13 @@ test('inventories only one app, preserves IDs and annotations, and refuses silen
     const ambiguous = run(app, '--check')
     assert.match(ambiguous.stderr, /function source scope\(s\) need review/)
     assert.match(ambiguous.stderr, /scripts\.mts/)
-    const legacy = YAML.parse(readFileSync(catalog, 'utf8'))
-    delete legacy.functions[0].sourceScope
-    writeFileSync(catalog, YAML.stringify(legacy))
+    const validBeforeInvalid = readFileSync(catalog, 'utf8')
+    const invalid = YAML.parse(validBeforeInvalid)
+    delete invalid.functions[0].sourceScope
+    writeFileSync(catalog, YAML.stringify(invalid))
     assert.equal(run(app, '--check').status, 1)
-    assert.equal(run(app, '--write').status, 0, 'migrates an old catalog without reassigning IDs')
+    assert.equal(run(app, '--write').status, 1, 'invalid prior records are not repaired automatically')
+    writeFileSync(catalog, validBeforeInvalid)
     assert.deepEqual(YAML.parse(readFileSync(catalog, 'utf8')).functions.map((entry: { id: string }) => entry.id), initialIds)
     assert(entries.some((entry: { context?: string }) => entry.context?.includes('withCleanup > return')))
     assert(entries.some((entry: { context?: string }) => entry.context?.includes('it(works)')))
@@ -82,6 +84,13 @@ test('inventories only one app, preserves IDs and annotations, and refuses silen
     assert.equal(entries[0].description, 'Curated investigation hint.')
     assert.equal(entries[0].sourceScope, 'unclassified')
     const validCatalog = readFileSync(catalog, 'utf8')
+    entries[0].id = 'fn:legacy-identity'
+    writeFileSync(catalog, YAML.stringify({ functions: entries }))
+    const nonlexical = run(app, '--write')
+    assert.notEqual(nonlexical.status, 0)
+    assert.match(nonlexical.stderr, /Identity changed/)
+    assert.equal(YAML.parse(readFileSync(catalog, 'utf8')).functions[0].id, 'fn:legacy-identity')
+    entries[0].id = ids[0]
     entries[0].sourceScope = 'not-a-scope'
     writeFileSync(catalog, YAML.stringify({ functions: entries }))
     const invalidScope = run(app, '--check')

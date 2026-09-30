@@ -19,8 +19,8 @@ type Declaration = { name: string; suite: string[]; location: string; inferredKi
 type Callee = { root: 'test' | 'describe'; each: boolean; bound: boolean }
 
 const [appFlag, appPath, mode] = process.argv.slice(2)
-if (appFlag !== '--app' || !appPath || !['--check', '--write', '--identity-preview', '--write-lexical', '--check-lexical'].includes(mode) || process.argv.length !== 5) {
-  throw new Error('Usage: tests-catalog.ts --app <absolute-app-root> --check|--write|--identity-preview|--write-lexical|--check-lexical')
+if (appFlag !== '--app' || !appPath || !['--check', '--write'].includes(mode) || process.argv.length !== 5) {
+  throw new Error('Usage: tests-catalog.ts --app <absolute-app-root> --check|--write')
 }
 if (appPath !== resolve(appPath)) throw new Error('--app must be an absolute path')
 const appRoot = realpathSync(appPath)
@@ -30,9 +30,6 @@ if (!existsSync(join(appRoot, 'package.json')) || !existsSync(join(appRoot, 'tsc
 }
 
 const catalogFile = join(appRoot, '.sourcespec/catalogs/tests-catalog.yaml')
-if (mode === '--write-lexical' && existsSync(catalogFile)) {
-  throw new Error(`Lexical test generation is initial-only: ${catalogFile} already exists. Review IDs, curated metadata, and links before replacing it.`)
-}
 const schemaFile = fileURLToPath(new URL('../assets/tests.schema.yaml', import.meta.url))
 const validate = new Ajv2020({ allErrors: true }).compile(YAML.parse(readFileSync(schemaFile, 'utf8')))
 const identity = (entry: Pick<TestRecord, 'location' | 'suite' | 'name'>) =>
@@ -53,6 +50,9 @@ function readCatalog(): TestRecord[] {
     if (!validate(entry)) throw new Error(`Invalid catalog test: ${JSON.stringify(validate.errors)}`)
     const record = entry as TestRecord
     if (!record.location) throw new Error(`Existing test ${record.id} has no source location; reconcile it before refreshing`)
+    if (record.id !== lexicalId(record)) {
+      throw new Error(`Test identity changed for ${record.location} (${record.name}): ${record.id} -> ${lexicalId(record)}. Review intended-check links before replacing the catalog.`)
+    }
     if (ids.has(record.id)) throw new Error(`Duplicate test ID: ${record.id}`)
     if (identities.has(identity(record))) throw new Error(`Ambiguous existing test identity: ${identity(record)}`)
     ids.add(record.id)
@@ -164,7 +164,7 @@ function titleFor(call: ts.CallExpression, source: ts.SourceFile): string {
   throw new Error(`Nonliteral or empty test/suite name at ${relative(appRoot, source.fileName)}:${line + 1}; review and use an explicit static name`)
 }
 
-const previous = mode === '--identity-preview' || mode === '--write-lexical' ? [] : readCatalog()
+const previous = readCatalog()
 const prior = new Map(previous.map((entry) => [identity(entry), entry]))
 const declarations: Declaration[] = []
 const files = testFiles()
@@ -214,8 +214,7 @@ for (const declaration of declarations) {
   if (old) matched.add(old.id)
   else added++
   const record: TestRecord = {
-    id: mode === '--write-lexical' || mode === '--check-lexical' || mode === '--identity-preview'
-      ? proposedId : old?.id ?? proposedId,
+    id: proposedId,
     name: declaration.name,
     ...(declaration.suite.length ? { suite: declaration.suite } : {}),
     description: old?.description ?? `Review what this declared test checks: ${declaration.name}`,
@@ -252,12 +251,7 @@ function reportAmbiguities(): void {
     console.warn(`- ${entry.id}: ${entry.location} — ${[...(entry.suite ?? []), entry.name].join(' > ')}`)
   }
 }
-if (mode === '--identity-preview') {
-  console.log(JSON.stringify({
-    format: 'test-identities-preview/v1', scope: appRoot, declarations: records.length,
-    tests: records.map(({ id, location, suite, name }) => ({ id, location, ...(suite ? { suite } : {}), name })),
-  }))
-} else if (mode === '--check' || mode === '--check-lexical') {
+if (mode === '--check') {
   if (!existsSync(catalogFile) || !isDeepStrictEqual(previous, records) ||
       !hasSeparatedEntries(readFileSync(catalogFile, 'utf8'), records.length)) {
     console.error(`Test catalog is stale, has mismatched IDs, or lacks blank lines between entries (${added} new declarations). Review IDs and links before a refresh.`)

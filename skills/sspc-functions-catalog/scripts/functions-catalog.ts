@@ -28,8 +28,8 @@ type FunctionRecord = {
 const args = process.argv.slice(2)
 const scoped = args[0] === '--project' && args[2] === '--scope' && args.length === 5
 const standalone = args[0] === '--app' && args.length === 3
-if ((!scoped && !standalone) || !['--probe', '--check', '--write', '--identity-preview', '--write-breadcrumbs', '--check-breadcrumbs'].includes(args.at(-1) ?? '')) {
-  throw new Error('Usage: functions-catalog.ts --app <absolute-app-root> --probe|--check|--write|--identity-preview|--write-breadcrumbs|--check-breadcrumbs OR --project <absolute-config-root> --scope <relative-owned-directory|@root> <mode>')
+if ((!scoped && !standalone) || !['--probe', '--check', '--write'].includes(args.at(-1) ?? '')) {
+  throw new Error('Usage: functions-catalog.ts --app <absolute-app-root> --probe|--check|--write OR --project <absolute-config-root> --scope <relative-owned-directory|@root> <mode>')
 }
 const projectPath = args[1]
 if (projectPath !== resolve(projectPath)) throw new Error('--app/--project must be an absolute path')
@@ -40,13 +40,11 @@ if (!existsSync(join(projectRoot, 'package.json')) || !existsSync(join(projectRo
 if (standalone && existsSync(join(projectRoot, 'pnpm-workspace.yaml'))) {
   throw new Error('Pass a single app root (such as apps/api), not the monorepo root')
 }
-const mode = args.at(-1) as '--probe' | '--check' | '--write' | '--identity-preview' | '--write-breadcrumbs' | '--check-breadcrumbs'
-const identityPreview = mode === '--identity-preview'
-const breadcrumbMode = mode === '--write-breadcrumbs' || mode === '--check-breadcrumbs'
+const mode = args.at(-1) as '--probe' | '--check' | '--write'
 const scopePath = scoped ? args[3] : '.'
-const rootOnly = scoped && scopePath === '@root' && (breadcrumbMode || identityPreview)
+const rootOnly = scoped && scopePath === '@root'
 if (scoped && (scopePath === '.' || scopePath === '' || (!rootOnly && resolve(scopePath) === scopePath))) {
-  throw new Error('--scope must be a non-root directory relative to the project; @root is reserved for breadcrumb mode')
+  throw new Error('--scope must be a non-root directory relative to the project or @root for direct root tooling')
 }
 const appRoot = rootOnly ? projectRoot : realpathSync(resolve(projectRoot, scopePath))
 const ownedPath = rootOnly ? '@root' : relative(projectRoot, appRoot)
@@ -66,9 +64,6 @@ try {
 }
 
 const catalogFile = join(appRoot, `.sourcespec/catalogs/functions-catalog${rootOnly ? '-root' : ''}.yaml`)
-if (mode === '--write-breadcrumbs' && existsSync(catalogFile)) {
-  throw new Error(`Breadcrumb generation is initial-only: ${catalogFile} already exists. Review links before any refresh.`)
-}
 const schemaFile = fileURLToPath(new URL('../assets/functions.schema.yaml', import.meta.url))
 const validate = new Ajv2020({ allErrors: true }).compile(YAML.parse(readFileSync(schemaFile, 'utf8')))
 
@@ -79,10 +74,7 @@ function readCatalog(): FunctionRecord[] {
       !Array.isArray(document.functions)) throw new Error('Expected a functions array in the existing catalog')
   const ids = new Set<string>()
   for (const entry of document.functions) {
-    // Accept only the previous missing-field shape while migrating older catalogs.
-    const candidate = entry && typeof entry === 'object' && !('sourceScope' in entry)
-      ? { ...entry, sourceScope: 'unclassified' } : entry
-    if (!validate(candidate)) throw new Error(`Invalid catalog function: ${JSON.stringify(validate.errors)}`)
+    if (!validate(entry)) throw new Error(`Invalid catalog function: ${JSON.stringify(validate.errors)}`)
     const record = entry as FunctionRecord
     if (typeof record.location !== 'string') throw new Error('Catalog function location is missing')
     if (ids.has(record.id)) throw new Error(`Duplicate function ID: ${record.id}`)
@@ -243,7 +235,7 @@ if (parsed.errors.length) throw new Error('Cannot parse the app tsconfig.json')
 const files = sourceFiles()
 const program = ts.createProgram(files, { ...parsed.options, allowJs: true, noEmit: true })
 const checker = program.getTypeChecker()
-const previous = mode === '--probe' || identityPreview || mode === '--write-breadcrumbs' ? [] : readCatalog()
+const previous = mode === '--probe' ? [] : readCatalog()
 const identity = (entry: Pick<FunctionRecord, 'location' | 'name' | 'context'>) =>
   JSON.stringify([entry.location, entry.name, entry.context ?? ''])
 // Cross-scope IDs must include the owning project path. Catalog locations remain
@@ -272,7 +264,7 @@ function hasSeparatedEntries(text: string, count: number): boolean {
     (lines[index - 1] === '' && lines[index - 2] !== ''))
 }
 
-function formatCatalog(records: FunctionRecord[], provisional = false): string {
+function formatCatalog(records: FunctionRecord[]): string {
   let first = true
   const body = YAML.stringify({ functions: records }, { lineWidth: 110 }).replace(/^  - id:/gm, (line) => {
     if (first) {
@@ -281,10 +273,7 @@ function formatCatalog(records: FunctionRecord[], provisional = false): string {
     }
     return `\n${line}`
   })
-  const header = provisional
-    ? '# Readable lexical IDs; range suffixes may change. Review links before any refresh.\n'
-    : '# Generated app-owned function inventory. Review ID reconciliation after refactors.\n'
-  return header + body
+  return '# Readable lexical IDs; range suffixes may change. Review links before any refresh.\n' + body
 }
 
 // Count readable candidate IDs so *all* members of a collision group receive
@@ -308,9 +297,7 @@ const baseCounts = new Map<string, number>()
 const seen = new Set<string>()
 const used = new Set<string>()
 const records: FunctionRecord[] = []
-const previews: { id: string; location: string; name: string | null; context: string; kind: string;
-  range: { startUtf16: number; endUtf16: number }; offsetFallback: boolean }[] = []
-type IdentityIssue = { kind: 'collision' | 'missing-context' | 'invalid-record' | 'missing-source'; location: string; message: string }
+type IdentityIssue = { kind: 'collision' | 'invalid-record' | 'missing-source'; location: string; message: string }
 const identityIssues: IdentityIssue[] = []
 let signatureOnly = 0
 let definitions = 0
@@ -342,51 +329,42 @@ for (const file of files) {
         identityIssues.push({ kind: 'collision', location, message: `Ambiguous function identity ${key}; review the source` })
       } else {
         seen.add(key)
-        if (identityPreview) {
-          previews.push({
-            id,
-            location,
-            name,
-            context: breadcrumb,
-            kind: ts.SyntaxKind[node.kind],
-            range: { startUtf16: start, endUtf16: end },
-            offsetFallback,
-          })
-        } else {
-          const old = byIdentity.get(key)
-          if (old) used.add(old.id)
-          else added++
-          const signature = checker.getSignatureFromDeclaration(node)
-          const inferredReturn = signature ? conciseType(checker.getReturnTypeOfSignature(signature), node, checker) : 'unknown'
-          const returnType = old?.description && old.return?.type && !/import\(|[{};\n]/.test(old.return.type)
-            ? old.return.type : inferredReturn
-          const parameters: Parameter[] = node.parameters.map((parameter) => {
-            const parameterName = parameter.name.getText(source)
-            const oldParameter = old?.parameters.find((item) => item.name === parameterName)
-            return {
-              name: parameterName,
-              type: stableParameterType(checker.typeToString(checker.getTypeAtLocation(parameter), node, ts.TypeFormatFlags.NoTruncation)),
-              ...(oldParameter?.description ? { description: oldParameter.description } : {}),
-              ...(oldParameter?.default ? { default: oldParameter.default } : {}),
-              required: !parameter.questionToken && !parameter.initializer && !parameter.dotDotDotToken,
-            }
-          })
-          const record: FunctionRecord = {
-            id: breadcrumbMode ? id : old?.id ?? id,
-            name,
-            ...(old?.description ? { description: old.description } : {}),
-            location,
-            sourceScope: old?.sourceScope ?? sourceScopeFor(location),
-            ...(breadcrumb ? { context: breadcrumb } : {}),
-            parameters,
-            return: {
-              type: returnType,
-              ...(old?.return.description ? { description: old.return.description } : {}),
-            },
-          }
-          if (!validate(record)) identityIssues.push({ kind: 'invalid-record', location, message: `Generated invalid function at ${location}: ${JSON.stringify(validate.errors)}` })
-          else records.push(record)
+        const old = byIdentity.get(key)
+        if (old && old.id !== id) {
+          throw new Error(`Identity changed for ${location} (${name ?? breadcrumb}): ${old.id} -> ${id}. Review authored links before replacing the catalog.`)
         }
+        if (old) used.add(old.id)
+        else added++
+        const signature = checker.getSignatureFromDeclaration(node)
+        const inferredReturn = signature ? conciseType(checker.getReturnTypeOfSignature(signature), node, checker) : 'unknown'
+        const returnType = old?.description && old.return?.type && !/import\(|[{};\n]/.test(old.return.type)
+          ? old.return.type : inferredReturn
+        const parameters: Parameter[] = node.parameters.map((parameter) => {
+          const parameterName = parameter.name.getText(source)
+          const oldParameter = old?.parameters.find((item) => item.name === parameterName)
+          return {
+            name: parameterName,
+            type: stableParameterType(checker.typeToString(checker.getTypeAtLocation(parameter), node, ts.TypeFormatFlags.NoTruncation)),
+            ...(oldParameter?.description ? { description: oldParameter.description } : {}),
+            ...(oldParameter?.default ? { default: oldParameter.default } : {}),
+            required: !parameter.questionToken && !parameter.initializer && !parameter.dotDotDotToken,
+          }
+        })
+        const record: FunctionRecord = {
+          id,
+          name,
+          ...(old?.description ? { description: old.description } : {}),
+          location,
+          sourceScope: old?.sourceScope ?? sourceScopeFor(location),
+          ...(breadcrumb ? { context: breadcrumb } : {}),
+          parameters,
+          return: {
+            type: returnType,
+            ...(old?.return.description ? { description: old.return.description } : {}),
+          },
+        }
+        if (!validate(record)) identityIssues.push({ kind: 'invalid-record', location, message: `Generated invalid function at ${location}: ${JSON.stringify(validate.errors)}` })
+        else records.push(record)
       }
     }
     ts.forEachChild(node, visit)
@@ -404,22 +382,7 @@ function reportAmbiguities(limit = Infinity): void {
   }
   if (unresolved.length > limit) console.warn(`... and ${unresolved.length - limit} more; review the scope before writing.`)
 }
-if (identityPreview) {
-  const ids = new Set(previews.map((entry) => entry.id))
-  if (ids.size !== previews.length) throw new Error('Generated duplicate preview IDs')
-  const result = {
-    format: 'function-identities-preview/v2',
-    scope: appRoot,
-    files: files.length,
-    definitions,
-    excludedSignatures: signatureOnly,
-    offsetFallbacks: previews.filter((entry) => entry.offsetFallback).length,
-    issues: identityIssues.map((issue) => issue.message),
-    functions: previews,
-  }
-  console.log(JSON.stringify(result))
-  if (identityIssues.length) process.exitCode = 1
-} else if (mode === '--probe') {
+if (mode === '--probe') {
   const byDirectory = new Map<string, number>()
   for (const file of files) {
     const path = relative(appRoot, file)
@@ -460,16 +423,12 @@ if (identityPreview) {
   if (new Set(records.map((entry) => entry.id)).size !== records.length) {
     throw new Error('Generated duplicate function IDs')
   }
-  if (mode === '--check' || mode === '--check-breadcrumbs') {
-    const existing = mode === '--check-breadcrumbs' && existsSync(catalogFile) ? readCatalog() : previous
+  if (mode === '--check') {
     const text = existsSync(catalogFile) ? readFileSync(catalogFile, 'utf8') : ''
-    const matches = existsSync(catalogFile) && isDeepStrictEqual(existing, records) &&
-      hasSeparatedEntries(text, records.length) &&
-      (mode !== '--check-breadcrumbs' || text === formatCatalog(records, true))
+    const matches = existsSync(catalogFile) && isDeepStrictEqual(previous, records) &&
+      hasSeparatedEntries(text, records.length)
     if (!matches) {
-      console.error(mode === '--check-breadcrumbs'
-        ? `Readable lexical catalog is missing or stale: ${catalogFile}. Review links before any regeneration.`
-        : `Function catalog is stale or lacks a blank line between entries (${added} new definitions). Refresh with --write and review the diff.`)
+      console.error(`Function catalog is stale or lacks a blank line between entries (${added} new definitions). Refresh with --write and review the diff.`)
       process.exitCode = 1
     } else {
       console.log(`Function catalog matches ${records.length} definitions in ${files.length} owned files.`)
@@ -478,7 +437,7 @@ if (identityPreview) {
     mkdirSync(dirname(catalogFile), { recursive: true })
     const temporary = `${catalogFile}.${randomUUID()}.tmp`
     try {
-      writeFileSync(temporary, formatCatalog(records, breadcrumbMode), { flag: 'wx' })
+      writeFileSync(temporary, formatCatalog(records), { flag: 'wx' })
       renameSync(temporary, catalogFile)
     } finally {
       if (existsSync(temporary)) unlinkSync(temporary)
