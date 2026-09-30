@@ -14,14 +14,14 @@ scenarios:
       - No saved tasks are shown in the UI.
       - The task-list API refuses to return saved tasks without a valid session.
     implementedBy:
-      - function: todo-interface
+      - function: fn:src/App.tsx#App
         role: Shows the sign-in UI instead of tasks when there is no current user.
-      - function: local-api-handler
+      - function: fn:server/todo-api.ts#createTodoHandler.return.handleTodoRequest
         role: Refuses task-list requests without a valid session.
     verifiedBy:
-      - test: sign-in-gates-tasks
+      - test: test:src/App.test.tsx#gates-tasks-behind-sign-in-and-clears-them-on-sign-out
         checks: Tasks stay hidden before sign-in and after sign-out.
-      - test: api-validates-and-persists-tasks
+      - test: test:server/todo-api.test.ts#requires-a-session-and-keeps-HTTP-tasks-private-to-their-owner
         checks: Requests without a session or with an ended session cannot list tasks.
 
   - id: only-own-tasks-visible
@@ -33,14 +33,14 @@ scenarios:
     then:
       - Only tasks owned by that account are returned and shown; the other account's tasks are absent.
     implementedBy:
-      - function: local-api-handler
+      - function: fn:server/todo-api.ts#createTodoHandler.return.handleTodoRequest
         role: Resolves the signed-in account before listing its tasks.
-      - function: store-list-tasks
+      - function: fn:server/todo-store.ts#openTodoStore.listTodos
         role: Reads tasks scoped to that account in SQLite.
-      - function: todo-interface
+      - function: fn:src/App.tsx#App
         role: Renders the task list returned for the current account.
     verifiedBy:
-      - test: api-validates-and-persists-tasks
+      - test: test:server/todo-api.test.ts#requires-a-session-and-keeps-HTTP-tasks-private-to-their-owner
         checks: Another account cannot read a task created by the first account.
-      - test: sqlite-tasks-survive-reopen
+      - test: test:server/todo-api.test.ts#scopes-tasks-to-users-and-persists-them-across-SQLite-connections
         checks: Each account sees only its own persisted tasks.

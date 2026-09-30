@@ -1,4 +1,3 @@
-# Parallel format experiment; the existing behaviors/sign-out.yaml remains unchanged.
 # implementedBy locates code; verifiedBy names intended checks, not passing test runs.
 id: sign-out
 name: Sign out of a local account
@@ -14,12 +13,12 @@ scenarios:
       - The server invalidates the session and clears the browser cookie.
       - The UI returns to the sign-in form.
     implementedBy:
-      - function: auth-sign-out
+      - function: fn:src/App.tsx#App.logOut
         role: Clears account and task state after the server confirms sign-out.
-      - function: local-auth-handler
+      - function: fn:server/auth-api.ts#createAuthHandler.return.handleAuthRequest
         role: Revokes the session and expires the cookie.
     verifiedBy:
-      - test: sign-in-gates-tasks
+      - test: test:src/App.test.tsx#gates-tasks-behind-sign-in-and-clears-them-on-sign-out
         checks: Signing out returns the UI to the sign-in form.
-      - test: api-validates-and-persists-tasks
+      - test: test:server/todo-api.test.ts#requires-a-session-and-keeps-HTTP-tasks-private-to-their-owner
         checks: The old session token no longer authorizes task requests.

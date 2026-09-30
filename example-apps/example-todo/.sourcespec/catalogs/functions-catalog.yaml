@@ -1,6 +1,6 @@
-# Generated app-owned function inventory. Review ID reconciliation after refactors.
+# Readable lexical IDs; range suffixes may change. Review links before any refresh.
 functions:
-  - id: validate-credentials
+  - id: fn:server/auth-api.ts#credentials
     name: credentials
     location: server/auth-api.ts
     sourceScope: application
@@ -11,7 +11,7 @@ functions:
     return:
       type: object
 
-  - id: fn-320ad921-0657-4708-b9a2-deea03b2c082
+  - id: fn:server/auth-api.ts#credentials.Object.keys-body-.some
     name: null
     location: server/auth-api.ts
     sourceScope: application
@@ -23,7 +23,7 @@ functions:
     return:
       type: boolean
 
-  - id: set-auth-cookie
+  - id: fn:server/auth-api.ts#setSessionCookie
     name: setSessionCookie
     location: server/auth-api.ts
     sourceScope: application
@@ -40,7 +40,7 @@ functions:
     return:
       type: void
 
-  - id: create-auth-handler
+  - id: fn:server/auth-api.ts#createAuthHandler
     name: createAuthHandler
     location: server/auth-api.ts
     sourceScope: application
@@ -63,7 +63,7 @@ functions:
     return:
       type: "(request: IncomingMessage, response: ServerResponse) => Promise<void>"
 
-  - id: local-auth-handler
+  - id: fn:server/auth-api.ts#createAuthHandler.return.handleAuthRequest
     name: handleAuthRequest
     location: server/auth-api.ts
     sourceScope: application
@@ -78,67 +78,7 @@ functions:
     return:
       type: Promise<void>
 
-  - id: auto-server-behavior-test-ts-10-61
-    name: null
-    location: server/behavior.test.ts
-    sourceScope: test
-    context: it(resolves behavior case links against the app catalogs)
-    parameters: []
-    return:
-      type: void
-
-  - id: auto-server-behavior-test-ts-20-125
-    name: null
-    location: server/behavior.test.ts
-    sourceScope: test
-    context: it(resolves behavior case links against the app catalogs) > functionIds variable > new Set >
-      parse(readFileSync(functionsFile, utf8)).functions.map
-    parameters:
-      - name: entry
-        type: "{ id: string; }"
-        required: true
-    return:
-      type: string
-
-  - id: auto-server-behavior-test-ts-21-109
-    name: null
-    location: server/behavior.test.ts
-    sourceScope: test
-    context: it(resolves behavior case links against the app catalogs) > testIds variable > new Set >
-      parse(readFileSync(testsFile, utf8)).tests.map
-    parameters:
-      - name: entry
-        type: "{ id: string; }"
-        required: true
-    return:
-      type: string
-
-  - id: fn-c92e59fa-c41b-420b-8e6b-35ed819ed440
-    name: null
-    location: server/behavior.test.ts
-    sourceScope: test
-    context: it(resolves behavior case links against the app catalogs) > readdirSync(behaviorDirectory).filter
-    parameters:
-      - name: name
-        type: string
-        required: true
-    return:
-      type: boolean
-
-  - id: auto-server-behavior-test-ts-24-37
-    name: null
-    location: server/behavior.test.ts
-    sourceScope: test
-    context: it(resolves behavior case links against the app catalogs) > expect > new Set > behavior.cases.map
-    parameters:
-      - name: entry
-        type: "{ id: string; implementedBy: { function: string; role: string; }[]; verifiedBy: { test: string; checks:
-          string; }[]; steps?: unknown; apiOperations?: unknown; }"
-        required: true
-    return:
-      type: string
-
-  - id: fn-ac39b9e7-cfa1-44ce-837d-ae2f82a3e98c
+  - id: fn:server/data-model.test.ts#it-maps-every-documented-table-and-relationship-to-SQLite-foreign-keys
     name: null
     location: server/data-model.test.ts
     sourceScope: test
@@ -147,7 +87,7 @@ functions:
     return:
       type: void
 
-  - id: fn-aaee039d-e7b0-4576-a457-28dec895e731
+  - id: fn:server/data-model.test.ts#it-maps-every-documented-table-and-relationship-to-SQLite-foreign-keys.actual-variable.db.prepare-SELECT-name-FROM-sqlite_master-WHERE-type-table-AND-name-NOT-LIKE-sqlite_-.all-.map
     name: null
     location: server/data-model.test.ts
     sourceScope: test
@@ -160,7 +100,7 @@ functions:
     return:
       type: null | string | number | bigint | NonSharedUint8Array
 
-  - id: fn-3512cfb1-5669-4d7e-ac12-4ffca1806f53
+  - id: fn:server/data-model.test.ts#it-maps-every-documented-table-and-relationship-to-SQLite-foreign-keys.expect.model.tables.map
     name: null
     location: server/data-model.test.ts
     sourceScope: test
@@ -172,7 +112,7 @@ functions:
     return:
       type: string
 
-  - id: fn-706de048-2738-4bda-90dc-a0247822c8d9
+  - id: fn:server/data-model.test.ts#it-maps-every-documented-table-and-relationship-to-SQLite-foreign-keys.actualRelations-variable.model.tables.flatMap
     name: null
     location: server/data-model.test.ts
     sourceScope: test
@@ -185,7 +125,7 @@ functions:
     return:
       type: string[]
 
-  - id: fn-3847bf2a-b5b2-4401-8239-82059465dd7b
+  - id: fn:server/data-model.test.ts#it-maps-every-documented-table-and-relationship-to-SQLite-foreign-keys.actualRelations-variable.model.tables.flatMap.db.prepare-PRAGMA-foreign_key_list-$-table.name-.all-.map
     name: null
     location: server/data-model.test.ts
     sourceScope: test
@@ -198,7 +138,7 @@ functions:
     return:
       type: string
 
-  - id: fn-bfe8373a-1a45-49f7-a76a-a0d71b162da7
+  - id: fn:server/data-model.test.ts#it-maps-every-documented-table-and-relationship-to-SQLite-foreign-keys.expect.model.relationships.map
     name: null
     location: server/data-model.test.ts
     sourceScope: test
@@ -211,7 +151,7 @@ functions:
     return:
       type: string
 
-  - id: fn-bc297476-743c-4b1e-9912-307d54ed584d
+  - id: fn:server/data-model.test.ts#it-maps-every-documented-table-and-relationship-to-SQLite-foreign-keys.expect.model.relationships.every
     name: null
     location: server/data-model.test.ts
     sourceScope: test
@@ -224,7 +164,7 @@ functions:
     return:
       type: boolean
 
-  - id: fn-f43d5721-7c90-4e6d-8ef7-bc22d7d2ebfc
+  - id: fn:server/data-model.test.ts#it-resolves-data-model-representations-to-TypeScript-and-OpenAPI-definitions
     name: null
     location: server/data-model.test.ts
     sourceScope: test
@@ -233,7 +173,7 @@ functions:
     return:
       type: void
 
-  - id: auto-server-openapi-test-ts-11-1
+  - id: fn:server/openapi.test.ts#validatedApi
     name: validatedApi
     location: server/openapi.test.ts
     sourceScope: test
@@ -241,7 +181,7 @@ functions:
     return:
       type: Promise<ApiDocument>
 
-  - id: auto-server-openapi-test-ts-15-66
+  - id: fn:server/openapi.test.ts#it-validates-the-local-OpenAPI-contract-and-its-operation-IDs
     name: null
     location: server/openapi.test.ts
     sourceScope: test
@@ -250,7 +190,7 @@ functions:
     return:
       type: Promise<void>
 
-  - id: auto-server-openapi-test-ts-19-56
+  - id: fn:server/openapi.test.ts#it-validates-the-local-OpenAPI-contract-and-its-operation-IDs.operations-variable.Object.entries-api.paths-.flatMap
     name: null
     location: server/openapi.test.ts
     sourceScope: test
@@ -263,7 +203,7 @@ functions:
     return:
       type: object[]
 
-  - id: auto-server-openapi-test-ts-20-39
+  - id: fn:server/openapi.test.ts#it-validates-the-local-OpenAPI-contract-and-its-operation-IDs.operations-variable.Object.entries-api.paths-.flatMap.Object.entries-item-.filter
     name: null
     location: server/openapi.test.ts
     sourceScope: test
@@ -276,7 +216,7 @@ functions:
     return:
       type: boolean
 
-  - id: auto-server-openapi-test-ts-21-12
+  - id: fn:server/openapi.test.ts#it-validates-the-local-OpenAPI-contract-and-its-operation-IDs.operations-variable.Object.entries-api.paths-.flatMap.Object.entries-item-.filter-.map
     name: null
     location: server/openapi.test.ts
     sourceScope: test
@@ -289,7 +229,7 @@ functions:
     return:
       type: object
 
-  - id: auto-server-openapi-test-ts-29-33
+  - id: fn:server/openapi.test.ts#it-validates-the-local-OpenAPI-contract-and-its-operation-IDs.expect.new-Set.operations.map
     name: null
     location: server/openapi.test.ts
     sourceScope: test
@@ -301,7 +241,7 @@ functions:
     return:
       type: undefined | string
 
-  - id: fn-7ae1482b-eff9-498c-8053-06f496e5c7a3
+  - id: fn:server/operations.test.ts#fromApp-variable
     name: null
     location: server/operations.test.ts
     sourceScope: test
@@ -313,7 +253,7 @@ functions:
     return:
       type: any
 
-  - id: fn-58bdfda7-2f16-4365-92c5-af3ac86fca0f
+  - id: fn:server/operations.test.ts#it-resolves-every-HTTP-operation-to-its-mount-handler-and-intended-tests
     name: null
     location: server/operations.test.ts
     sourceScope: test
@@ -322,7 +262,7 @@ functions:
     return:
       type: void
 
-  - id: fn-5293139a-1dd5-4133-9213-5e2012aa050e
+  - id: fn:server/operations.test.ts#it-resolves-every-HTTP-operation-to-its-mount-handler-and-intended-tests.functionIds-variable.new-Set.fromApp-.sourcespec-catalogs-functions-catalog.yaml-.functions.map
     name: null
     location: server/operations.test.ts
     sourceScope: test
@@ -335,7 +275,7 @@ functions:
     return:
       type: string
 
-  - id: fn-1af5bc27-1f44-4936-a978-529800ced0fd
+  - id: fn:server/operations.test.ts#it-resolves-every-HTTP-operation-to-its-mount-handler-and-intended-tests.testIds-variable.new-Set.fromApp-.sourcespec-catalogs-tests-catalog.yaml-.tests.map
     name: null
     location: server/operations.test.ts
     sourceScope: test
@@ -348,7 +288,7 @@ functions:
     return:
       type: string
 
-  - id: fn-e4197297-14e1-498d-a66f-871b73b6dd74
+  - id: fn:server/operations.test.ts#it-resolves-every-HTTP-operation-to-its-mount-handler-and-intended-tests.contractOperations-variable.Object.entries-api.paths-.flatMap
     name: null
     location: server/operations.test.ts
     sourceScope: test
@@ -361,7 +301,7 @@ functions:
     return:
       type: object[]
 
-  - id: fn-7771a8e2-7758-4795-8865-a207f1e569e8
+  - id: fn:server/operations.test.ts#it-resolves-every-HTTP-operation-to-its-mount-handler-and-intended-tests.contractOperations-variable.Object.entries-api.paths-.flatMap.Object.entries-pathItem-.filter
     name: null
     location: server/operations.test.ts
     sourceScope: test
@@ -374,7 +314,7 @@ functions:
     return:
       type: boolean
 
-  - id: fn-1bfcd102-60b3-4e42-ace8-09ee563a460c
+  - id: fn:server/operations.test.ts#it-resolves-every-HTTP-operation-to-its-mount-handler-and-intended-tests.contractOperations-variable.Object.entries-api.paths-.flatMap.Object.entries-pathItem-.filter-.map
     name: null
     location: server/operations.test.ts
     sourceScope: test
@@ -387,7 +327,7 @@ functions:
     return:
       type: object
 
-  - id: fn-97c1799d-2fb3-4c0a-a6c1-aa957f2ab8d8
+  - id: fn:server/operations.test.ts#it-resolves-every-HTTP-operation-to-its-mount-handler-and-intended-tests.contractIds-variable.contractOperations.map
     name: null
     location: server/operations.test.ts
     sourceScope: test
@@ -400,7 +340,7 @@ functions:
     return:
       type: undefined | string
 
-  - id: fn-862874e9-9334-471f-a58a-6f2da95eee28
+  - id: fn:server/operations.test.ts#it-resolves-every-HTTP-operation-to-its-mount-handler-and-intended-tests.mappedIds-variable.map.operations.map
     name: null
     location: server/operations.test.ts
     sourceScope: test
@@ -413,7 +353,7 @@ functions:
     return:
       type: string
 
-  - id: fn-af5ed432-8482-4c78-933c-1dde11429bda
+  - id: fn:server/operations.test.ts#it-resolves-every-HTTP-operation-to-its-mount-handler-and-intended-tests.expect.contractIds.every
     name: null
     location: server/operations.test.ts
     sourceScope: test
@@ -425,7 +365,7 @@ functions:
     return:
       type: boolean
 
-  - id: fn-1a8d71de-aab9-4cdb-b040-740c2b600f55
+  - id: fn:server/operations.test.ts#it-resolves-every-HTTP-operation-to-its-mount-handler-and-intended-tests.expect.new-Set.map.mounts.map
     name: null
     location: server/operations.test.ts
     sourceScope: test
@@ -438,7 +378,7 @@ functions:
     return:
       type: string
 
-  - id: fn-e3dfe831-ccd1-4696-945a-fdff503b4a90
+  - id: fn:server/operations.test.ts#it-resolves-every-HTTP-operation-to-its-mount-handler-and-intended-tests.mount-variable.map.mounts.find
     name: null
     location: server/operations.test.ts
     sourceScope: test
@@ -451,7 +391,7 @@ functions:
     return:
       type: boolean
 
-  - id: fn-d5c08d14-77e8-4f5a-999e-9521e86c0160
+  - id: fn:server/operations.test.ts#it-resolves-every-HTTP-operation-to-its-mount-handler-and-intended-tests.contractPath-variable.contractOperations.find
     name: null
     location: server/operations.test.ts
     sourceScope: test
@@ -464,7 +404,7 @@ functions:
     return:
       type: boolean
 
-  - id: fn-4a714910-4ad1-4e4c-bf53-be5a5fdbb5e8
+  - id: fn:server/todo-api.test.ts#it-scopes-tasks-to-users-and-persists-them-across-SQLite-connections
     name: null
     location: server/todo-api.test.ts
     sourceScope: test
@@ -473,7 +413,7 @@ functions:
     return:
       type: void
 
-  - id: fn-75446f16-d362-4708-8f4d-c8f311a5a121
+  - id: fn:server/todo-api.test.ts#it-preserves-old-single-user-tasks-and-assigns-them-to-the-first-registered-user
     name: null
     location: server/todo-api.test.ts
     sourceScope: test
@@ -482,7 +422,7 @@ functions:
     return:
       type: void
 
-  - id: fn-87e44a7f-4fb2-4e42-a6b3-a9086273229a
+  - id: fn:server/todo-api.test.ts#it-requires-a-session-and-keeps-HTTP-tasks-private-to-their-owner
     name: null
     location: server/todo-api.test.ts
     sourceScope: test
@@ -491,7 +431,7 @@ functions:
     return:
       type: Promise<void>
 
-  - id: fn-b35c0629-7fb6-4332-a7e9-5be226097f65
+  - id: fn:server/todo-api.test.ts#it-requires-a-session-and-keeps-HTTP-tasks-private-to-their-owner.server-variable.createServer
     name: null
     location: server/todo-api.test.ts
     sourceScope: test
@@ -507,7 +447,7 @@ functions:
     return:
       type: void
 
-  - id: fn-31b202aa-9b24-4c7f-b7ed-afd4fdcc2019
+  - id: fn:server/todo-api.test.ts#it-requires-a-session-and-keeps-HTTP-tasks-private-to-their-owner.new-Promise.invokes-server.listen
     name: null
     location: server/todo-api.test.ts
     sourceScope: test
@@ -519,7 +459,7 @@ functions:
     return:
       type: Server
 
-  - id: fn-49613bed-7916-44c9-925d-1780ae636fde
+  - id: fn:server/todo-api.test.ts#it-requires-a-session-and-keeps-HTTP-tasks-private-to-their-owner.post-variable
     name: null
     location: server/todo-api.test.ts
     sourceScope: test
@@ -537,7 +477,7 @@ functions:
     return:
       type: Promise<Response>
 
-  - id: fn-1999e378-149f-49bb-aaf7-a0e9e38b841a
+  - id: fn:server/todo-api.test.ts#it-requires-a-session-and-keeps-HTTP-tasks-private-to-their-owner.patch-variable
     name: null
     location: server/todo-api.test.ts
     sourceScope: test
@@ -552,7 +492,7 @@ functions:
     return:
       type: Promise<Response>
 
-  - id: fn-c92d4ee1-4a3e-40ef-9443-916f622b5bc7
+  - id: fn:server/todo-api.test.ts#it-requires-a-session-and-keeps-HTTP-tasks-private-to-their-owner.new-Promise.invokes-server.close
     name: null
     location: server/todo-api.test.ts
     sourceScope: test
@@ -567,7 +507,7 @@ functions:
     return:
       type: Server
 
-  - id: fn-5c1629cf-343e-4690-a803-3814e9267733
+  - id: fn:server/todo-api.test.ts#it-requires-a-session-and-keeps-HTTP-tasks-private-to-their-owner.new-Promise.server.close
     name: null
     location: server/todo-api.test.ts
     sourceScope: test
@@ -579,7 +519,7 @@ functions:
     return:
       type: void
 
-  - id: auto-server-todo-api-ts-5-3
+  - id: fn:server/todo-api.ts#RequestError.constructor
     name: constructor
     location: server/todo-api.ts
     sourceScope: application
@@ -594,7 +534,7 @@ functions:
     return:
       type: RequestError
 
-  - id: auto-server-todo-api-ts-10-1
+  - id: fn:server/todo-api.ts#sendJson
     name: sendJson
     location: server/todo-api.ts
     sourceScope: application
@@ -611,7 +551,7 @@ functions:
     return:
       type: void
 
-  - id: auto-server-todo-api-ts-18-1
+  - id: fn:server/todo-api.ts#readJson
     name: readJson
     location: server/todo-api.ts
     sourceScope: application
@@ -622,7 +562,7 @@ functions:
     return:
       type: Promise<unknown>
 
-  - id: fn-26d46830-6e02-443c-b16f-df84e46c651d
+  - id: fn:server/todo-api.ts#checkOrigin
     name: checkOrigin
     location: server/todo-api.ts
     sourceScope: application
@@ -633,7 +573,7 @@ functions:
     return:
       type: void
 
-  - id: fn-76d841ca-11da-4c44-901e-810555351830
+  - id: fn:server/todo-api.ts#sendError
     name: sendError
     location: server/todo-api.ts
     sourceScope: application
@@ -647,7 +587,7 @@ functions:
     return:
       type: void
 
-  - id: fn-96f79f61-66f1-4db4-85b3-ccbbd22d22b5
+  - id: fn:server/todo-api.ts#sessionToken
     name: sessionToken
     location: server/todo-api.ts
     sourceScope: application
@@ -658,7 +598,7 @@ functions:
     return:
       type: null | string
 
-  - id: fn-b656a82a-cca1-4896-b316-007b3066a1dd
+  - id: fn:server/todo-api.ts#sessionToken.cookie-variable.request.headers.cookie.split-.map
     name: null
     location: server/todo-api.ts
     sourceScope: application
@@ -670,7 +610,7 @@ functions:
     return:
       type: string
 
-  - id: fn-a7c2fcaa-f025-47dc-a655-8ba440945022
+  - id: fn:server/todo-api.ts#sessionToken.cookie-variable.request.headers.cookie.split-.map-.find
     name: null
     location: server/todo-api.ts
     sourceScope: application
@@ -682,7 +622,7 @@ functions:
     return:
       type: boolean
 
-  - id: auto-server-todo-api-ts-33-1
+  - id: fn:server/todo-api.ts#createTodoHandler
     name: createTodoHandler
     location: server/todo-api.ts
     sourceScope: application
@@ -705,7 +645,7 @@ functions:
     return:
       type: "(request: IncomingMessage, response: ServerResponse) => Promise<void>"
 
-  - id: local-api-handler
+  - id: fn:server/todo-api.ts#createTodoHandler.return.handleTodoRequest
     name: handleTodoRequest
     description: Validates local todo requests and routes them to the SQLite-backed store.
     location: server/todo-api.ts
@@ -724,7 +664,7 @@ functions:
       type: Promise<void>
       description: Resolves after the request has been handled.
 
-  - id: fn-d545ebc3-7cc8-437e-9111-adef2c71ce2e
+  - id: fn:server/todo-store.ts#passwordHash
     name: passwordHash
     location: server/todo-store.ts
     sourceScope: application
@@ -738,7 +678,7 @@ functions:
     return:
       type: string
 
-  - id: fn-42845836-23bf-4020-9971-b8107d130747
+  - id: fn:server/todo-store.ts#validPassword
     name: validPassword
     location: server/todo-store.ts
     sourceScope: application
@@ -752,7 +692,7 @@ functions:
     return:
       type: boolean
 
-  - id: fn-4aa62499-4354-41d9-a497-3670b27396ce
+  - id: fn:server/todo-store.ts#tokenHash
     name: tokenHash
     location: server/todo-store.ts
     sourceScope: application
@@ -763,7 +703,7 @@ functions:
     return:
       type: string
 
-  - id: open-todo-store
+  - id: fn:server/todo-store.ts#openTodoStore
     name: openTodoStore
     description: Opens a local SQLite database and creates the todos table if needed.
     location: server/todo-store.ts
@@ -777,7 +717,7 @@ functions:
       type: TodoStore
       description: Operations for working with the opened database.
 
-  - id: fn-f8a79aa6-7d55-4f37-a29a-e16ad8522d56
+  - id: fn:server/todo-store.ts#openTodoStore.db.prepare-PRAGMA-table_info-todos-.all-.some
     name: null
     location: server/todo-store.ts
     sourceScope: application
@@ -789,7 +729,7 @@ functions:
     return:
       type: boolean
 
-  - id: auto-server-todo-store-ts-19-3
+  - id: fn:server/todo-store.ts#openTodoStore.toTodo
     name: toTodo
     location: server/todo-store.ts
     sourceScope: application
@@ -801,7 +741,7 @@ functions:
     return:
       type: Todo
 
-  - id: store-register-user
+  - id: fn:server/todo-store.ts#openTodoStore.register
     name: register
     location: server/todo-store.ts
     sourceScope: application
@@ -816,7 +756,7 @@ functions:
     return:
       type: null | User
 
-  - id: store-authenticate-user
+  - id: fn:server/todo-store.ts#openTodoStore.authenticate
     name: authenticate
     location: server/todo-store.ts
     sourceScope: application
@@ -831,7 +771,7 @@ functions:
     return:
       type: null | User
 
-  - id: store-create-session
+  - id: fn:server/todo-store.ts#openTodoStore.createSession
     name: createSession
     location: server/todo-store.ts
     sourceScope: application
@@ -843,7 +783,7 @@ functions:
     return:
       type: string
 
-  - id: store-session-user
+  - id: fn:server/todo-store.ts#openTodoStore.sessionUser
     name: sessionUser
     location: server/todo-store.ts
     sourceScope: application
@@ -855,7 +795,7 @@ functions:
     return:
       type: null | User
 
-  - id: fn-c00fc267-5ce6-4bb4-9912-3f6db0f3f1c4
+  - id: fn:server/todo-store.ts#openTodoStore.endSession
     name: endSession
     location: server/todo-store.ts
     sourceScope: application
@@ -867,7 +807,7 @@ functions:
     return:
       type: void
 
-  - id: store-list-tasks
+  - id: fn:server/todo-store.ts#openTodoStore.listTodos
     name: listTodos
     description: Reads the saved tasks from SQLite in insertion order.
     location: server/todo-store.ts
@@ -881,7 +821,7 @@ functions:
       type: Todo[]
       description: The saved tasks.
 
-  - id: store-create-task
+  - id: fn:server/todo-store.ts#openTodoStore.createTodo
     name: createTodo
     description: Inserts a new incomplete task in SQLite with a generated ID.
     location: server/todo-store.ts
@@ -899,7 +839,7 @@ functions:
       type: Todo
       description: The task that was saved.
 
-  - id: store-update-task
+  - id: fn:server/todo-store.ts#openTodoStore.setTodoCompleted
     name: setTodoCompleted
     description: Updates the completion state of a saved task.
     location: server/todo-store.ts
@@ -921,7 +861,7 @@ functions:
       type: Todo | null
       description: The updated task, or null if it does not exist.
 
-  - id: store-delete-task
+  - id: fn:server/todo-store.ts#openTodoStore.removeTodo
     name: removeTodo
     description: Deletes a saved task by ID.
     location: server/todo-store.ts
@@ -939,7 +879,7 @@ functions:
       type: boolean
       description: Whether a task was deleted.
 
-  - id: auto-server-todo-store-ts-43-72
+  - id: fn:server/todo-store.ts#openTodoStore.return.close-property
     name: null
     location: server/todo-store.ts
     sourceScope: application
@@ -948,7 +888,7 @@ functions:
     return:
       type: void
 
-  - id: fn-dc6961f7-2053-4862-bcb4-2812fcbd18e2
+  - id: fn:src/App.test.tsx#vi.mock-.-auth-api
     name: null
     location: src/App.test.tsx
     sourceScope: test
@@ -957,7 +897,7 @@ functions:
     return:
       type: object
 
-  - id: auto-src-app-test-tsx-9-23
+  - id: fn:src/App.test.tsx#vi.mock-.-todo-api
     name: null
     location: src/App.test.tsx
     sourceScope: test
@@ -966,7 +906,7 @@ functions:
     return:
       type: object
 
-  - id: auto-src-app-test-tsx-16-12
+  - id: fn:src/App.test.tsx#beforeEach
     name: null
     location: src/App.test.tsx
     sourceScope: test
@@ -975,7 +915,7 @@ functions:
     return:
       type: void
 
-  - id: auto-src-app-test-tsx-19-44
+  - id: fn:src/App.test.tsx#beforeEach.vi.mocked-createTodo-.mockImplementation
     name: null
     location: src/App.test.tsx
     sourceScope: test
@@ -987,7 +927,7 @@ functions:
     return:
       type: Promise<object>
 
-  - id: auto-src-app-test-tsx-20-50
+  - id: fn:src/App.test.tsx#beforeEach.vi.mocked-setTodoCompleted-.mockImplementation
     name: null
     location: src/App.test.tsx
     sourceScope: test
@@ -1002,7 +942,7 @@ functions:
     return:
       type: Promise<object>
 
-  - id: fn-db1c434c-3462-4834-bdbd-9965380c1abe
+  - id: fn:src/App.test.tsx#it-gates-tasks-behind-sign-in-and-clears-them-on-sign-out
     name: null
     location: src/App.test.tsx
     sourceScope: test
@@ -1011,7 +951,7 @@ functions:
     return:
       type: Promise<void>
 
-  - id: fn-e7177b31-2662-41b6-a6bb-94db3934fdc0
+  - id: fn:src/App.test.tsx#it-reports-incorrect-credentials-without-loading-tasks
     name: null
     location: src/App.test.tsx
     sourceScope: test
@@ -1020,7 +960,7 @@ functions:
     return:
       type: Promise<void>
 
-  - id: auto-src-app-test-tsx-25-28
+  - id: fn:src/App.test.tsx#it-loads-existing-tasks
     name: null
     location: src/App.test.tsx
     sourceScope: test
@@ -1029,7 +969,7 @@ functions:
     return:
       type: Promise<void>
 
-  - id: auto-src-app-test-tsx-33-58
+  - id: fn:src/App.test.tsx#it-adds-a-task-with-trimmed-text-and-clears-the-input
     name: null
     location: src/App.test.tsx
     sourceScope: test
@@ -1038,7 +978,7 @@ functions:
     return:
       type: Promise<void>
 
-  - id: auto-src-app-test-tsx-48-35
+  - id: fn:src/App.test.tsx#it-does-not-allow-a-blank-task
     name: null
     location: src/App.test.tsx
     sourceScope: test
@@ -1047,7 +987,7 @@ functions:
     return:
       type: Promise<void>
 
-  - id: auto-src-app-test-tsx-63-61
+  - id: fn:src/App.test.tsx#it-marks-a-task-complete-and-updates-the-remaining-count
     name: null
     location: src/App.test.tsx
     sourceScope: test
@@ -1056,7 +996,7 @@ functions:
     return:
       type: Promise<void>
 
-  - id: auto-src-app-test-tsx-73-17
+  - id: fn:src/App.test.tsx#it-marks-a-task-complete-and-updates-the-remaining-count.waitFor
     name: null
     location: src/App.test.tsx
     sourceScope: test
@@ -1065,7 +1005,7 @@ functions:
     return:
       type: void
 
-  - id: fn-d9fc0f9d-dd99-4597-9adb-15ce32c6f425
+  - id: fn:src/App.test.tsx#it-reopens-a-completed-task-and-restores-the-remaining-count
     name: null
     location: src/App.test.tsx
     sourceScope: test
@@ -1074,7 +1014,7 @@ functions:
     return:
       type: Promise<void>
 
-  - id: fn-20ea1da2-9b05-42f3-a44d-3238dddcadb5
+  - id: fn:src/App.test.tsx#it-reopens-a-completed-task-and-restores-the-remaining-count.waitFor
     name: null
     location: src/App.test.tsx
     sourceScope: test
@@ -1083,7 +1023,7 @@ functions:
     return:
       type: void
 
-  - id: auto-src-app-test-tsx-78-36
+  - id: fn:src/App.test.tsx#it-removes-a-task-from-the-list
     name: null
     location: src/App.test.tsx
     sourceScope: test
@@ -1092,7 +1032,7 @@ functions:
     return:
       type: Promise<void>
 
-  - id: auto-src-app-test-tsx-88-17
+  - id: fn:src/App.test.tsx#it-removes-a-task-from-the-list.waitFor
     name: null
     location: src/App.test.tsx
     sourceScope: test
@@ -1101,7 +1041,7 @@ functions:
     return:
       type: void
 
-  - id: fn-956df28a-f721-48ed-aa05-85f4290e5633
+  - id: fn:src/App.test.tsx#it-keeps-a-task-visible-when-removal-fails
     name: null
     location: src/App.test.tsx
     sourceScope: test
@@ -1110,7 +1050,7 @@ functions:
     return:
       type: Promise<void>
 
-  - id: auto-src-app-test-tsx-94-41
+  - id: fn:src/App.test.tsx#it-keeps-the-draft-when-saving-fails
     name: null
     location: src/App.test.tsx
     sourceScope: test
@@ -1119,7 +1059,7 @@ functions:
     return:
       type: Promise<void>
 
-  - id: todo-interface
+  - id: fn:src/App.tsx#App
     name: App
     description: Loads saved tasks and renders the form, task list, counts, and request errors.
     location: src/App.tsx
@@ -1129,7 +1069,7 @@ functions:
       type: React.JSX.Element
       description: The rendered todo interface.
 
-  - id: auto-src-app-tsx-17-34
+  - id: fn:src/App.tsx#App.remaining-variable.todos.filter
     name: null
     location: src/App.tsx
     sourceScope: application
@@ -1141,7 +1081,7 @@ functions:
     return:
       type: boolean
 
-  - id: fn-723fd5c8-07eb-46b8-a4c5-c93ab4039a7b
+  - id: fn:src/App.tsx#App.useEffect-dependencies
     name: null
     location: src/App.tsx
     sourceScope: application
@@ -1150,7 +1090,7 @@ functions:
     return:
       type: () => void
 
-  - id: fn-ac388de5-6ff9-420e-be9e-e8076245e1f9
+  - id: fn:src/App.tsx#App.useEffect-dependencies.currentUser-.then
     name: null
     location: src/App.tsx
     sourceScope: application
@@ -1162,7 +1102,7 @@ functions:
     return:
       type: void
 
-  - id: fn-cba02c07-521e-4977-8031-7d26848aaaa3
+  - id: fn:src/App.tsx#App.useEffect-dependencies.currentUser-.then-.catch
     name: null
     location: src/App.tsx
     sourceScope: application
@@ -1171,7 +1111,7 @@ functions:
     return:
       type: void
 
-  - id: fn-fc3fea0f-773d-473e-96bc-d20d10a7efbf
+  - id: fn:src/App.tsx#App.useEffect-dependencies.currentUser-.then-.catch-.finally
     name: null
     location: src/App.tsx
     sourceScope: application
@@ -1180,7 +1120,7 @@ functions:
     return:
       type: void
 
-  - id: fn-1df9ecd4-758f-42e5-ba03-75b828ec94ed
+  - id: fn:src/App.tsx#App.useEffect-dependencies.return
     name: null
     location: src/App.tsx
     sourceScope: application
@@ -1189,7 +1129,7 @@ functions:
     return:
       type: void
 
-  - id: fn-3744bd77-8694-49c5-a87c-8db7fa6336c0
+  - id: fn:src/App.tsx#App.useEffect-dependencies-user-.id
     name: null
     location: src/App.tsx
     sourceScope: application
@@ -1198,7 +1138,7 @@ functions:
     return:
       type: undefined | () => void
 
-  - id: fn-8f32e3cf-eca6-4bfd-97f6-fe6353a708d2
+  - id: fn:src/App.tsx#App.useEffect-dependencies-user-.id.listTodos-.then
     name: null
     location: src/App.tsx
     sourceScope: application
@@ -1210,7 +1150,7 @@ functions:
     return:
       type: void
 
-  - id: fn-57983a25-ff26-45a5-b77b-d60aefeee86e
+  - id: fn:src/App.tsx#App.useEffect-dependencies-user-.id.listTodos-.then-.catch
     name: null
     location: src/App.tsx
     sourceScope: application
@@ -1219,7 +1159,7 @@ functions:
     return:
       type: void
 
-  - id: fn-083ec3ac-155b-4e02-ab78-01edd98a9ce0
+  - id: fn:src/App.tsx#App.useEffect-dependencies-user-.id.listTodos-.then-.catch-.finally
     name: null
     location: src/App.tsx
     sourceScope: application
@@ -1228,7 +1168,7 @@ functions:
     return:
       type: void
 
-  - id: fn-e210014d-a590-4393-b4b7-162a32fb0a5a
+  - id: fn:src/App.tsx#App.useEffect-dependencies-user-.id.return
     name: null
     location: src/App.tsx
     sourceScope: application
@@ -1237,7 +1177,7 @@ functions:
     return:
       type: void
 
-  - id: auth-submit
+  - id: fn:src/App.tsx#App.submitCredentials
     name: submitCredentials
     location: src/App.tsx
     sourceScope: application
@@ -1249,7 +1189,7 @@ functions:
     return:
       type: Promise<void>
 
-  - id: auth-sign-out
+  - id: fn:src/App.tsx#App.logOut
     name: logOut
     location: src/App.tsx
     sourceScope: application
@@ -1258,7 +1198,7 @@ functions:
     return:
       type: Promise<void>
 
-  - id: add-task-submission
+  - id: fn:src/App.tsx#App.addTodo
     name: addTodo
     description: Submits a nonblank draft for persistence and adds the saved task to the displayed list. Keeps the
       draft when saving fails.
@@ -1274,7 +1214,7 @@ functions:
       type: Promise<void>
       description: Resolves when the submission attempt finishes.
 
-  - id: auto-src-app-tsx-43-16
+  - id: fn:src/App.tsx#App.addTodo.setTodos
     name: null
     location: src/App.tsx
     sourceScope: application
@@ -1286,7 +1226,7 @@ functions:
     return:
       type: Todo[]
 
-  - id: toggle-task-completion
+  - id: fn:src/App.tsx#App.toggleTodo
     name: toggleTodo
     description: Persists a task's new completion state and displays the updated task after success.
     location: src/App.tsx
@@ -1301,7 +1241,7 @@ functions:
       type: Promise<void>
       description: Resolves when the update attempt finishes.
 
-  - id: auto-src-app-tsx-53-29
+  - id: fn:src/App.tsx#App.toggleTodo.todo-variable.todos.find
     name: null
     location: src/App.tsx
     sourceScope: application
@@ -1313,7 +1253,7 @@ functions:
     return:
       type: boolean
 
-  - id: auto-src-app-tsx-59-16
+  - id: fn:src/App.tsx#App.toggleTodo.setTodos
     name: null
     location: src/App.tsx
     sourceScope: application
@@ -1325,7 +1265,7 @@ functions:
     return:
       type: Todo[]
 
-  - id: auto-src-app-tsx-59-41
+  - id: fn:src/App.tsx#App.toggleTodo.setTodos.current.map
     name: null
     location: src/App.tsx
     sourceScope: application
@@ -1337,7 +1277,7 @@ functions:
     return:
       type: Todo
 
-  - id: remove-task
+  - id: fn:src/App.tsx#App.removeTodo
     name: removeTodo
     description: Deletes a task through the local API and removes it from the displayed list after success.
     location: src/App.tsx
@@ -1352,7 +1292,7 @@ functions:
       type: Promise<void>
       description: Resolves when the deletion attempt finishes.
 
-  - id: auto-src-app-tsx-73-16
+  - id: fn:src/App.tsx#App.removeTodo.setTodos
     name: null
     location: src/App.tsx
     sourceScope: application
@@ -1364,7 +1304,7 @@ functions:
     return:
       type: Todo[]
 
-  - id: auto-src-app-tsx-73-44
+  - id: fn:src/App.tsx#App.removeTodo.setTodos.current.filter
     name: null
     location: src/App.tsx
     sourceScope: application
@@ -1376,7 +1316,7 @@ functions:
     return:
       type: boolean
 
-  - id: fn-bc2f91c9-a5cf-4072-80d7-f602003119b5
+  - id: fn:src/App.tsx#App.return.onChange-attribute-username
     name: null
     location: src/App.tsx
     sourceScope: application
@@ -1389,7 +1329,7 @@ functions:
     return:
       type: void
 
-  - id: fn-27f7c3b2-f637-457f-b5ff-3764a07a1e9c
+  - id: fn:src/App.tsx#App.return.onChange-attribute-password
     name: null
     location: src/App.tsx
     sourceScope: application
@@ -1402,7 +1342,7 @@ functions:
     return:
       type: void
 
-  - id: fn-62952604-4fa4-463b-8896-b6c55c6537b8
+  - id: fn:src/App.tsx#App.return.onClick-attribute
     name: null
     location: src/App.tsx
     sourceScope: application
@@ -1411,7 +1351,7 @@ functions:
     return:
       type: void
 
-  - id: fn-ebcaded2-d24a-4522-a917-7f82f7387533
+  - id: fn:src/App.tsx#App.return.onChange-attribute-new-todo
     name: null
     location: src/App.tsx
     sourceScope: application
@@ -1424,7 +1364,7 @@ functions:
     return:
       type: void
 
-  - id: auto-src-app-tsx-111-24
+  - id: fn:src/App.tsx#App.return.todos.map
     name: null
     location: src/App.tsx
     sourceScope: application
@@ -1436,7 +1376,7 @@ functions:
     return:
       type: React.JSX.Element
 
-  - id: auto-src-app-tsx-117-31
+  - id: fn:src/App.tsx#App.return.todos.map.onChange-attribute
     name: null
     location: src/App.tsx
     sourceScope: application
@@ -1445,7 +1385,7 @@ functions:
     return:
       type: Promise<void>
 
-  - id: auto-src-app-tsx-122-67
+  - id: fn:src/App.tsx#App.return.todos.map.onClick-attribute
     name: null
     location: src/App.tsx
     sourceScope: application
@@ -1454,7 +1394,7 @@ functions:
     return:
       type: Promise<void>
 
-  - id: fn-fce40967-9a9a-4318-a2a5-5de11ed7a316
+  - id: fn:src/auth-api.ts#authRequest
     name: authRequest
     location: src/auth-api.ts
     sourceScope: application
@@ -1468,7 +1408,7 @@ functions:
     return:
       type: Promise<object>
 
-  - id: client-current-user
+  - id: fn:src/auth-api.ts#currentUser
     name: currentUser
     location: src/auth-api.ts
     sourceScope: application
@@ -1476,7 +1416,7 @@ functions:
     return:
       type: Promise<null | User>
 
-  - id: fn-3b1821e9-ef22-4194-aa87-f7fe11398183
+  - id: fn:src/auth-api.ts#currentUser.return.authRequest-session-.then
     name: null
     location: src/auth-api.ts
     sourceScope: application
@@ -1488,7 +1428,7 @@ functions:
     return:
       type: null | User
 
-  - id: client-sign-in
+  - id: fn:src/auth-api.ts#signIn
     name: signIn
     location: src/auth-api.ts
     sourceScope: application
@@ -1505,7 +1445,7 @@ functions:
     return:
       type: Promise<User>
 
-  - id: fn-dad1eec4-8d05-4f1f-824f-763a9fc41726
+  - id: fn:src/auth-api.ts#signIn.return.authRequest-register-register-login-method-POST-headers-Content-Type-application-json-body-JSON.stringify-username-.then
     name: null
     location: src/auth-api.ts
     sourceScope: application
@@ -1518,7 +1458,7 @@ functions:
     return:
       type: User
 
-  - id: client-sign-out
+  - id: fn:src/auth-api.ts#signOut
     name: signOut
     location: src/auth-api.ts
     sourceScope: application
@@ -1526,7 +1466,7 @@ functions:
     return:
       type: Promise<void>
 
-  - id: auto-src-todo-api-ts-3-1
+  - id: fn:src/todo-api.ts#request
     name: request
     location: src/todo-api.ts
     sourceScope: application
@@ -1540,7 +1480,7 @@ functions:
     return:
       type: Promise<T>
 
-  - id: client-list-tasks
+  - id: fn:src/todo-api.ts#listTodos
     name: listTodos
     description: Fetches the saved tasks from the local API.
     location: src/todo-api.ts
@@ -1550,7 +1490,7 @@ functions:
       type: Promise<Todo[]>
       description: The saved tasks in list order.
 
-  - id: client-create-task
+  - id: fn:src/todo-api.ts#createTodo
     name: createTodo
     description: Requests creation of a task through the local API.
     location: src/todo-api.ts
@@ -1564,7 +1504,7 @@ functions:
       type: Promise<Todo>
       description: The task created by the API.
 
-  - id: client-update-task
+  - id: fn:src/todo-api.ts#setTodoCompleted
     name: setTodoCompleted
     description: Requests a change to a task's completion state.
     location: src/todo-api.ts
@@ -1582,7 +1522,7 @@ functions:
       type: Promise<Todo>
       description: The updated task returned by the API.
 
-  - id: client-delete-task
+  - id: fn:src/todo-api.ts#removeTodo
     name: removeTodo
     description: Requests deletion of a task through the local API.
     location: src/todo-api.ts
@@ -1596,7 +1536,7 @@ functions:
       type: Promise<void>
       description: Resolves when the deletion succeeds.
 
-  - id: auto-vite-config-ts-7-1
+  - id: fn:vite.config.ts#localTodoApi
     name: localTodoApi
     location: vite.config.ts
     sourceScope: tooling
@@ -1604,7 +1544,7 @@ functions:
     return:
       type: Plugin
 
-  - id: auto-vite-config-ts-8-3
+  - id: fn:vite.config.ts#localTodoApi.attach
     name: attach
     location: vite.config.ts
     sourceScope: tooling
@@ -1616,7 +1556,7 @@ functions:
     return:
       type: void
 
-  - id: auto-vite-config-ts-11-38
+  - id: fn:vite.config.ts#localTodoApi.attach.server.httpServer.once-close
     name: null
     location: vite.config.ts
     sourceScope: tooling

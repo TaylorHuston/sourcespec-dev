@@ -28,8 +28,8 @@ type FunctionRecord = {
 const args = process.argv.slice(2)
 const scoped = args[0] === '--project' && args[2] === '--scope' && args.length === 5
 const standalone = args[0] === '--app' && args.length === 3
-if ((!scoped && !standalone) || !['--probe', '--check', '--write'].includes(args.at(-1) ?? '')) {
-  throw new Error('Usage: functions-catalog.ts --app <absolute-app-root> --probe|--check|--write OR --project <absolute-config-root> --scope <relative-owned-directory> --probe|--check|--write')
+if ((!scoped && !standalone) || !['--probe', '--check', '--write', '--identity-preview', '--write-breadcrumbs', '--check-breadcrumbs'].includes(args.at(-1) ?? '')) {
+  throw new Error('Usage: functions-catalog.ts --app <absolute-app-root> --probe|--check|--write|--identity-preview|--write-breadcrumbs|--check-breadcrumbs OR --project <absolute-config-root> --scope <relative-owned-directory|@root> <mode>')
 }
 const projectPath = args[1]
 if (projectPath !== resolve(projectPath)) throw new Error('--app/--project must be an absolute path')
@@ -40,13 +40,16 @@ if (!existsSync(join(projectRoot, 'package.json')) || !existsSync(join(projectRo
 if (standalone && existsSync(join(projectRoot, 'pnpm-workspace.yaml'))) {
   throw new Error('Pass a single app root (such as apps/api), not the monorepo root')
 }
-const mode = args.at(-1) as '--probe' | '--check' | '--write'
+const mode = args.at(-1) as '--probe' | '--check' | '--write' | '--identity-preview' | '--write-breadcrumbs' | '--check-breadcrumbs'
+const identityPreview = mode === '--identity-preview'
+const breadcrumbMode = mode === '--write-breadcrumbs' || mode === '--check-breadcrumbs'
 const scopePath = scoped ? args[3] : '.'
-if (scoped && (scopePath === '.' || scopePath === '' || resolve(scopePath) === scopePath)) {
-  throw new Error('--scope must be a non-root directory relative to the project')
+const rootOnly = scoped && scopePath === '@root' && (breadcrumbMode || identityPreview)
+if (scoped && (scopePath === '.' || scopePath === '' || (!rootOnly && resolve(scopePath) === scopePath))) {
+  throw new Error('--scope must be a non-root directory relative to the project; @root is reserved for breadcrumb mode')
 }
-const appRoot = realpathSync(resolve(projectRoot, scopePath))
-const ownedPath = relative(projectRoot, appRoot)
+const appRoot = rootOnly ? projectRoot : realpathSync(resolve(projectRoot, scopePath))
+const ownedPath = rootOnly ? '@root' : relative(projectRoot, appRoot)
 if (scoped && (!ownedPath || ownedPath === '..' || ownedPath.startsWith(`..${sep}`))) {
   throw new Error('--scope must stay inside the project root')
 }
@@ -62,7 +65,10 @@ try {
   if ((error as NodeJS.ErrnoException).code !== 'MODULE_NOT_FOUND') throw error
 }
 
-const catalogFile = join(appRoot, '.sourcespec/catalogs/functions-catalog.yaml')
+const catalogFile = join(appRoot, `.sourcespec/catalogs/functions-catalog${rootOnly ? '-root' : ''}.yaml`)
+if (mode === '--write-breadcrumbs' && existsSync(catalogFile)) {
+  throw new Error(`Breadcrumb generation is initial-only: ${catalogFile} already exists. Review links before any refresh.`)
+}
 const schemaFile = fileURLToPath(new URL('../assets/functions.schema.yaml', import.meta.url))
 const validate = new Ajv2020({ allErrors: true }).compile(YAML.parse(readFileSync(schemaFile, 'utf8')))
 
@@ -91,6 +97,7 @@ const skippedDirectories: string[] = []
 function sourceFiles(directory = appRoot): string[] {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     if (entry.isDirectory()) {
+      if (rootOnly) return [] // Root tooling owns direct files, never sibling apps.
       if (ignored.has(entry.name)) {
         skippedDirectories.push(relative(appRoot, join(directory, entry.name)))
         return []
@@ -181,8 +188,10 @@ function stableParameterType(type: string): string {
 }
 
 function sourceScopeFor(location: string): SourceScope {
-  if (/(?:^|\/)(?:__mocks__|__tests__|tests?)\//.test(location) || /\.(?:test|spec)\.[cm]?[jt]sx?$/.test(location)) return 'test'
-  if (/(?:^|\/)(?:migrations|scripts|tools)\//.test(location) || /(?:^|\/)[^/]+\.config\.[cm]?[jt]sx?$/.test(location)) return 'tooling'
+  const ownedLocation = scoped ? `${ownedPath.split(sep).join('/')}/${location}` : location
+  if (/(?:^|\/)(?:__mocks__|__tests__|tests?)\//.test(ownedLocation) || /\.(?:test|spec)\.[cm]?[jt]sx?$/.test(location)) return 'test'
+  if (/(?:^|\/)(?:migrations|scripts|tools)\//.test(ownedLocation) || /(?:^|\/)[^/]+\.config\.[cm]?[jt]sx?$/.test(location)) return 'tooling'
+  if (rootOnly || (scoped && ownedPath.startsWith('.'))) return 'tooling'
   if (scoped || /^(?:src|server|app|lib)\//.test(location)) return 'application'
   return 'unclassified'
 }
@@ -234,9 +243,22 @@ if (parsed.errors.length) throw new Error('Cannot parse the app tsconfig.json')
 const files = sourceFiles()
 const program = ts.createProgram(files, { ...parsed.options, allowJs: true, noEmit: true })
 const checker = program.getTypeChecker()
-const previous = mode === '--probe' ? [] : readCatalog()
+const previous = mode === '--probe' || identityPreview || mode === '--write-breadcrumbs' ? [] : readCatalog()
 const identity = (entry: Pick<FunctionRecord, 'location' | 'name' | 'context'>) =>
   JSON.stringify([entry.location, entry.name, entry.context ?? ''])
+// Cross-scope IDs must include the owning project path. Catalog locations remain
+// scope-relative for navigation, while the readable ID uses the project-relative path.
+const projectLocation = (location: string) => scoped && !rootOnly
+  ? `${ownedPath.split(sep).join('/')}/${location}` : location
+const lexicalSegment = (text: string) => text.normalize('NFKC').replace(/[^A-Za-z0-9_$.-]+/g, '-')
+  .replace(/^[.-]+|[.-]+$/g, '') || 'anonymous'
+// A readable project-relative path plus lexical owner chain; sanitization collisions
+// are disambiguated in a second pass rather than silently sharing an ID.
+const lexicalId = (entry: Pick<FunctionRecord, 'location' | 'name' | 'context'>) => {
+  const owner = (entry.context ?? '').split(' > ').filter(Boolean).map(lexicalSegment)
+  if (entry.name) owner.push(lexicalSegment(entry.name))
+  return `fn:${projectLocation(entry.location)}#${owner.join('.') || 'anonymous'}`
+}
 const byIdentity = new Map<string, FunctionRecord>()
 for (const entry of previous) {
   const key = identity(entry)
@@ -250,7 +272,7 @@ function hasSeparatedEntries(text: string, count: number): boolean {
     (lines[index - 1] === '' && lines[index - 2] !== ''))
 }
 
-function formatCatalog(records: FunctionRecord[]): string {
+function formatCatalog(records: FunctionRecord[], provisional = false): string {
   let first = true
   const body = YAML.stringify({ functions: records }, { lineWidth: 110 }).replace(/^  - id:/gm, (line) => {
     if (first) {
@@ -259,12 +281,35 @@ function formatCatalog(records: FunctionRecord[]): string {
     }
     return `\n${line}`
   })
-  return '# Generated app-owned function inventory. Review ID reconciliation after refactors.\n' + body
+  const header = provisional
+    ? '# Readable lexical IDs; range suffixes may change. Review links before any refresh.\n'
+    : '# Generated app-owned function inventory. Review ID reconciliation after refactors.\n'
+  return header + body
 }
 
+// Count readable candidate IDs so *all* members of a collision group receive
+// a range suffix, including contexts that normalize to the same lexical path.
+const baseCounts = new Map<string, number>()
+{
+  for (const file of files) {
+    const source = program.getSourceFile(file)
+    if (!source) continue
+    const location = relative(appRoot, file)
+    const visit = (node: TS.Node): void => {
+      if (isFunction(node)) {
+        const key = lexicalId({ location, name: declaredName(node), context: contextFor(node, source) })
+        baseCounts.set(key, (baseCounts.get(key) ?? 0) + 1)
+      }
+      ts.forEachChild(node, visit)
+    }
+    visit(source)
+  }
+}
 const seen = new Set<string>()
 const used = new Set<string>()
 const records: FunctionRecord[] = []
+const previews: { id: string; location: string; name: string | null; context: string; kind: string;
+  range: { startUtf16: number; endUtf16: number }; offsetFallback: boolean }[] = []
 type IdentityIssue = { kind: 'collision' | 'missing-context' | 'invalid-record' | 'missing-source'; location: string; message: string }
 const identityIssues: IdentityIssue[] = []
 let signatureOnly = 0
@@ -284,46 +329,64 @@ for (const file of files) {
       const name = declaredName(node)
       const context = contextFor(node, source!)
       const location = relative(appRoot, file)
-      const key = identity({ location, name, context })
+      const baseKey = lexicalId({ location, name, context })
+      const offsetFallback = (baseCounts.get(baseKey) ?? 0) > 1 || (!name && !context)
+      const start = node.getStart(source)
+      const end = node.getEnd()
+      const breadcrumb = offsetFallback
+        ? `${context ? `${context} > ` : ''}@utf16:${start}-${end}:${ts.SyntaxKind[node.kind]}` : context
+      const key = identity({ location, name, context: breadcrumb })
+      const id = offsetFallback
+        ? `${baseKey}@utf16:${start}-${end}:${ts.SyntaxKind[node.kind]}` : baseKey
       if (seen.has(key)) {
         identityIssues.push({ kind: 'collision', location, message: `Ambiguous function identity ${key}; review the source` })
-      } else if (!name && !context) {
-        identityIssues.push({ kind: 'missing-context', location, message: `Anonymous function without searchable context: ${location}` })
       } else {
         seen.add(key)
-        const old = byIdentity.get(key)
-        if (old) used.add(old.id)
-        else added++
-        const signature = checker.getSignatureFromDeclaration(node)
-        const inferredReturn = signature ? conciseType(checker.getReturnTypeOfSignature(signature), node, checker) : 'unknown'
-        const returnType = old?.description && old.return?.type && !/import\(|[{};\n]/.test(old.return.type)
-          ? old.return.type : inferredReturn
-        const parameters: Parameter[] = node.parameters.map((parameter) => {
-          const parameterName = parameter.name.getText(source)
-          const oldParameter = old?.parameters.find((item) => item.name === parameterName)
-          return {
-            name: parameterName,
-            type: stableParameterType(checker.typeToString(checker.getTypeAtLocation(parameter), node, ts.TypeFormatFlags.NoTruncation)),
-            ...(oldParameter?.description ? { description: oldParameter.description } : {}),
-            ...(oldParameter?.default ? { default: oldParameter.default } : {}),
-            required: !parameter.questionToken && !parameter.initializer && !parameter.dotDotDotToken,
+        if (identityPreview) {
+          previews.push({
+            id,
+            location,
+            name,
+            context: breadcrumb,
+            kind: ts.SyntaxKind[node.kind],
+            range: { startUtf16: start, endUtf16: end },
+            offsetFallback,
+          })
+        } else {
+          const old = byIdentity.get(key)
+          if (old) used.add(old.id)
+          else added++
+          const signature = checker.getSignatureFromDeclaration(node)
+          const inferredReturn = signature ? conciseType(checker.getReturnTypeOfSignature(signature), node, checker) : 'unknown'
+          const returnType = old?.description && old.return?.type && !/import\(|[{};\n]/.test(old.return.type)
+            ? old.return.type : inferredReturn
+          const parameters: Parameter[] = node.parameters.map((parameter) => {
+            const parameterName = parameter.name.getText(source)
+            const oldParameter = old?.parameters.find((item) => item.name === parameterName)
+            return {
+              name: parameterName,
+              type: stableParameterType(checker.typeToString(checker.getTypeAtLocation(parameter), node, ts.TypeFormatFlags.NoTruncation)),
+              ...(oldParameter?.description ? { description: oldParameter.description } : {}),
+              ...(oldParameter?.default ? { default: oldParameter.default } : {}),
+              required: !parameter.questionToken && !parameter.initializer && !parameter.dotDotDotToken,
+            }
+          })
+          const record: FunctionRecord = {
+            id: breadcrumbMode ? id : old?.id ?? id,
+            name,
+            ...(old?.description ? { description: old.description } : {}),
+            location,
+            sourceScope: old?.sourceScope ?? sourceScopeFor(location),
+            ...(breadcrumb ? { context: breadcrumb } : {}),
+            parameters,
+            return: {
+              type: returnType,
+              ...(old?.return.description ? { description: old.return.description } : {}),
+            },
           }
-        })
-        const record: FunctionRecord = {
-          id: old?.id ?? (mode === '--probe' ? `probe-${records.length + 1}` : `fn-${randomUUID()}`),
-          name,
-          ...(old?.description ? { description: old.description } : {}),
-          location,
-          sourceScope: old?.sourceScope ?? sourceScopeFor(location),
-          ...(context ? { context } : {}),
-          parameters,
-          return: {
-            type: returnType,
-            ...(old?.return.description ? { description: old.return.description } : {}),
-          },
+          if (!validate(record)) identityIssues.push({ kind: 'invalid-record', location, message: `Generated invalid function at ${location}: ${JSON.stringify(validate.errors)}` })
+          else records.push(record)
         }
-        if (!validate(record)) identityIssues.push({ kind: 'invalid-record', location, message: `Generated invalid function at ${location}: ${JSON.stringify(validate.errors)}` })
-        else records.push(record)
       }
     }
     ts.forEachChild(node, visit)
@@ -341,7 +404,22 @@ function reportAmbiguities(limit = Infinity): void {
   }
   if (unresolved.length > limit) console.warn(`... and ${unresolved.length - limit} more; review the scope before writing.`)
 }
-if (mode === '--probe') {
+if (identityPreview) {
+  const ids = new Set(previews.map((entry) => entry.id))
+  if (ids.size !== previews.length) throw new Error('Generated duplicate preview IDs')
+  const result = {
+    format: 'function-identities-preview/v2',
+    scope: appRoot,
+    files: files.length,
+    definitions,
+    excludedSignatures: signatureOnly,
+    offsetFallbacks: previews.filter((entry) => entry.offsetFallback).length,
+    issues: identityIssues.map((issue) => issue.message),
+    functions: previews,
+  }
+  console.log(JSON.stringify(result))
+  if (identityIssues.length) process.exitCode = 1
+} else if (mode === '--probe') {
   const byDirectory = new Map<string, number>()
   for (const file of files) {
     const path = relative(appRoot, file)
@@ -371,9 +449,6 @@ if (mode === '--probe') {
       console.error(`Sample from ${directory}: ${message}`)
     }
   }
-  for (const issue of identityIssues.filter((entry) => entry.kind === 'missing-context').slice(0, 10)) {
-    console.error(`Missing context: ${issue.location}`)
-  }
   if (identityIssues.length > 20) console.error(`... and ${identityIssues.length - 20} more identity issues.`)
   reportAmbiguities(20)
   if (identityIssues.length) process.exitCode = 1
@@ -382,19 +457,28 @@ if (mode === '--probe') {
 } else if (missing.length) {
   throw new Error(`Unmatched prior IDs: ${missing.map((entry) => entry.id).join(', ')}. Review moves/removals and links; this pilot never prunes automatically.`)
 } else {
-  if (mode === '--check') {
-    if (!existsSync(catalogFile) || !isDeepStrictEqual(previous, records) ||
-        !hasSeparatedEntries(readFileSync(catalogFile, 'utf8'), records.length)) {
-      console.error(`Function catalog is stale or lacks a blank line between entries (${added} new definitions). Refresh with --write and review the diff.`)
+  if (new Set(records.map((entry) => entry.id)).size !== records.length) {
+    throw new Error('Generated duplicate function IDs')
+  }
+  if (mode === '--check' || mode === '--check-breadcrumbs') {
+    const existing = mode === '--check-breadcrumbs' && existsSync(catalogFile) ? readCatalog() : previous
+    const text = existsSync(catalogFile) ? readFileSync(catalogFile, 'utf8') : ''
+    const matches = existsSync(catalogFile) && isDeepStrictEqual(existing, records) &&
+      hasSeparatedEntries(text, records.length) &&
+      (mode !== '--check-breadcrumbs' || text === formatCatalog(records, true))
+    if (!matches) {
+      console.error(mode === '--check-breadcrumbs'
+        ? `Readable lexical catalog is missing or stale: ${catalogFile}. Review links before any regeneration.`
+        : `Function catalog is stale or lacks a blank line between entries (${added} new definitions). Refresh with --write and review the diff.`)
       process.exitCode = 1
     } else {
-      console.log(`Function catalog matches ${records.length} definitions in ${files.length} app-owned files.`)
+      console.log(`Function catalog matches ${records.length} definitions in ${files.length} owned files.`)
     }
   } else {
     mkdirSync(dirname(catalogFile), { recursive: true })
     const temporary = `${catalogFile}.${randomUUID()}.tmp`
     try {
-      writeFileSync(temporary, formatCatalog(records), { flag: 'wx' })
+      writeFileSync(temporary, formatCatalog(records, breadcrumbMode), { flag: 'wx' })
       renameSync(temporary, catalogFile)
     } finally {
       if (existsSync(temporary)) unlinkSync(temporary)

@@ -7,11 +7,17 @@ required:
   - name
   - description
   - kind
+  - location
 properties:
   id:
     type: string
     minLength: 1
-    description: A unique identifier within the application that stays stable across test moves or renames.
+    description: >-
+      Unique readable test-declaration identifier. The TypeScript/JavaScript adapter
+      uses test:<project-relative-file>#<suite.test-title>, with normalized title
+      segments. Moving a declaration or changing its suite/title changes the ID;
+      review intended-check links before transferring them. Duplicate normalized
+      paths require explicit disambiguation in the source, not a silent reassignment.
   name:
     type: string
     minLength: 1
@@ -35,4 +41,4 @@ properties:
   location:
     type: string
     minLength: 1
-    description: The source file for an implemented test, when available.
+    description: Path to the declaring source file relative to the application root; required for this implemented-test catalog.

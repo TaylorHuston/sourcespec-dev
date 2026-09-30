@@ -1,4 +1,3 @@
-# Parallel format experiment; the existing behaviors/create-account.yaml remains unchanged.
 # implementedBy locates code; verifiedBy names intended checks, not passing test runs.
 id: create-account
 name: Create a local account
@@ -15,18 +14,18 @@ scenarios:
       - The browser receives an HTTP-only session cookie and opens the task-list view.
       - If this is the first account, it claims tasks preserved from the earlier single-user database.
     implementedBy:
-      - function: auth-submit
+      - function: fn:src/App.tsx#App.submitCredentials
         role: Submits the form and opens the signed-in UI.
-      - function: local-auth-handler
+      - function: fn:server/auth-api.ts#createAuthHandler.return.handleAuthRequest
         role: Checks registration input and establishes a session.
-      - function: store-register-user
+      - function: fn:server/todo-store.ts#openTodoStore.register
         role: Saves the account and claims eligible legacy tasks.
     verifiedBy:
-      - test: sign-in-gates-tasks
+      - test: test:src/App.test.tsx#gates-tasks-behind-sign-in-and-clears-them-on-sign-out
         checks: Signup opens the account's task UI.
-      - test: api-validates-and-persists-tasks
+      - test: test:server/todo-api.test.ts#requires-a-session-and-keeps-HTTP-tasks-private-to-their-owner
         checks: Registration issues a usable session for the newly created account.
-      - test: legacy-tasks-claimed
+      - test: test:server/todo-api.test.ts#preserves-old-single-user-tasks-and-assigns-them-to-the-first-registered-user
         checks: Only the first account receives preserved single-user tasks.
 
   - id: account-not-created
@@ -39,10 +38,10 @@ scenarios:
       - No new account or session is created.
       - The person can correct the input or choose another name.
     implementedBy:
-      - function: local-auth-handler
+      - function: fn:server/auth-api.ts#createAuthHandler.return.handleAuthRequest
         role: Rejects invalid or duplicate registration.
-      - function: auth-submit
+      - function: fn:src/App.tsx#App.submitCredentials
         role: Shows the error without opening the task UI.
     verifiedBy:
-      - test: api-validates-and-persists-tasks
+      - test: test:server/todo-api.test.ts#requires-a-session-and-keeps-HTTP-tasks-private-to-their-owner
         checks: Invalid and duplicate registration requests are refused.

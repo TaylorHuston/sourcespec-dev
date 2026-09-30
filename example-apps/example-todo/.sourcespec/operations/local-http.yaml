@@ -4,81 +4,81 @@ contract: openapi.yaml
 mounts:
   - id: auth-api
     prefix: /api/auth
-    function: auto-vite-config-ts-8-3
+    function: fn:vite.config.ts#localTodoApi.attach
     role: Mounts account routes in both the Vite dev and preview servers.
   - id: todo-api
     prefix: /api/todos
-    function: auto-vite-config-ts-8-3
+    function: fn:vite.config.ts#localTodoApi.attach
     role: Mounts task routes in both the Vite dev and preview servers.
 operations:
   - operationId: registerUser
     mount: auth-api
     implementedBy:
-      - function: local-auth-handler
+      - function: fn:server/auth-api.ts#createAuthHandler.return.handleAuthRequest
         role: Handles account registration and session creation.
     verifiedBy:
-      - test: api-validates-and-persists-tasks
+      - test: test:server/todo-api.test.ts#requires-a-session-and-keeps-HTTP-tasks-private-to-their-owner
         checks: Registration returns a usable account session and refuses invalid or duplicate input.
 
   - operationId: loginUser
     mount: auth-api
     implementedBy:
-      - function: local-auth-handler
+      - function: fn:server/auth-api.ts#createAuthHandler.return.handleAuthRequest
         role: Handles credential-based sign-in and creates a session.
     verifiedBy:
-      - test: api-validates-and-persists-tasks
+      - test: test:server/todo-api.test.ts#requires-a-session-and-keeps-HTTP-tasks-private-to-their-owner
         checks: Correct credentials sign in and incorrect credentials are refused.
 
   - operationId: getSession
     mount: auth-api
     implementedBy:
-      - function: local-auth-handler
+      - function: fn:server/auth-api.ts#createAuthHandler.return.handleAuthRequest
         role: Looks up the current account from its session cookie.
     verifiedBy:
-      - test: api-validates-and-persists-tasks
+      - test: test:server/todo-api.test.ts#requires-a-session-and-keeps-HTTP-tasks-private-to-their-owner
         checks: A registered account's cookie retrieves its current session.
 
   - operationId: logoutUser
     mount: auth-api
     implementedBy:
-      - function: local-auth-handler
+      - function: fn:server/auth-api.ts#createAuthHandler.return.handleAuthRequest
         role: Ends the current session and clears its cookie.
     verifiedBy:
-      - test: api-validates-and-persists-tasks
+      - test: test:server/todo-api.test.ts#requires-a-session-and-keeps-HTTP-tasks-private-to-their-owner
         checks: The prior cookie no longer grants task access after logout.
 
   - operationId: listTodos
     mount: todo-api
     implementedBy:
-      - function: local-api-handler
+      - function: fn:server/todo-api.ts#createTodoHandler.return.handleTodoRequest
         role: Lists only the current account's tasks.
     verifiedBy:
-      - test: api-validates-and-persists-tasks
+      - test: test:server/todo-api.test.ts#requires-a-session-and-keeps-HTTP-tasks-private-to-their-owner
         checks: A valid session can list its own tasks, but not another account's.
 
   - operationId: createTodo
     mount: todo-api
     implementedBy:
-      - function: local-api-handler
+      - function: fn:server/todo-api.ts#createTodoHandler.return.handleTodoRequest
         role: Handles creation of a task for the signed-in account.
     verifiedBy:
-      - test: api-validates-and-persists-tasks
+      - test: test:server/todo-api.test.ts#requires-a-session-and-keeps-HTTP-tasks-private-to-their-owner
         checks: Authenticated creation trims task text; invalid requests are refused.
 
   - operationId: setTodoCompleted
     mount: todo-api
     implementedBy:
-      - function: local-api-handler
+      - function: fn:server/todo-api.ts#createTodoHandler.return.handleTodoRequest
         role: Handles completion updates for the current account's task.
     verifiedBy:
-      - test: api-validates-and-persists-tasks
+      - test: test:server/todo-api.test.ts#requires-a-session-and-keeps-HTTP-tasks-private-to-their-owner
         checks: Completion and reopening persist; another account cannot update the task.
 
   - operationId: removeTodo
     mount: todo-api
     implementedBy:
-      - function: local-api-handler
+      - function: fn:server/todo-api.ts#createTodoHandler.return.handleTodoRequest
         role: Handles deletion of a task owned by the current account.
     verifiedBy:
-      - test: api-validates-and-persists-tasks
+      - test: test:server/todo-api.test.ts#requires-a-session-and-keeps-HTTP-tasks-private-to-their-owner
         checks: Own-task deletion succeeds and another account cannot delete the task.

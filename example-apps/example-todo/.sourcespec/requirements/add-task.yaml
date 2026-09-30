@@ -1,4 +1,3 @@
-# Parallel format experiment; the existing behaviors/add-task.yaml remains unchanged.
 # implementedBy locates code; verifiedBy names intended checks, not passing test runs.
 id: add-task
 name: Add task
@@ -15,22 +14,22 @@ scenarios:
       - The remaining count increases by one and the New task field is cleared.
       - The task remains available after a reload or local server restart.
     implementedBy:
-      - function: add-task-submission
+      - function: fn:src/App.tsx#App.addTodo
         role: Displays the saved task and clears the input only after a successful request.
-      - function: todo-interface
+      - function: fn:src/App.tsx#App
         role: Loads saved tasks and renders the task list and remaining count.
-      - function: client-create-task
+      - function: fn:src/todo-api.ts#createTodo
         role: Sends the task to the local API.
-      - function: local-api-handler
+      - function: fn:server/todo-api.ts#createTodoHandler.return.handleTodoRequest
         role: Requires the current session and validates and routes the create request.
-      - function: store-create-task
+      - function: fn:server/todo-store.ts#openTodoStore.createTodo
         role: Inserts the task into SQLite for the signed-in user.
     verifiedBy:
-      - test: add-task-trims-input
+      - test: test:src/App.test.tsx#adds-a-task-with-trimmed-text-and-clears-the-input
         checks: The UI submits trimmed text and displays the new task, count, and cleared input.
-      - test: api-validates-and-persists-tasks
+      - test: test:server/todo-api.test.ts#requires-a-session-and-keeps-HTTP-tasks-private-to-their-owner
         checks: The API stores trimmed task text for the signed-in account.
-      - test: sqlite-tasks-survive-reopen
+      - test: test:server/todo-api.test.ts#scopes-tasks-to-users-and-persists-them-across-SQLite-connections
         checks: Task contents remain saved for the owner after reopening the database.
 
   - id: blank-task
@@ -42,10 +41,10 @@ scenarios:
     then:
       - Add task is disabled; no task is added, and the list and remaining count stay unchanged.
     implementedBy:
-      - function: todo-interface
+      - function: fn:src/App.tsx#App
         role: Disables Add task when the trimmed draft is empty.
     verifiedBy:
-      - test: add-task-blocks-blank-input
+      - test: test:src/App.test.tsx#does-not-allow-a-blank-task
         checks: Empty and whitespace-only input disable Add task and leave the list and count unchanged.
 
   - id: save-failed
@@ -58,10 +57,10 @@ scenarios:
       - An error is shown and the draft remains available to retry.
       - No unsaved task appears in the list.
     implementedBy:
-      - function: add-task-submission
+      - function: fn:src/App.tsx#App.addTodo
         role: Reports the failure and leaves the draft and task list unchanged.
-      - function: client-create-task
+      - function: fn:src/todo-api.ts#createTodo
         role: Sends the save request that may fail.
     verifiedBy:
-      - test: add-task-save-failure
+      - test: test:src/App.test.tsx#keeps-the-draft-when-saving-fails
         checks: A failed save reports an error without clearing the draft or adding a task.

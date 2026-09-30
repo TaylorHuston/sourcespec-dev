@@ -15,7 +15,14 @@ properties:
   id:
     type: string
     minLength: 1
-    description: Unique application identifier, independent of source position; preserve across moves or renames only after confirming the responsibility is unchanged
+    description: >-
+      Unique function identifier. Generated TypeScript/JavaScript IDs use a readable
+      project-relative file and lexical owner chain (fn:<file>#<owner.function>).
+      Colliding normalized paths and context-free anonymous functions need an
+      explicit UTF-16 range and AST-kind suffix. A move, rename, call-site change,
+      new collision, or range shift can change the ID; review authored links and
+      responsibility before transferring them. Other language adapters may use
+      equivalent readable lexical paths.
   name:
     type:
       - string

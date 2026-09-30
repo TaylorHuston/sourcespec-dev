@@ -19,8 +19,8 @@ type Declaration = { name: string; suite: string[]; location: string; inferredKi
 type Callee = { root: 'test' | 'describe'; each: boolean; bound: boolean }
 
 const [appFlag, appPath, mode] = process.argv.slice(2)
-if (appFlag !== '--app' || !appPath || !['--check', '--write'].includes(mode) || process.argv.length !== 5) {
-  throw new Error('Usage: tests-catalog.ts --app <absolute-app-root> --check|--write')
+if (appFlag !== '--app' || !appPath || !['--check', '--write', '--identity-preview', '--write-lexical', '--check-lexical'].includes(mode) || process.argv.length !== 5) {
+  throw new Error('Usage: tests-catalog.ts --app <absolute-app-root> --check|--write|--identity-preview|--write-lexical|--check-lexical')
 }
 if (appPath !== resolve(appPath)) throw new Error('--app must be an absolute path')
 const appRoot = realpathSync(appPath)
@@ -30,10 +30,17 @@ if (!existsSync(join(appRoot, 'package.json')) || !existsSync(join(appRoot, 'tsc
 }
 
 const catalogFile = join(appRoot, '.sourcespec/catalogs/tests-catalog.yaml')
+if (mode === '--write-lexical' && existsSync(catalogFile)) {
+  throw new Error(`Lexical test generation is initial-only: ${catalogFile} already exists. Review IDs, curated metadata, and links before replacing it.`)
+}
 const schemaFile = fileURLToPath(new URL('../assets/tests.schema.yaml', import.meta.url))
 const validate = new Ajv2020({ allErrors: true }).compile(YAML.parse(readFileSync(schemaFile, 'utf8')))
 const identity = (entry: Pick<TestRecord, 'location' | 'suite' | 'name'>) =>
   JSON.stringify([entry.location, entry.suite ?? [], entry.name])
+const lexicalSegment = (text: string) => text.normalize('NFKC').replace(/[^A-Za-z0-9_$.-]+/g, '-')
+  .replace(/^[.-]+|[.-]+$/g, '') || 'unnamed'
+const lexicalId = (entry: Pick<TestRecord, 'location' | 'suite' | 'name'>) =>
+  `test:${entry.location.split('/').map(lexicalSegment).join('/')}#${[...(entry.suite ?? []), entry.name].map(lexicalSegment).join('.')}`
 
 function readCatalog(): TestRecord[] {
   if (!existsSync(catalogFile)) return []
@@ -157,7 +164,7 @@ function titleFor(call: ts.CallExpression, source: ts.SourceFile): string {
   throw new Error(`Nonliteral or empty test/suite name at ${relative(appRoot, source.fileName)}:${line + 1}; review and use an explicit static name`)
 }
 
-const previous = readCatalog()
+const previous = mode === '--identity-preview' || mode === '--write-lexical' ? [] : readCatalog()
 const prior = new Map(previous.map((entry) => [identity(entry), entry]))
 const declarations: Declaration[] = []
 const files = testFiles()
@@ -190,6 +197,7 @@ for (const file of files) {
 }
 
 const seen = new Set<string>()
+const seenLexicalIds = new Set<string>()
 const matched = new Set<string>()
 const records: TestRecord[] = []
 let added = 0
@@ -197,11 +205,17 @@ for (const declaration of declarations) {
   const key = identity(declaration)
   if (seen.has(key)) throw new Error(`Ambiguous test identity ${key}; disambiguate duplicate declarations`)
   seen.add(key)
+  const proposedId = lexicalId(declaration)
+  if (seenLexicalIds.has(proposedId)) {
+    throw new Error(`Ambiguous readable test ID ${proposedId}; disambiguate the suite or test title before writing`)
+  }
+  seenLexicalIds.add(proposedId)
   const old = prior.get(key)
   if (old) matched.add(old.id)
   else added++
   const record: TestRecord = {
-    id: old?.id ?? `test-${randomUUID()}`,
+    id: mode === '--write-lexical' || mode === '--check-lexical' || mode === '--identity-preview'
+      ? proposedId : old?.id ?? proposedId,
     name: declaration.name,
     ...(declaration.suite.length ? { suite: declaration.suite } : {}),
     description: old?.description ?? `Review what this declared test checks: ${declaration.name}`,
@@ -228,7 +242,7 @@ function formatCatalog(entries: TestRecord[]): string {
     if (first) { first = false; return line }
     return `\n${line}`
   })
-  return '# Generated test-declaration inventory. Curate descriptions and kinds before using as evidence pointers.\n' + body
+  return '# Readable lexical test-declaration inventory. Curate descriptions and kinds before using as evidence pointers.\n' + body
 }
 function reportAmbiguities(): void {
   const unresolved = records.filter((entry) => entry.kind === 'unclassified')
@@ -238,10 +252,15 @@ function reportAmbiguities(): void {
     console.warn(`- ${entry.id}: ${entry.location} — ${[...(entry.suite ?? []), entry.name].join(' > ')}`)
   }
 }
-if (mode === '--check') {
+if (mode === '--identity-preview') {
+  console.log(JSON.stringify({
+    format: 'test-identities-preview/v1', scope: appRoot, declarations: records.length,
+    tests: records.map(({ id, location, suite, name }) => ({ id, location, ...(suite ? { suite } : {}), name })),
+  }))
+} else if (mode === '--check' || mode === '--check-lexical') {
   if (!existsSync(catalogFile) || !isDeepStrictEqual(previous, records) ||
       !hasSeparatedEntries(readFileSync(catalogFile, 'utf8'), records.length)) {
-    console.error(`Test catalog is stale or lacks blank lines between entries (${added} new declarations). Refresh with --write and review the diff.`)
+    console.error(`Test catalog is stale, has mismatched IDs, or lacks blank lines between entries (${added} new declarations). Review IDs and links before a refresh.`)
     process.exitCode = 1
   } else {
     console.log(`Test catalog matches ${records.length} declarations in ${files.length} app-owned test files.`)

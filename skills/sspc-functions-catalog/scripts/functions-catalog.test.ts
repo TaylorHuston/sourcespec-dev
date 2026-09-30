@@ -51,6 +51,7 @@ test('inventories only one app, preserves IDs and annotations, and refuses silen
     let entries = YAML.parse(text).functions
     assert.deepEqual(entries.map((entry: { id: string }) => entry.id), initialIds)
     assert.equal(entries.length, 7)
+    assert(entries.some((entry: { id: string }) => entry.id === 'fn:src/index.ts#value'))
     const scopeOf = (location: string) => entries.find((entry: { location: string }) => entry.location === location)?.sourceScope
     assert.equal(scopeOf('src/index.ts'), 'application')
     assert.equal(scopeOf('src/index.test.ts'), 'test')
@@ -184,14 +185,15 @@ test('probes a monorepo-owned scope before writing, including assignment callbac
     assert.equal(runScope(project, 'server', '--check').status, 0)
 
     writeFileSync(join(project, 'server/broken.ts'), 'export const callbacks = [() => 1, () => 2];\nvoid (() => 3);\n')
-    const unresolved = runScope(project, 'server', '--probe')
-    assert.equal(unresolved.status, 1)
-    assert.match(unresolved.stdout, /Identity issues by cause: collision=1, missing-context=1/)
-    assert.match(unresolved.stderr, /Ambiguous function identity/)
-    assert.match(unresolved.stderr, /Anonymous function without searchable context/)
-    const before = readFileSync(catalog, 'utf8')
-    assert.equal(runScope(project, 'server', '--write').status, 1)
-    assert.equal(readFileSync(catalog, 'utf8'), before, 'invalid inventory must not overwrite the catalog')
+    const resolved = runScope(project, 'server', '--probe')
+    assert.equal(resolved.status, 0, resolved.stderr)
+    assert.match(resolved.stdout, /Identity issues by cause: none/)
+    assert.equal(runScope(project, 'server', '--write').status, 0)
+    const withRanges = YAML.parse(readFileSync(catalog, 'utf8')).functions as { id: string; location: string }[]
+    assert.equal(withRanges.filter((entry) => entry.location === 'broken.ts').length, 3)
+    assert(withRanges.filter((entry) => entry.location === 'broken.ts').every((entry) => entry.id.includes('@utf16:')))
+    const finalCheck = runScope(project, 'server', '--check')
+    assert.equal(finalCheck.status, 0, finalCheck.stderr)
   } finally {
     rmSync(project, { recursive: true, force: true })
   }

@@ -1,4 +1,3 @@
-import { randomUUID } from 'node:crypto'
 import { createRequire } from 'node:module'
 import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { join, relative } from 'node:path'
@@ -131,6 +130,14 @@ function sourceScopeFor(location) {
   return 'unclassified'
 }
 
+const lexicalSegment = (text) => text.normalize('NFKC').replace(/[^A-Za-z0-9_$.-]+/g, '-')
+  .replace(/^[.-]+|[.-]+$/g, '') || 'anonymous'
+function lexicalId(file, name, context) {
+  const owner = context.split(' > ').filter(Boolean).map(lexicalSegment)
+  if (name) owner.push(lexicalSegment(name))
+  return `fn:${file}#${owner.join('.') || 'anonymous'}`
+}
+
 function legacyLocation(node, file, source) {
   if (declaredName(node)) {
     const names = []
@@ -160,6 +167,20 @@ for (const item of previous.filter((entry) => !entry.source)) {
   if (byIdentity.has(key)) throw new Error(`Ambiguous catalog identity for ${key}; reconcile the records before refreshing`)
   byIdentity.set(key, item)
 }
+const baseCounts = new Map()
+for (const absoluteFile of files) {
+  const source = program.getSourceFile(absoluteFile)
+  if (!source) throw new Error(`Could not parse ${absoluteFile}`)
+  const file = relative(appRoot, absoluteFile)
+  function count(node) {
+    if (isFunction(node)) {
+      const base = lexicalId(file, declaredName(node), contextFor(node, source))
+      baseCounts.set(base, (baseCounts.get(base) ?? 0) + 1)
+    }
+    ts.forEachChild(node, count)
+  }
+  count(source)
+}
 const records = []
 const identities = new Set()
 const usedIds = new Set()
@@ -173,16 +194,20 @@ for (const absoluteFile of files) {
     if (isFunction(node)) {
       const name = declaredName(node)
       const context = contextFor(node, source)
-      const key = JSON.stringify([file, name, context])
-      if (identities.has(key)) throw new Error(`Ambiguous functions at ${file} (${name ?? 'anonymous'}, ${context}); review their call sites`)
+      const base = lexicalId(file, name, context)
+      const fallback = (baseCounts.get(base) ?? 0) > 1 || (!name && !context)
+      const breadcrumb = fallback
+        ? `${context ? `${context} > ` : ''}@utf16:${node.getStart(source)}-${node.getEnd()}:${ts.SyntaxKind[node.kind]}` : context
+      const key = JSON.stringify([file, name, breadcrumb])
+      if (identities.has(key)) throw new Error(`Ambiguous functions at ${file} (${name ?? 'anonymous'}, ${breadcrumb}); review their call sites`)
       identities.add(key)
-      if (!name && !context) throw new Error(`Anonymous function in ${file} has no searchable context`)
+      const id = fallback ? `${base}@utf16:${node.getStart(source)}-${node.getEnd()}:${ts.SyntaxKind[node.kind]}` : base
       const legacy = legacyBySource.get(`${file}:${node.getStart(source)}`)
       // Only trust the old offset when the old displayed location also agrees. This is migration-only.
       const old = legacy && legacy.name === name && legacy.location === legacyLocation(node, file, source)
         ? legacy : byIdentity.get(key)
+      if (old && old.id !== id) throw new Error(`Identity changed for ${file} (${name ?? breadcrumb}): ${old.id} -> ${id}. Review old and new definitions and links before replacing the catalog.`)
       if (old && usedIds.has(old.id)) throw new Error(`Multiple functions matched catalog ID ${old.id}`)
-      const id = old?.id ?? `fn-${randomUUID()}`
       usedIds.add(id)
       const signature = checker.getSignatureFromDeclaration(node)
       const inferredReturn = signature ? conciseType(checker.getReturnTypeOfSignature(signature), node, checker) : 'unknown'
@@ -205,7 +230,7 @@ for (const absoluteFile of files) {
         ...(old?.description ? { description: old.description } : {}),
         location: file,
         sourceScope: old?.sourceScope ?? sourceScopeFor(file),
-        ...(context ? { context } : {}),
+        ...(breadcrumb ? { context: breadcrumb } : {}),
         parameters,
         return: {
           type: curatedReturn ?? inferredReturn,
@@ -227,15 +252,28 @@ function hasSeparatedEntries(text, count) {
 
 const missing = previous.filter((entry) => !usedIds.has(entry.id))
 if (missing.length && mode === '--write' && !prune) {
-  throw new Error(`Unmatched existing function IDs: ${missing.map((entry) => entry.id).join(', ')}. Reconcile moved functions, or use --write --prune after reviewing removed IDs and behavior links.`)
+  throw new Error(`Unmatched existing function IDs: ${missing.map((entry) => entry.id).join(', ')}. Reconcile moved functions, or use --write --prune after reviewing removed IDs and curated links.`)
 }
 if (missing.length && prune) {
-  const behaviorDir = join(appRoot, '.sourcespec/behaviors')
-  const linked = existsSync(behaviorDir) ? readdirSync(behaviorDir).filter((file) => file.endsWith('.yaml'))
-    .flatMap((file) => (YAML.parse(readFileSync(join(behaviorDir, file), 'utf8')).cases ?? [])
-      .flatMap((entry) => (entry.implementedBy ?? []).map((link) => link.function))) : []
-  const stillLinked = missing.filter((item) => linked.includes(item.id))
-  if (stillLinked.length) throw new Error(`Cannot retire behavior-linked function IDs: ${stillLinked.map((item) => item.id).join(', ')}`)
+  const requirementDir = join(appRoot, '.sourcespec/requirements')
+  const requirementLinks = existsSync(requirementDir) ? readdirSync(requirementDir)
+    .filter((file) => file.endsWith('.yaml'))
+    .flatMap((file) => (YAML.parse(readFileSync(join(requirementDir, file), 'utf8')).scenarios ?? [])
+      .flatMap((scenario) => (scenario.implementedBy ?? []).map((link) => link.function))) : []
+  const operationDir = join(appRoot, '.sourcespec/operations')
+  const operationLinks = existsSync(operationDir) ? readdirSync(operationDir)
+    .filter((file) => file.endsWith('.yaml'))
+    .flatMap((file) => {
+      const map = YAML.parse(readFileSync(join(operationDir, file), 'utf8'))
+      return [
+        ...(map.mounts ?? []).map((mount) => mount.function),
+        ...(map.operations ?? []).flatMap((operation) =>
+          (operation.implementedBy ?? []).map((link) => link.function)),
+      ]
+    }) : []
+  const linked = new Set([...requirementLinks, ...operationLinks])
+  const stillLinked = missing.filter((item) => linked.has(item.id))
+  if (stillLinked.length) throw new Error(`Cannot retire function IDs linked by Requirements or operations: ${stillLinked.map((item) => item.id).join(', ')}`)
 }
 if (mode === '--check') {
   if (!isDeepStrictEqual(previous, records) || !existsSync(catalogFile) ||
@@ -246,9 +284,7 @@ if (mode === '--check') {
     console.log(`Function catalog covers all ${records.length} app-owned function definitions in ${files.length} source files.`)
   }
 } else {
-  const header = '# Generated function inventory. IDs and prose are preserved when identities match.\n' +
-    '# Includes app-owned runtime, config, and test functions (including anonymous callbacks).\n' +
-    '# Location is a file path; context is a search hint, not a guaranteed identity across refactors.\n'
+  const header = '# Readable lexical IDs; range suffixes may change. Review links before any refresh.\n'
   let firstRecord = true
   const body = YAML.stringify({ functions: records }, { lineWidth: 110 }).replace(/^  - id:/gm, (line) => {
     if (firstRecord) {

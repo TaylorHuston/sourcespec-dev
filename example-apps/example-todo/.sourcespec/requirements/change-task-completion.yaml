@@ -1,4 +1,3 @@
-# Parallel format experiment; the existing behaviors/change-task-completion.yaml remains unchanged.
 # implementedBy locates code; verifiedBy names intended checks, not passing test runs.
 id: change-task-completion
 name: Change task completion
@@ -14,18 +13,18 @@ scenarios:
       - The task is checked and remains complete after reload.
       - The remaining count decreases by one.
     implementedBy:
-      - function: toggle-task-completion
+      - function: fn:src/App.tsx#App.toggleTodo
         role: Updates the checkbox and count after the server confirms the change.
-      - function: local-api-handler
+      - function: fn:server/todo-api.ts#createTodoHandler.return.handleTodoRequest
         role: Requires the current session and routes the update.
-      - function: store-update-task
+      - function: fn:server/todo-store.ts#openTodoStore.setTodoCompleted
         role: Updates only the current user's task in SQLite.
     verifiedBy:
-      - test: complete-task-updates-count
+      - test: test:src/App.test.tsx#marks-a-task-complete-and-updates-the-remaining-count
         checks: Completion checks the task and decreases the remaining count.
-      - test: api-validates-and-persists-tasks
+      - test: test:server/todo-api.test.ts#requires-a-session-and-keeps-HTTP-tasks-private-to-their-owner
         checks: The API persists completion and refuses updates to another user's task.
-      - test: sqlite-tasks-survive-reopen
+      - test: test:server/todo-api.test.ts#scopes-tasks-to-users-and-persists-them-across-SQLite-connections
         checks: The task stays complete after reopening SQLite.
 
   - id: task-reopened
@@ -38,12 +37,12 @@ scenarios:
       - The task is unchecked and remains incomplete after reload.
       - The remaining count increases by one.
     implementedBy:
-      - function: toggle-task-completion
+      - function: fn:src/App.tsx#App.toggleTodo
         role: Sends the new state and refreshes the checkbox and count.
-      - function: store-update-task
+      - function: fn:server/todo-store.ts#openTodoStore.setTodoCompleted
         role: Persists the new completion state for the current user.
     verifiedBy:
-      - test: reopen-task-restores-count
+      - test: test:src/App.test.tsx#reopens-a-completed-task-and-restores-the-remaining-count
         checks: Reopening unchecks the task and increases the remaining count.
-      - test: api-validates-and-persists-tasks
+      - test: test:server/todo-api.test.ts#requires-a-session-and-keeps-HTTP-tasks-private-to-their-owner
         checks: The update endpoint persists the reopened state.

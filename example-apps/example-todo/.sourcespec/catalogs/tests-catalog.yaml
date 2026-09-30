@@ -1,112 +1,106 @@
-# Hand-authored catalog of automated tests in this app.
-# Each entry follows ../../../../schema/tests.yaml; the tests list itself
-# does not have a catalog schema yet. Locations are relative to the app root.
-# A catalog entry does not record whether the test currently passes.
+# Readable lexical test-declaration inventory. Curate descriptions and kinds before using as evidence pointers.
 tests:
-  - id: load-existing-tasks
-    name: loads existing tasks
-    description: Checks that a task returned from the local API appears with its saved completion state.
-    kind: component
-    location: src/App.test.tsx
-
-  - id: add-task-trims-input
-    name: adds a task with trimmed text and clears the input
-    description: Checks submission trims the draft and displays the new incomplete task, updated count, and cleared input.
-    kind: component
-    location: src/App.test.tsx
-
-  - id: add-task-blocks-blank-input
-    name: does not allow a blank task
-    description: Checks empty and whitespace-only input leave Add task disabled, with no task added or remaining-count change.
-    kind: component
-    location: src/App.test.tsx
-
-  - id: complete-task-updates-count
-    name: marks a task complete and updates the remaining count
-    description: Checks that updating completion through the API changes the checkbox and remaining count.
-    kind: component
-    location: src/App.test.tsx
-
-  - id: reopen-task-restores-count
-    name: reopens a completed task and restores the remaining count
-    description: Checks that turning off completion through the API restores the unchecked checkbox and remaining count.
-    kind: component
-    location: src/App.test.tsx
-
-  - id: remove-task-clears-list
-    name: removes a task from the list
-    description: Checks that a successful API deletion restores the empty list and zero remaining count.
-    kind: component
-    location: src/App.test.tsx
-
-  - id: remove-task-failure-keeps-task
-    name: keeps a task visible when removal fails
-    description: Checks a failed delete reports an error and leaves the task and remaining count intact.
-    kind: component
-    location: src/App.test.tsx
-
-  - id: add-task-save-failure
-    name: keeps the draft when saving fails
-    description: Checks a failed create request reports an error without losing the draft or showing an unsaved task.
-    kind: component
-    location: src/App.test.tsx
-
-  - id: sqlite-tasks-survive-reopen
-    name: scopes tasks to users and persists them across SQLite connections
-    description: Checks user ownership, cross-user write refusal, and session/task persistence across connections.
-    kind: integration
-    location: server/todo-api.test.ts
-
-  - id: api-validates-and-persists-tasks
-    name: requires a session and keeps HTTP tasks private to their owner
-    description: Checks signup, login, logout, blank-text validation, ownership for all task routes, and cross-origin mutation refusal.
-    kind: integration
-    location: server/todo-api.test.ts
-
-  - id: legacy-tasks-claimed
-    name: preserves old single-user tasks and assigns them to the first registered user
-    description: Checks the additive legacy SQLite migration preserves old tasks without exposing them to later accounts.
-    kind: integration
-    location: server/todo-api.test.ts
-
-  - id: data-model-links-match-sqlite
+  - id: test:server/data-model.test.ts#maps-every-documented-table-and-relationship-to-SQLite-foreign-keys
     name: maps every documented table and relationship to SQLite foreign keys
     description: Compares SourceSpec data-model table and relationship references with SQLite's actual schema.
     kind: contract
     location: server/data-model.test.ts
 
-  - id: data-model-representations-resolve
+  - id: test:server/data-model.test.ts#resolves-data-model-representations-to-TypeScript-and-OpenAPI-definitions
     name: resolves data-model representations to TypeScript and OpenAPI definitions
     description: Checks data-model links point to existing exported types and HTTP schemas.
     kind: contract
     location: server/data-model.test.ts
 
-  - id: sign-in-gates-tasks
-    name: gates tasks behind sign in and clears them on sign out
-    description: Checks the UI keeps tasks private until signup and clears them when signing out.
-    kind: component
-    location: src/App.test.tsx
-
-  - id: sign-in-shows-error
-    name: reports incorrect credentials without loading tasks
-    description: Checks invalid login reports an accessible error and does not load private tasks.
-    kind: component
-    location: src/App.test.tsx
-
-  - id: openapi-contract-valid
+  - id: test:server/openapi.test.ts#validates-the-local-OpenAPI-contract-and-its-operation-IDs
     name: validates the local OpenAPI contract and its operation IDs
     description: Validates the root OpenAPI document and its eight unique HTTP operation IDs.
     kind: contract
     location: server/openapi.test.ts
 
-  - id: operation-map-links-resolve
+  - id: test:server/operations.test.ts#resolves-every-HTTP-operation-to-its-mount-handler-and-intended-tests
     name: resolves every HTTP operation to its mount, handler, and intended tests
-    description: Checks the operation map covers every OpenAPI operation and its mount prefix, with valid function and test IDs; it does not prove live server routing.
+    description: Checks the operation map covers every OpenAPI operation and its mount prefix, with valid function
+      and test IDs; it does not prove live server routing.
     kind: contract
     location: server/operations.test.ts
 
-  - id: behavior-catalog-links-resolve
-    name: resolves behavior case links against the app catalogs
-    description: Checks every behavior case's function and test links resolve to catalog entries without implying an execution sequence.
-    kind: contract
-    location: server/behavior.test.ts
+  - id: test:server/todo-api.test.ts#scopes-tasks-to-users-and-persists-them-across-SQLite-connections
+    name: scopes tasks to users and persists them across SQLite connections
+    description: Checks user ownership, cross-user write refusal, and session/task persistence across connections.
+    kind: integration
+    location: server/todo-api.test.ts
+
+  - id: test:server/todo-api.test.ts#preserves-old-single-user-tasks-and-assigns-them-to-the-first-registered-user
+    name: preserves old single-user tasks and assigns them to the first registered user
+    description: Checks the additive legacy SQLite migration preserves old tasks without exposing them to later accounts.
+    kind: integration
+    location: server/todo-api.test.ts
+
+  - id: test:server/todo-api.test.ts#requires-a-session-and-keeps-HTTP-tasks-private-to-their-owner
+    name: requires a session and keeps HTTP tasks private to their owner
+    description: Checks signup, login, logout, blank-text validation, ownership for all task routes, and
+      cross-origin mutation refusal.
+    kind: integration
+    location: server/todo-api.test.ts
+
+  - id: test:src/App.test.tsx#gates-tasks-behind-sign-in-and-clears-them-on-sign-out
+    name: gates tasks behind sign in and clears them on sign out
+    description: Checks the UI keeps tasks private until signup and clears them when signing out.
+    kind: component
+    location: src/App.test.tsx
+
+  - id: test:src/App.test.tsx#reports-incorrect-credentials-without-loading-tasks
+    name: reports incorrect credentials without loading tasks
+    description: Checks invalid login reports an accessible error and does not load private tasks.
+    kind: component
+    location: src/App.test.tsx
+
+  - id: test:src/App.test.tsx#loads-existing-tasks
+    name: loads existing tasks
+    description: Checks that a task returned from the local API appears with its saved completion state.
+    kind: component
+    location: src/App.test.tsx
+
+  - id: test:src/App.test.tsx#adds-a-task-with-trimmed-text-and-clears-the-input
+    name: adds a task with trimmed text and clears the input
+    description: Checks submission trims the draft and displays the new incomplete task, updated count, and cleared input.
+    kind: component
+    location: src/App.test.tsx
+
+  - id: test:src/App.test.tsx#does-not-allow-a-blank-task
+    name: does not allow a blank task
+    description: Checks empty and whitespace-only input leave Add task disabled, with no task added or
+      remaining-count change.
+    kind: component
+    location: src/App.test.tsx
+
+  - id: test:src/App.test.tsx#marks-a-task-complete-and-updates-the-remaining-count
+    name: marks a task complete and updates the remaining count
+    description: Checks that updating completion through the API changes the checkbox and remaining count.
+    kind: component
+    location: src/App.test.tsx
+
+  - id: test:src/App.test.tsx#reopens-a-completed-task-and-restores-the-remaining-count
+    name: reopens a completed task and restores the remaining count
+    description: Checks that turning off completion through the API restores the unchecked checkbox and remaining count.
+    kind: component
+    location: src/App.test.tsx
+
+  - id: test:src/App.test.tsx#removes-a-task-from-the-list
+    name: removes a task from the list
+    description: Checks that a successful API deletion restores the empty list and zero remaining count.
+    kind: component
+    location: src/App.test.tsx
+
+  - id: test:src/App.test.tsx#keeps-a-task-visible-when-removal-fails
+    name: keeps a task visible when removal fails
+    description: Checks a failed delete reports an error and leaves the task and remaining count intact.
+    kind: component
+    location: src/App.test.tsx
+
+  - id: test:src/App.test.tsx#keeps-the-draft-when-saving-fails
+    name: keeps the draft when saving fails
+    description: Checks a failed create request reports an error without losing the draft or showing an unsaved task.
+    kind: component
+    location: src/App.test.tsx
