@@ -125,14 +125,18 @@ test('binds decorated fields, class callbacks, and default exports across harmle
       '  first = () => 1',
       '  second = () => 2',
     ]
-    const source = (lines: string[]) => `function ForeignKey(callback: () => string) { return () => {} }\nclass Records {\n  parse(value: string): number\n  parse(value: number): number\n  parse(value: string | number): number { return 1 }\n${lines.join('\n')}\n}\nexport default () => 3\n`
+    const source = (lines: string[]) => `function openStore() { return { register: (name: string) => ({ name }), authenticate: (password: string) => ({ token: password }), sessionUser: (token: string) => ({ token }) } }\ntype Store = ReturnType<typeof openStore>\nfunction withStore(store: Store) { return store.register('a') }\ntype Changed<T> = { value: T }\nfunction onChange(callback: (event: Changed<string>) => void) { callback({ value: 'a' }) }\nonChange((event) => { void event.value })\nfunction ForeignKey(callback: () => string) { return () => {} }\nclass Records {\n  parse(value: string): number\n  parse(value: number): number\n  parse(value: string | number): number { return 1 }\n${lines.join('\n')}\n}\nexport default () => 3\n`
     writeFileSync(file, source(fields))
     const probe = run(app, '--probe')
     assert.equal(probe.status, 0, probe.stderr)
     assert.match(probe.stdout, /Excluded 2 signature-only declaration/)
     assert.equal(run(app, '--write').status, 0)
-    const entries = YAML.parse(readFileSync(catalog, 'utf8')).functions as { id: string; name?: string; context?: string }[]
+    const entries = YAML.parse(readFileSync(catalog, 'utf8')).functions as {
+      id: string; name?: string; context?: string; parameters: { name: string; type: string }[]
+    }[]
     assert.equal(entries.filter((entry) => entry.name === 'parse').length, 1)
+    assert.equal(entries.find((entry) => entry.name === 'withStore')?.parameters[0]?.type, 'Store')
+    assert.equal(entries.flatMap((entry) => entry.parameters).find((parameter) => parameter.name === 'event')?.type, 'Changed<string>')
     assert(entries.some((entry) => entry.context?.includes('Records > userId field > ForeignKey')))
     assert(entries.some((entry) => entry.context?.includes('Records > organizationId field > ForeignKey')))
     assert(entries.some((entry) => entry.context === 'default export'))

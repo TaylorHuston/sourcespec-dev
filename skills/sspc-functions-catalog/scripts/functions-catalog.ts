@@ -173,12 +173,6 @@ function contextFor(node: FunctionNode, source: TS.SourceFile): string {
   return labels.reverse().join(' > ')
 }
 
-const nodeBuiltins = new Set(builtinModules.map((name) => name.replace(/^node:/, '')))
-function stableParameterType(type: string): string {
-  return type.replace(/import\("([^"]+)"\)/g, (original, moduleName: string) =>
-    nodeBuiltins.has(moduleName) ? `import("node:${moduleName}")` : original)
-}
-
 function sourceScopeFor(location: string): SourceScope {
   const ownedLocation = scoped ? `${ownedPath.split(sep).join('/')}/${location}` : location
   if (/(?:^|\/)(?:__mocks__|__tests__|tests?)\//.test(ownedLocation) || /\.(?:test|spec)\.[cm]?[jt]sx?$/.test(location)) return 'test'
@@ -225,6 +219,31 @@ function conciseType(type: TS.Type, node: TS.Node, checker: TS.TypeChecker, visi
   }
   if (name && /^[A-Za-z_$][\w$]*$/.test(name) && !name.startsWith('__')) return name
   return 'object'
+}
+
+const nodeBuiltins = new Set(builtinModules.map((name) => name.replace(/^node:/, '')))
+function stableParameterType(type: string): string {
+  return type.replace(/import\("([^"]+)"\)/g, (original, moduleName: string) =>
+    nodeBuiltins.has(moduleName) ? `import("node:${moduleName}")` : original)
+}
+
+function conciseParameterType(parameter: TS.ParameterDeclaration, node: FunctionNode, source: TS.SourceFile, checker: TS.TypeChecker): string {
+  const type = checker.getTypeAtLocation(parameter)
+  const printed = stableParameterType(checker.typeToString(type, node, ts.TypeFormatFlags.NoTruncation))
+  if (printed.length <= 120 && !/import\(["'](?:\/|[A-Za-z]:[\\/])/.test(printed)) return printed
+  if (parameter.type && ts.isTypeReferenceNode(parameter.type)) {
+    const written = parameter.type.getText(source)
+    if (written.length <= 120 && !/import\(|[{};\n]/.test(written)) return written
+  }
+  const summary = conciseType(type, node, checker)
+  const args = type.aliasTypeArguments ?? (type.flags & ts.TypeFlags.Object &&
+    (type as TS.ObjectType).objectFlags & ts.ObjectFlags.Reference
+    ? checker.getTypeArguments(type as TS.TypeReference) : [])
+  if (args.length && args.length <= 3 && summary !== 'object' && /^[A-Za-z_$][\w$]*$/.test(summary)) {
+    const generic = `${summary}<${args.map((arg) => conciseType(arg, node, checker)).join(', ')}>`
+    if (generic.length <= 120) return generic
+  }
+  return summary
 }
 
 const config = ts.readConfigFile(join(projectRoot, 'tsconfig.json'), ts.sys.readFile)
@@ -344,7 +363,7 @@ for (const file of files) {
           const oldParameter = old?.parameters.find((item) => item.name === parameterName)
           return {
             name: parameterName,
-            type: stableParameterType(checker.typeToString(checker.getTypeAtLocation(parameter), node, ts.TypeFormatFlags.NoTruncation)),
+            type: conciseParameterType(parameter, node, source!, checker),
             ...(oldParameter?.description ? { description: oldParameter.description } : {}),
             ...(oldParameter?.default ? { default: oldParameter.default } : {}),
             required: !parameter.questionToken && !parameter.initializer && !parameter.dotDotDotToken,

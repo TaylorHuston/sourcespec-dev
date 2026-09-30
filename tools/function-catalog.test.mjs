@@ -20,7 +20,7 @@ test('readable lexical IDs expose ownership and fail closed when a range shifts'
     mkdirSync(join(sandbox, '.sourcespec/catalogs'), { recursive: true })
     symlinkSync(join(app, 'node_modules'), join(sandbox, 'node_modules'))
     writeFileSync(join(sandbox, 'package.json'), '{"private":true,"type":"module"}')
-    writeFileSync(join(sandbox, 'tsconfig.json'), '{"compilerOptions":{"target":"ES2022"}}')
+    writeFileSync(join(sandbox, 'tsconfig.json'), '{"compilerOptions":{"target":"ES2022","strict":true}}')
     const source = [
       'export class First { run() { return 1 } }',
       'export class Second { run() { return 2 } }',
@@ -28,6 +28,11 @@ test('readable lexical IDs expose ownership and fail closed when a range shifts'
       "export const routes = { 'sign in': () => 1, 'sign-in': () => 2 };",
       'export const callbacks = [() => 1, () => 2];',
       'void (() => 3);',
+      'export function openStore() { return { register: (name: string) => ({ name }), authenticate: (password: string) => ({ token: password }), sessionUser: (token: string) => ({ token }) } }',
+      'export type Store = ReturnType<typeof openStore>',
+      'export function withStore(store: Store) { return store.register("a") }',
+      'export function withOptional(options?: { value: string }) { return options?.value }',
+      'export const pair = (value: [string, { active: boolean }]) => value[1].active',
       '',
     ].join('\n')
     const run = (...args) => spawnSync(process.execPath, [tool, ...args], { cwd: sandbox, encoding: 'utf8' })
@@ -38,6 +43,9 @@ test('readable lexical IDs expose ownership and fail closed when a range shifts'
     const entries = YAML.parse(readFileSync(catalog, 'utf8')).functions
     assert(entries.some((entry) => entry.id === 'fn:src/index.ts#First.run'))
     assert(entries.some((entry) => entry.id === 'fn:src/index.ts#Second.run'))
+    assert.equal(entries.find((entry) => entry.id === 'fn:src/index.ts#withStore')?.parameters[0]?.type, 'Store')
+    assert.match(entries.find((entry) => entry.id === 'fn:src/index.ts#withOptional')?.parameters[0]?.type, /undefined/)
+    assert.match(entries.find((entry) => entry.id === 'fn:src/index.ts#pair-variable')?.parameters[0]?.type, /^\[string,/)
     assert.equal(new Set(entries.map((entry) => entry.id)).size, entries.length)
     assert.equal(entries.filter((entry) => entry.id.includes('@utf16:')).length, 7,
       'get/set, two normalized property collisions, two callbacks, and one context-free callback')

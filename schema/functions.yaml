@@ -66,7 +66,7 @@ properties:
           description: The name of the parameter
         type:
           type: string
-          description: The type of the parameter
+          description: Concise TypeScript-facing parameter type; prefer explicit named annotations and bounded generics over expanded structures or machine-specific import paths
         description:
           type: string
           description: The description of the parameter

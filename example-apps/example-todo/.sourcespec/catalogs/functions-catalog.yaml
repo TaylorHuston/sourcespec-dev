@@ -46,19 +46,7 @@ functions:
     sourceScope: application
     parameters:
       - name: store
-        type: '{ register: (username: string, password: string) =>
-          import("/Users/taylor/src/my-life/spaces/sourcespec/example-apps/example-todo/server/todo-store").User
-          | null; authenticate: (username: string, password: string) =>
-          import("/Users/taylor/src/my-life/spaces/sourcespec/example-apps/example-todo/server/todo-store").User
-          | null; createSession: (userId: string) => string; sessionUser: (token: string) =>
-          import("/Users/taylor/src/my-life/spaces/sourcespec/example-apps/example-todo/server/todo-store").User
-          | null; endSession: (token: string) => void; listTodos: (userId: string) =>
-          import("/Users/taylor/src/my-life/spaces/sourcespec/example-apps/example-todo/server/todo-store").Todo[];
-          createTodo: (userId: string, text: string) =>
-          import("/Users/taylor/src/my-life/spaces/sourcespec/example-apps/example-todo/server/todo-store").Todo;
-          setTodoCompleted: (userId: string, id: string, completed: boolean) =>
-          import("/Users/taylor/src/my-life/spaces/sourcespec/example-apps/example-todo/server/todo-store").Todo
-          | null; removeTodo: (userId: string, id: string) => boolean; close: () => void; }'
+        type: TodoStore
         required: true
     return:
       type: "(request: IncomingMessage, response: ServerResponse) => Promise<void>"
@@ -628,19 +616,7 @@ functions:
     sourceScope: application
     parameters:
       - name: store
-        type: '{ register: (username: string, password: string) =>
-          import("/Users/taylor/src/my-life/spaces/sourcespec/example-apps/example-todo/server/todo-store").User
-          | null; authenticate: (username: string, password: string) =>
-          import("/Users/taylor/src/my-life/spaces/sourcespec/example-apps/example-todo/server/todo-store").User
-          | null; createSession: (userId: string) => string; sessionUser: (token: string) =>
-          import("/Users/taylor/src/my-life/spaces/sourcespec/example-apps/example-todo/server/todo-store").User
-          | null; endSession: (token: string) => void; listTodos: (userId: string) =>
-          import("/Users/taylor/src/my-life/spaces/sourcespec/example-apps/example-todo/server/todo-store").Todo[];
-          createTodo: (userId: string, text: string) =>
-          import("/Users/taylor/src/my-life/spaces/sourcespec/example-apps/example-todo/server/todo-store").Todo;
-          setTodoCompleted: (userId: string, id: string, completed: boolean) =>
-          import("/Users/taylor/src/my-life/spaces/sourcespec/example-apps/example-todo/server/todo-store").Todo
-          | null; removeTodo: (userId: string, id: string) => boolean; close: () => void; }'
+        type: TodoStore
         required: true
     return:
       type: "(request: IncomingMessage, response: ServerResponse) => Promise<void>"
@@ -1323,8 +1299,7 @@ functions:
     context: App > return > onChange attribute#username
     parameters:
       - name: event
-        type: import("/Users/taylor/src/my-life/spaces/sourcespec/example-apps/example-todo/node_modules/@types/react/index").ChangeEvent<HTMLInputElement,
-          HTMLInputElement>
+        type: ChangeEvent<HTMLInputElement, HTMLInputElement>
         required: true
     return:
       type: void
@@ -1336,8 +1311,7 @@ functions:
     context: App > return > onChange attribute#password
     parameters:
       - name: event
-        type: import("/Users/taylor/src/my-life/spaces/sourcespec/example-apps/example-todo/node_modules/@types/react/index").ChangeEvent<HTMLInputElement,
-          HTMLInputElement>
+        type: ChangeEvent<HTMLInputElement, HTMLInputElement>
         required: true
     return:
       type: void
@@ -1358,8 +1332,7 @@ functions:
     context: App > return > onChange attribute#new-todo
     parameters:
       - name: event
-        type: import("/Users/taylor/src/my-life/spaces/sourcespec/example-apps/example-todo/node_modules/@types/react/index").ChangeEvent<HTMLInputElement,
-          HTMLInputElement>
+        type: ChangeEvent<HTMLInputElement, HTMLInputElement>
         required: true
     return:
       type: void

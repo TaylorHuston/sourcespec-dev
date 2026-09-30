@@ -121,6 +121,24 @@ function conciseType(type, node, checker) {
   return 'object'
 }
 
+function conciseParameterType(parameter, node, source, checker) {
+  const type = checker.getTypeAtLocation(parameter)
+  const printed = checker.typeToString(type, node, ts.TypeFormatFlags.NoTruncation)
+  if (printed.length <= 120 && !/import\(["'](?:\/|[A-Za-z]:[\\/])/.test(printed)) return printed
+  if (parameter.type && ts.isTypeReferenceNode(parameter.type)) {
+    const written = parameter.type.getText(source)
+    if (written.length <= 120 && !/import\(|[{};\n]/.test(written)) return written
+  }
+  const summary = conciseType(type, node, checker)
+  const args = type.aliasTypeArguments ?? (type.flags & ts.TypeFlags.Object &&
+    type.objectFlags & ts.ObjectFlags.Reference ? checker.getTypeArguments(type) : [])
+  if (args.length && args.length <= 3 && summary !== 'object' && /^[A-Za-z_$][\w$]*$/.test(summary)) {
+    const generic = `${summary}<${args.map((arg) => conciseType(arg, node, checker)).join(', ')}>`
+    if (generic.length <= 120) return generic
+  }
+  return summary
+}
+
 // This adapter classifies source ownership, not whether a callable is itself a test.
 // Ambiguous paths stay visible for review instead of silently becoming application code.
 function sourceScopeFor(location) {
@@ -170,8 +188,6 @@ for (const absoluteFile of files) {
 const records = []
 const identities = new Set()
 const usedIds = new Set()
-const flags = ts.TypeFormatFlags.NoTruncation
-
 for (const absoluteFile of files) {
   const source = program.getSourceFile(absoluteFile)
   if (!source) throw new Error(`Could not parse ${absoluteFile}`)
@@ -201,7 +217,7 @@ for (const absoluteFile of files) {
         const previousParameter = old?.parameters?.find((item) => item.name === parameterName)
         return {
           name: parameterName,
-          type: checker.typeToString(checker.getTypeAtLocation(parameter), node, flags),
+          type: conciseParameterType(parameter, node, source, checker),
           ...(previousParameter?.description ? { description: previousParameter.description } : {}),
           ...(previousParameter?.default ? { default: previousParameter.default } : {}),
           required: !parameter.questionToken && !parameter.initializer && !parameter.dotDotDotToken,
