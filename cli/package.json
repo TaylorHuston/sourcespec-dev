@@ -1,12 +1,16 @@
 {
-  "name": "sspc-tests-catalog-skill",
+  "name": "@sourcespec/cli",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@11.5.2",
   "engines": { "node": ">=24" },
+  "bin": { "sourcespec": "./dist/sourcespec.js" },
+  "files": ["dist/", "assets/"],
   "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/copy-schemas.mjs",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test scripts/*.test.ts"
+    "test": "pnpm build && tsx --test test/*.test.ts test/catalog-integration.test.mjs && node --test test/install.test.mjs"
   },
   "dependencies": {
     "ajv": "^8.17.1",

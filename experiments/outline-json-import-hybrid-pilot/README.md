@@ -10,7 +10,7 @@ This is an **experiment, not a canonical SourceSpec schema or a Code Property Gr
 - `snapshot-index.test.mjs` uses disposable fixtures to test link upkeep. It never mutates Outline.
 - `results.md` records the read-only investigations, verification, limits, and decision.
 
-Use the TypeScript version pinned in `skills/sspc-functions-catalog/` (install its lockfile dependencies first if needed). From the workspace root:
+Use the TypeScript version pinned in `cli/` (`pnpm --dir spaces/sourcespec/cli install --frozen-lockfile` first). From the workspace root:
 
 ```bash
 node --test spaces/sourcespec/experiments/outline-json-import-hybrid-pilot/snapshot-index.test.mjs
@@ -29,7 +29,7 @@ The generated index is disposable; do not commit it or use its source offsets as
 | `server/` | 1,104 | 8,750 | 65 | 5/5 |
 | `app/` | 852 | 6,840 | 6 | 1/1 |
 
-Within each generated snapshot, every supported implementation has a distinct address: 8,750/8,750 and 6,840/6,840. These match the function skill's post-overload candidate counts, **not** a claim that all code, dependencies, cross-scope relationships, or executed paths were discovered. Outline's dependencies are absent; the parser is the skill's pinned TypeScript 6.0.3. No Outline tests or services were run.
+Within each generated snapshot, every supported implementation has a distinct address: 8,750/8,750 and 6,840/6,840. These match the function skill's post-overload candidate counts, **not** a claim that all code, dependencies, cross-scope relationships, or executed paths were discovered. Outline's dependencies are absent; the parser is the CLI's pinned TypeScript 6.0.3. No Outline tests or services were run.
 
 A fixture test exercises **three synthetic anchors** (one per selector kind), not mutations to all six real Outline anchors. Inserting unrelated callbacks changed snapshot addresses but required **zero anchor edits**. Renaming a linked method or UI binding produced `missing`; duplicating the linked route produced `ambiguous`; replacing the route with a different operation produced `missing`. Unknown scopes and duplicate anchor IDs are rejected. All six real anchors separately resolved uniquely at the frozen checkout. This checks syntactic link maintenance, not whether the Scenario is true at runtime or whether a semantic change without a rename is detected.
 

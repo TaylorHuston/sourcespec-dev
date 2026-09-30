@@ -26,10 +26,12 @@ type FunctionRecord = {
 }
 
 const args = process.argv.slice(2)
-const scoped = args[0] === '--project' && args[2] === '--scope' && args.length === 5
-const standalone = args[0] === '--app' && args.length === 3
-if ((!scoped && !standalone) || !['--probe', '--check', '--write'].includes(args.at(-1) ?? '')) {
-  throw new Error('Usage: functions-catalog.ts --app <absolute-app-root> --probe|--check|--write OR --project <absolute-config-root> --scope <relative-owned-directory|@root> <mode>')
+const mode = args.at(-1) as '--probe' | '--check' | '--write'
+const force = mode === '--write' && args.at(-2) === '--force'
+const scoped = args[0] === '--project' && args[2] === '--scope' && args.length === (force ? 6 : 5)
+const standalone = args[0] === '--app' && args.length === (force ? 4 : 3)
+if ((!scoped && !standalone) || !['--probe', '--check', '--write'].includes(mode)) {
+  throw new Error('Usage: sourcespec sspc-functions probe|check|write --app <absolute-app-root> [--force for write] OR sourcespec sspc-functions probe|check|write --project <absolute-config-root> --scope <relative-owned-directory|@root> [--force for write]')
 }
 const projectPath = args[1]
 if (projectPath !== resolve(projectPath)) throw new Error('--app/--project must be an absolute path')
@@ -40,7 +42,6 @@ if (!existsSync(join(projectRoot, 'package.json')) || !existsSync(join(projectRo
 if (standalone && existsSync(join(projectRoot, 'pnpm-workspace.yaml'))) {
   throw new Error('Pass a single app root (such as apps/api), not the monorepo root')
 }
-const mode = args.at(-1) as '--probe' | '--check' | '--write'
 const scopePath = scoped ? args[3] : '.'
 const rootOnly = scoped && scopePath === '@root'
 if (scoped && (scopePath === '.' || scopePath === '' || (!rootOnly && resolve(scopePath) === scopePath))) {
@@ -254,7 +255,7 @@ if (parsed.errors.length) throw new Error('Cannot parse the app tsconfig.json')
 const files = sourceFiles()
 const program = ts.createProgram(files, { ...parsed.options, allowJs: true, noEmit: true })
 const checker = program.getTypeChecker()
-const previous = mode === '--probe' ? [] : readCatalog()
+const previous = mode === '--probe' || force ? [] : readCatalog()
 const identity = (entry: Pick<FunctionRecord, 'location' | 'name' | 'context'>) =>
   JSON.stringify([entry.location, entry.name, entry.context ?? ''])
 // Cross-scope IDs must include the owning project path. Catalog locations remain
@@ -410,7 +411,7 @@ if (mode === '--probe') {
   }
   console.log(`Probe: ${definitions} definitions in ${files.length} source files; ${records.length} provisionally recordable; ${identityIssues.length} identity issue(s).`)
   console.log(`Excluded ${signatureOnly} signature-only declaration(s) without bodies (not implementations).`)
-  console.log(`Scope: ${appRoot}; TypeScript: ${usingProjectTypescript ? 'project installation' : 'skill fallback (types may differ)'}.`)
+  console.log(`Scope: ${appRoot}; TypeScript: ${usingProjectTypescript ? 'project installation' : 'CLI fallback (types may differ)'}.`)
   console.log(`Files by top-level directory: ${[...byDirectory].map(([name, count]) => `${name}=${count}`).join(', ')}`)
   console.log(`Skipped generated/local directories (${skippedDirectories.length}): ${skippedDirectories.slice(0, 20).join(', ') || 'none'}${skippedDirectories.length > 20 ? ', ...' : ''}.`)
   const issueKinds = new Map<string, number>()
@@ -437,7 +438,7 @@ if (mode === '--probe') {
 } else if (identityIssues.length) {
   throw new Error(`${identityIssues.length} function identity issue(s); first: ${identityIssues.slice(0, 5).map((issue) => issue.message).join('; ')}. Run --probe to inspect all before writing.`)
 } else if (missing.length) {
-  throw new Error(`Unmatched prior IDs: ${missing.map((entry) => entry.id).join(', ')}. Review moves/removals and links; this pilot never prunes automatically.`)
+  throw new Error(`Unmatched prior IDs: ${missing.map((entry) => entry.id).join(', ')}. Review moves/removals and links; normal writes never prune automatically.`)
 } else {
   if (new Set(records.map((entry) => entry.id)).size !== records.length) {
     throw new Error('Generated duplicate function IDs')
@@ -453,6 +454,9 @@ if (mode === '--probe') {
       console.log(`Function catalog matches ${records.length} definitions in ${files.length} owned files.`)
     }
   } else {
+    if (force && existsSync(catalogFile)) {
+      console.warn(`Replacing ${catalogFile} from source; previous IDs and curated metadata will be lost. Review authored links separately.`)
+    }
     mkdirSync(dirname(catalogFile), { recursive: true })
     const temporary = `${catalogFile}.${randomUUID()}.tmp`
     try {

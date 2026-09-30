@@ -7,10 +7,9 @@ import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import YAML from 'yaml'
 
-const skill = fileURLToPath(new URL('../', import.meta.url))
+const cliRoot = fileURLToPath(new URL('../', import.meta.url))
 const run = (app: string, mode: '--write' | '--check') =>
-  spawnSync(join(skill, 'node_modules/.bin/tsx'),
-    [join(skill, 'scripts/tests-catalog.ts'), '--app', app, mode], { encoding: 'utf8' })
+  spawnSync(process.execPath, [join(cliRoot, 'dist/sourcespec.js'), 'sspc-tests', mode.slice(2), '--app', app], { encoding: 'utf8' })
 
 test('classifies only invoked boundaries and reports genuinely unresolved tests', () => {
   const app = mkdtempSync(join(tmpdir(), 'sspc-test-kinds-'))

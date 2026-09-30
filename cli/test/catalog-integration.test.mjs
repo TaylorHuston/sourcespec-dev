@@ -7,9 +7,9 @@ import { join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 
-const tool = fileURLToPath(new URL('function-catalog.mjs', import.meta.url))
-const app = fileURLToPath(new URL('../example-apps/example-todo/', import.meta.url))
-const YAML = createRequire(join(app, 'package.json'))('yaml')
+const cliRoot = fileURLToPath(new URL('../', import.meta.url))
+const tool = join(cliRoot, 'dist/sourcespec.js')
+const YAML = createRequire(join(cliRoot, 'package.json'))('yaml')
 
 test('readable lexical IDs expose ownership and fail closed when a range shifts', () => {
   const sandbox = mkdtempSync(join(tmpdir(), 'sspc-readable-catalog-'))
@@ -18,7 +18,7 @@ test('readable lexical IDs expose ownership and fail closed when a range shifts'
   try {
     mkdirSync(join(sandbox, 'src'), { recursive: true })
     mkdirSync(join(sandbox, '.sourcespec/catalogs'), { recursive: true })
-    symlinkSync(join(app, 'node_modules'), join(sandbox, 'node_modules'))
+    symlinkSync(join(cliRoot, 'node_modules'), join(sandbox, 'node_modules'))
     writeFileSync(join(sandbox, 'package.json'), '{"private":true,"type":"module"}')
     writeFileSync(join(sandbox, 'tsconfig.json'), '{"compilerOptions":{"target":"ES2022","strict":true}}')
     const source = [
@@ -35,7 +35,8 @@ test('readable lexical IDs expose ownership and fail closed when a range shifts'
       'export const pair = (value: [string, { active: boolean }]) => value[1].active',
       '',
     ].join('\n')
-    const run = (...args) => spawnSync(process.execPath, [tool, ...args], { cwd: sandbox, encoding: 'utf8' })
+    const run = (mode, force = false) => spawnSync(process.execPath,
+      [tool, 'sspc-functions', mode.slice(2), '--app', sandbox, ...(force ? ['--force'] : [])], { encoding: 'utf8' })
     writeFileSync(sourceFile, source)
     const created = run('--write')
     assert.equal(created.status, 0, created.stderr)
@@ -60,7 +61,7 @@ test('readable lexical IDs expose ownership and fail closed when a range shifts'
     writeFileSync(catalog, YAML.stringify({ functions: entries }))
     const noncurrent = run('--write')
     assert.notEqual(noncurrent.status, 0)
-    assert.match(noncurrent.stderr, /Noncurrent function record/)
+    assert.match(noncurrent.stderr, /Invalid catalog function/)
     writeFileSync(catalog, before)
     writeFileSync(sourceFile, 'const unrelated = () => false;\n' + source)
     const stale = run('--check')
@@ -69,6 +70,20 @@ test('readable lexical IDs expose ownership and fail closed when a range shifts'
     const refresh = run('--write')
     assert.notEqual(refresh.status, 0, 'changed range identities require review rather than silent transfer')
     assert.equal(readFileSync(catalog, 'utf8'), before)
+    const rejectedCheck = run('--check', true)
+    assert.equal(rejectedCheck.status, 2, '--force is only allowed for write')
+    assert.equal(readFileSync(catalog, 'utf8'), before)
+    const old = YAML.parse(before)
+    old.functions[0].id = 'fn-legacy-id'
+    writeFileSync(catalog, YAML.stringify(old))
+    assert.notEqual(run('--write').status, 0, 'normal write refuses legacy IDs')
+    const forced = run('--write', true)
+    assert.equal(forced.status, 0, forced.stderr)
+    assert.match(forced.stderr, /previous IDs and curated metadata will be lost/)
+    const replaced = YAML.parse(readFileSync(catalog, 'utf8')).functions
+    assert.equal(replaced.length, entries.length + 1)
+    assert(!replaced.some((entry) => entry.id === 'fn-legacy-id' || entry.description === 'Reviewed function responsibility.'))
+    assert.equal(run('--check').status, 0)
   } finally {
     rmSync(sandbox, { recursive: true, force: true })
   }

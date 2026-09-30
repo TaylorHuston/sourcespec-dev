@@ -5,8 +5,8 @@ import { createRequire } from 'node:module'
 import { isAbsolute, join, relative, sep } from 'node:path'
 import { pathToFileURL } from 'node:url'
 
-const requireSkill = createRequire(new URL('../../skills/sspc-functions-catalog/package.json', import.meta.url))
-const ts = requireSkill('typescript')
+const requireCli = createRequire(new URL('../../cli/package.json', import.meta.url))
+const ts = requireCli('typescript')
 const ignored = new Set(['.git', '.sourcespec', '.data', '.next', '.turbo', 'node_modules', 'dist', 'build', 'coverage', 'storybook-static', 'test-results', 'playwright-report'])
 const slash = (path) => path.split(sep).join('/')
 

@@ -5,15 +5,11 @@ description: Generate or check one application's full inventory of declared auto
 
 # SourceSpec test catalog
 
-Work on one app with `package.json` and `tsconfig.json`. Read its guidance, Git status, tests, and existing catalog first. Install this skill's pinned dependencies once with `pnpm --dir <skill-dir> install --frozen-lockfile`. Resolve `scripts/tests-catalog.ts` and `assets/tests.schema.yaml` relative to this file, not the app.
+Read the app's guidance, Git status, test source, and existing catalog. Run the user-installed CLI (installation and source: `spaces/sourcespec/cli/README.md`) against exactly one app:
 
 ```bash
-pnpm --dir <skill-dir> exec tsx scripts/tests-catalog.ts --app /absolute/path/to/app --write
-pnpm --dir <skill-dir> exec tsx scripts/tests-catalog.ts --app /absolute/path/to/app --check
+~/.sourcespec/bin/sourcespec sspc-tests write --app /absolute/path/to/app
+~/.sourcespec/bin/sourcespec sspc-tests check --app /absolute/path/to/app
 ```
 
-This TypeScript/JavaScript adapter inventories static `it`/`test` declarations and nested `describe` suites in app-owned test files, including common `.skip`, `.only`, and `.each` forms. One `test.each` declaration is one record, not one per data row. Fixtures, mocks, suite callbacks, and helpers remain in the separate function inventory. Dynamic titles and custom wrappers need review; other languages need other adapters.
-
-IDs use `test:<relative-file>#<suite.test-title>` with normalized path and title segments. `--write` preserves reviewed descriptions and kinds **only when the existing lexical ID still matches the same declaration**. It refuses duplicate or changed identities and unmatched prior entries; review intended-check links and use a task-specific one-off script outside this skill for deliberate reconciliation. New descriptions require review. The adapter infers `component` from invoked React renderers and `api` from invoked Supertest; other or conflicting evidence remains `unclassified`, not a guess. Review those kinds and the source, then run `--check`. The check enforces the full inventory and one blank line between records; it does not prove tests pass or cover Requirements. Do not commit without authorization.
-
-The bundled schema is a copy of SourceSpec's `schema/tests.yaml`; compare it when changing either. For skill changes run `pnpm --dir <skill-dir> typecheck` and `pnpm --dir <skill-dir> test`.
+This adapter inventories static `it`/`test` declarations, named suites, and common `.each` variants. Helpers and suite callbacks belong to the separate function catalog. Its IDs use `test:<relative-file>#<suite.test-title>`; a move or title change needs separate review of intended-check links. Normal writes fail closed on unmatched or ambiguous declarations instead of reassigning them. Only with explicit approval to discard the old catalog, use `sspc-tests write --app /absolute/path/to/app --force`: it atomically replaces the catalog, losing curated descriptions/kinds and old IDs. Back up the file and review links and the regenerated inventory first. Review new descriptions, inferred `component`/`api` kinds, `unclassified` cases, and the YAML diff; do not claim that a catalog link proves coverage or a test run. Run `check` after review. Do not commit without authorization.

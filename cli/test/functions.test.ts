@@ -7,16 +7,15 @@ import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import YAML from 'yaml'
 
-const skillRoot = fileURLToPath(new URL('../', import.meta.url))
-const runner = join(skillRoot, 'node_modules/.bin/tsx')
-const script = join(skillRoot, 'scripts/functions-catalog.ts')
+const cliRoot = fileURLToPath(new URL('../', import.meta.url))
+const script = join(cliRoot, 'dist/sourcespec.js')
 
 function run(app: string, mode: '--probe' | '--write' | '--check') {
-  return spawnSync(runner, [script, '--app', app, mode], { encoding: 'utf8' })
+  return spawnSync(process.execPath, [script, 'sspc-functions', mode.slice(2), '--app', app], { encoding: 'utf8' })
 }
 
 function runScope(project: string, scope: string, mode: '--probe' | '--write' | '--check') {
-  return spawnSync(runner, [script, '--project', project, '--scope', scope, mode], { encoding: 'utf8' })
+  return spawnSync(process.execPath, [script, 'sspc-functions', mode.slice(2), '--project', project, '--scope', scope], { encoding: 'utf8' })
 }
 
 test('inventories one app, preserves lexical IDs and annotations, and refuses silent removals', () => {

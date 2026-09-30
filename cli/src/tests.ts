@@ -18,9 +18,12 @@ type TestRecord = {
 type Declaration = { name: string; suite: string[]; location: string; inferredKind: string }
 type Callee = { root: 'test' | 'describe'; each: boolean; bound: boolean }
 
-const [appFlag, appPath, mode] = process.argv.slice(2)
-if (appFlag !== '--app' || !appPath || !['--check', '--write'].includes(mode) || process.argv.length !== 5) {
-  throw new Error('Usage: tests-catalog.ts --app <absolute-app-root> --check|--write')
+const [appFlag, appPath, ...options] = process.argv.slice(2)
+const mode = options.at(-1)
+const force = mode === '--write' && options.at(-2) === '--force'
+if (appFlag !== '--app' || !appPath || !['--check', '--write'].includes(mode ?? '') ||
+    options.length !== (force ? 2 : 1)) {
+  throw new Error('Usage: sourcespec sspc-tests check|write --app <absolute-app-root> [--force for write]')
 }
 if (appPath !== resolve(appPath)) throw new Error('--app must be an absolute path')
 const appRoot = realpathSync(appPath)
@@ -164,7 +167,7 @@ function titleFor(call: ts.CallExpression, source: ts.SourceFile): string {
   throw new Error(`Nonliteral or empty test/suite name at ${relative(appRoot, source.fileName)}:${line + 1}; review and use an explicit static name`)
 }
 
-const previous = readCatalog()
+const previous = force ? [] : readCatalog()
 const prior = new Map(previous.map((entry) => [identity(entry), entry]))
 const declarations: Declaration[] = []
 const files = testFiles()
@@ -226,7 +229,7 @@ for (const declaration of declarations) {
 }
 const missing = previous.filter((entry) => !matched.has(entry.id))
 if (missing.length) {
-  throw new Error(`Unmatched prior test IDs: ${missing.map((entry) => entry.id).join(', ')}. Review renamed/moved/removed tests and all links; this skill never prunes automatically.`)
+  throw new Error(`Unmatched prior test IDs: ${missing.map((entry) => entry.id).join(', ')}. Review renamed/moved/removed tests and all links; normal writes never prune automatically.`)
 }
 
 function hasSeparatedEntries(text: string, count: number): boolean {
@@ -260,6 +263,9 @@ if (mode === '--check') {
     console.log(`Test catalog matches ${records.length} declarations in ${files.length} app-owned test files.`)
   }
 } else {
+  if (force && existsSync(catalogFile)) {
+    console.warn(`Replacing ${catalogFile} from source; previous IDs and curated metadata will be lost. Review authored links separately.`)
+  }
   mkdirSync(dirname(catalogFile), { recursive: true })
   const temporary = `${catalogFile}.${randomUUID()}.tmp`
   try {

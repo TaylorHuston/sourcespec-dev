@@ -7,13 +7,12 @@ import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import YAML from 'yaml'
 
-const skill = fileURLToPath(new URL('../', import.meta.url))
-const runner = join(skill, 'node_modules/.bin/tsx')
-const script = join(skill, 'scripts/functions-catalog.ts')
+const cliRoot = fileURLToPath(new URL('../', import.meta.url))
+const script = join(cliRoot, 'dist/sourcespec.js')
 const run = (app: string, mode: '--write' | '--check') =>
-  spawnSync(runner, [script, '--app', app, mode], { encoding: 'utf8' })
+  spawnSync(process.execPath, [script, 'sspc-functions', mode.slice(2), '--app', app], { encoding: 'utf8' })
 const scoped = (project: string, scope: string, mode: '--write' | '--check') =>
-  spawnSync(runner, [script, '--project', project, '--scope', scope, mode], { encoding: 'utf8' })
+  spawnSync(process.execPath, [script, 'sspc-functions', mode.slice(2), '--project', project, '--scope', scope], { encoding: 'utf8' })
 
 test('normal catalog writes lexical IDs, preserves annotations, and refuses range churn', () => {
   const app = mkdtempSync(join(tmpdir(), 'sspc-lexical-'))

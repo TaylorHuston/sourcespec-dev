@@ -7,11 +7,10 @@ import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import YAML from 'yaml'
 
-const skill = fileURLToPath(new URL('../', import.meta.url))
-const runner = join(skill, 'node_modules/.bin/tsx')
-const script = join(skill, 'scripts/tests-catalog.ts')
-const run = (app: string, mode: '--write' | '--check') =>
-  spawnSync(runner, [script, '--app', app, mode], { encoding: 'utf8' })
+const cliRoot = fileURLToPath(new URL('../', import.meta.url))
+const script = join(cliRoot, 'dist/sourcespec.js')
+const run = (app: string, mode: '--write' | '--check', force = false) =>
+  spawnSync(process.execPath, [script, 'sspc-tests', mode.slice(2), '--app', app, ...(force ? ['--force'] : [])], { encoding: 'utf8' })
 
 const fixture = `import { beforeEach, describe, it, test } from 'vitest'
 beforeEach(() => { const helper = () => 1; helper() })
@@ -96,13 +95,30 @@ test('inventories declarations per app, preserves curated lexical IDs, and rejec
     const duplicate = run(app, '--write')
     assert.notEqual(duplicate.status, 0)
     assert.match(duplicate.stderr, /Ambiguous test identity/)
+    assert.notEqual(run(app, '--write', true).status, 0, 'force still refuses ambiguous source declarations')
     assert.equal(readFileSync(catalog, 'utf8'), beforeRemoval)
 
     writeFileSync(source, fixture + "const title = 'dynamic'\nit(title, () => {})\n")
     const dynamic = run(app, '--write')
     assert.notEqual(dynamic.status, 0)
     assert.match(dynamic.stderr, /Nonliteral or empty test\/suite name/)
+    assert.notEqual(run(app, '--write', true).status, 0, 'force still refuses dynamic test names')
     assert.equal(readFileSync(catalog, 'utf8'), beforeRemoval)
+    assert.equal(run(app, '--check', true).status, 2, '--force is only allowed for write')
+    assert.equal(readFileSync(catalog, 'utf8'), beforeRemoval)
+    writeFileSync(source, fixture.replace("  it.skip('disabled', () => {})\n", ''))
+    const legacy = YAML.parse(beforeRemoval)
+    legacy.tests[0].id = 'test-legacy-id'
+    writeFileSync(catalog, YAML.stringify(legacy))
+    assert.notEqual(run(app, '--write').status, 0, 'normal write refuses legacy IDs')
+    const forced = run(app, '--write', true)
+    assert.equal(forced.status, 0, forced.stderr)
+    assert.match(forced.stderr, /previous IDs and curated metadata will be lost/)
+    const replaced = YAML.parse(readFileSync(catalog, 'utf8')).tests
+    assert.equal(replaced.length, 5)
+    assert(!replaced.some((entry: { id: string; description: string; kind: string }) =>
+      entry.id === 'test-legacy-id' || entry.description === 'Checks that the account view responds to a request.' || entry.kind === 'component'))
+    assert.equal(run(app, '--check').status, 0)
   } finally {
     rmSync(workspace, { recursive: true, force: true })
   }

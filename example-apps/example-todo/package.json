@@ -9,11 +9,11 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "npm run catalog:check && npm run requirements:check && tsc --noEmit && vite build",
-    "test": "npm run catalog:check && npm run requirements:check && node --test ../../tools/function-catalog.test.mjs ../../tools/requirements-check.test.mjs && vitest run",
-    "catalog:check": "node ../../tools/function-catalog.mjs --check",
+    "test": "npm run catalog:check && npm run requirements:check && node --test ../../tools/requirements-check.test.mjs && vitest run",
+    "catalog:check": "node ../../cli/dist/sourcespec.js sspc-functions check --app \"$PWD\"",
     "requirements:check": "node ../../tools/requirements-check.mjs",
-    "catalog:refresh": "node ../../tools/function-catalog.mjs --write",
-    "tests-catalog:refresh": "pnpm --dir ../../skills/sspc-tests-catalog exec tsx scripts/tests-catalog.ts --app \"$PWD\" --write",
+    "catalog:refresh": "node ../../cli/dist/sourcespec.js sspc-functions write --app \"$PWD\"",
+    "tests-catalog:refresh": "node ../../cli/dist/sourcespec.js sspc-tests write --app \"$PWD\"",
     "preview": "vite preview --host 127.0.0.1"
   },
   "dependencies": {
