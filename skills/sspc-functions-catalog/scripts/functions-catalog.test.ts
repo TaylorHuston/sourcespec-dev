@@ -11,8 +11,12 @@ const skillRoot = fileURLToPath(new URL('../', import.meta.url))
 const runner = join(skillRoot, 'node_modules/.bin/tsx')
 const script = join(skillRoot, 'scripts/functions-catalog.ts')
 
-function run(app: string, mode: '--write' | '--check') {
+function run(app: string, mode: '--probe' | '--write' | '--check') {
   return spawnSync(runner, [script, '--app', app, mode], { encoding: 'utf8' })
+}
+
+function runScope(project: string, scope: string, mode: '--probe' | '--write' | '--check') {
+  return spawnSync(runner, [script, '--project', project, '--scope', scope, mode], { encoding: 'utf8' })
 }
 
 test('inventories only one app, preserves IDs and annotations, and refuses silent removals', () => {
@@ -95,5 +99,100 @@ test('inventories only one app, preserves IDs and annotations, and refuses silen
     assert.equal(readFileSync(catalog, 'utf8'), beforeRemoval)
   } finally {
     rmSync(workspace, { recursive: true, force: true })
+  }
+})
+
+test('binds decorated fields, class callbacks, and default exports across harmless reordering', () => {
+  const app = mkdtempSync(join(tmpdir(), 'sspc-semantic-'))
+  const catalog = join(app, '.sourcespec/catalogs/functions-catalog.yaml')
+  const file = join(app, 'index.ts')
+  try {
+    writeFileSync(join(app, 'package.json'), '{"name":"semantic-identities","private":true}')
+    writeFileSync(join(app, 'tsconfig.json'), '{"compilerOptions":{"experimentalDecorators":true}}')
+    const fields = [
+      "  @ForeignKey(() => 'user') userId = ''",
+      "  @ForeignKey(() => 'organization') organizationId = ''",
+      '  first = () => 1',
+      '  second = () => 2',
+    ]
+    const source = (lines: string[]) => `function ForeignKey(callback: () => string) { return () => {} }\nclass Records {\n  parse(value: string): number\n  parse(value: number): number\n  parse(value: string | number): number { return 1 }\n${lines.join('\n')}\n}\nexport default () => 3\n`
+    writeFileSync(file, source(fields))
+    const probe = run(app, '--probe')
+    assert.equal(probe.status, 0, probe.stderr)
+    assert.match(probe.stdout, /Excluded 2 signature-only declaration/)
+    assert.equal(run(app, '--write').status, 0)
+    const entries = YAML.parse(readFileSync(catalog, 'utf8')).functions as { id: string; name?: string; context?: string }[]
+    assert.equal(entries.filter((entry) => entry.name === 'parse').length, 1)
+    assert(entries.some((entry) => entry.context?.includes('Records > userId field > ForeignKey')))
+    assert(entries.some((entry) => entry.context?.includes('Records > organizationId field > ForeignKey')))
+    assert(entries.some((entry) => entry.context === 'default export'))
+    writeFileSync(file, source([fields[3], '// no semantic change', fields[1], fields[2], fields[0]]))
+    assert.equal(run(app, '--write').status, 0, 'moving fields must retain their IDs')
+    const refreshed = YAML.parse(readFileSync(catalog, 'utf8')).functions as { id: string; context?: string }[]
+    assert.deepEqual(Object.fromEntries(refreshed.map((entry) => [entry.context, entry.id])),
+      Object.fromEntries(entries.map((entry) => [entry.context, entry.id])))
+    assert.equal(run(app, '--check').status, 0)
+  } finally {
+    rmSync(app, { recursive: true, force: true })
+  }
+})
+
+test('probes a monorepo-owned scope before writing, including assignment callbacks and source ownership', () => {
+  const project = mkdtempSync(join(tmpdir(), 'sspc-scoped-'))
+  const catalog = join(project, 'server/.sourcespec/catalogs/functions-catalog.yaml')
+  try {
+    mkdirSync(join(project, 'server/__mocks__'), { recursive: true })
+    mkdirSync(join(project, 'server/migrations'), { recursive: true })
+    mkdirSync(join(project, 'server/build'), { recursive: true })
+    mkdirSync(join(project, 'app'), { recursive: true })
+    mkdirSync(join(project, 'shared'), { recursive: true })
+    writeFileSync(join(project, 'package.json'), '{"name":"monorepo","private":true}')
+    writeFileSync(join(project, 'pnpm-workspace.yaml'), 'packages: [server, app]\n')
+    writeFileSync(join(project, 'tsconfig.json'), '{"compilerOptions":{"target":"ES2022"},"exclude":["server/migrations"]}')
+    writeFileSync(join(project, 'server/handler.ts'), 'export function handle(value: string): number\nexport function handle(value: number): number\nexport function handle(value: string | number): number { return 1 }\n')
+    writeFileSync(join(project, 'server/__mocks__/console.js'), 'global.console.warn = () => {}\n')
+    writeFileSync(join(project, 'server/migrations/001.ts'), 'export function up() { return 2 }\n')
+    writeFileSync(join(project, 'server/build/generated.ts'), 'export function generated() { return 99 }\n')
+    writeFileSync(join(project, 'app/view.ts'), 'export function render() { return 3 }\n')
+    writeFileSync(join(project, 'shared/utility.ts'), 'export function shared() { return 4 }\n')
+
+    const probe = runScope(project, 'server', '--probe')
+    assert.equal(probe.status, 0, probe.stderr)
+    assert.match(probe.stdout, /3 definitions in 3 source files; 3 provisionally recordable; 0 identity issue/)
+    assert.match(probe.stdout, /Excluded 2 signature-only declaration/)
+    assert.match(probe.stdout, /__mocks__=1/)
+    assert.match(probe.stdout, /migrations=1/)
+    assert.match(probe.stdout, /Skipped generated\/local directories \(1\): build/)
+    assert.equal(run(project, '--probe').status, 1, 'legacy --app refuses a workspace root')
+    assert.equal(runScope(project, '../outside', '--probe').status, 1, 'scope cannot escape the project')
+    assert.equal(runScope(project, 'server', '--check').status, 1, 'missing scoped catalog needs a refresh')
+    assert.equal(runScope(project, 'server', '--write').status, 0)
+    const entries = YAML.parse(readFileSync(catalog, 'utf8')).functions
+    assert.equal(entries.length, 3)
+    assert.equal(entries.find((entry: { location: string }) => entry.location === '__mocks__/console.js')?.context, 'global.console.warn assignment')
+    assert.equal(entries.find((entry: { location: string }) => entry.location === '__mocks__/console.js')?.sourceScope, 'test')
+    assert.equal(entries.find((entry: { location: string }) => entry.location === 'migrations/001.ts')?.sourceScope, 'tooling')
+    assert.equal(entries.find((entry: { location: string }) => entry.location === 'handler.ts')?.sourceScope, 'application')
+    assert.equal(runScope(project, 'server', '--check').status, 0)
+    assert(entries.every((entry: { location: string }) => !entry.location.includes('app/') && !entry.location.includes('shared/')))
+
+    writeFileSync(join(project, 'server/recursive.ts'), 'export type Branch = Branch[] | { value: number }\nexport function recursivelyTyped(): Branch { return [] }\n')
+    const recursive = runScope(project, 'server', '--probe')
+    assert.equal(recursive.status, 0, recursive.stderr)
+    assert.match(recursive.stdout, /4 definitions in 4 source files; 4 provisionally recordable/)
+    assert.equal(runScope(project, 'server', '--write').status, 0, 'recursive types summarize without overflowing')
+    assert.equal(runScope(project, 'server', '--check').status, 0)
+
+    writeFileSync(join(project, 'server/broken.ts'), 'export const callbacks = [() => 1, () => 2];\nvoid (() => 3);\n')
+    const unresolved = runScope(project, 'server', '--probe')
+    assert.equal(unresolved.status, 1)
+    assert.match(unresolved.stdout, /Identity issues by cause: collision=1, missing-context=1/)
+    assert.match(unresolved.stderr, /Ambiguous function identity/)
+    assert.match(unresolved.stderr, /Anonymous function without searchable context/)
+    const before = readFileSync(catalog, 'utf8')
+    assert.equal(runScope(project, 'server', '--write').status, 1)
+    assert.equal(readFileSync(catalog, 'utf8'), before, 'invalid inventory must not overwrite the catalog')
+  } finally {
+    rmSync(project, { recursive: true, force: true })
   }
 })

@@ -5,17 +5,28 @@ This is an unstructured dumping ground for any notes I want to take as I am deve
 9-29-26
 
 - Still thinking about framing. The purpose behind this spec is help developers find out where exactly everything in the codebase _is_. It's similar to what I was trying to accomplish with my Story Driven Development process, that also had it's own version of "implemented by" and "verified by." I don't want this spec to only be something that can be used with SDD, but I do want it to be something that meshes well with it.&#x20;
+
 - As I see it there are kind of two base, fundamental questions that need to be answered about any codebase, especially one you're unfamiliar with.
   - What's actually been implemented?
   - Where is the code that actully handles that implementation?
 
 - I've been dropped into codebases that were such an undocumented mess that I didn't even know everything the app was _supposed_ to do, let alone where to look if something was broken. And there's been cases were some functionality was mentioned in a Confluence page or Google Doc, but no way to know for sure if it was ever actually implemented, or if it was but then later removed, etc.
+
 - So there are two questions that need answered, and I see this as two complimentary tools to answer them.
   - The YAML spec files, which are easily programatically generated and verified, should answer the "where does a given implementation exist?"
   - The markdown stories should answer the "what functionality has actually been implemented?"
 
 - To that end I am thinking I am going to reframe, again, from "behaviors" to "requirements." The resulting YAML files are essentially the same, but treating them like requirements bridges the gap between the two. A requirement is still a way of representing a flow or behavior through the app, something like new user creation, etc, by mapping it to the actual functions in the code. And a story should be broken down into concrete requirements, so they can just reference the requirement YAML files directly.
+
 - Both could still be used indepentantly. You could have all of the YAML specs as is as an implementation map, and track what user facing functionality has been developed in some other way. And you could still use stories, but just write the requirements in the markdown files directly, similar to what my existing SDD workflow does. In theory at least, I've only been working on this for about 48 hours and have not stress tested it on a real codebase yet.
+
+- After thinking about it, again, I might be backpeddling on my conclusion yesterday that I don't want this to be a more prescriptive flow. I've been reading up a bit on Joern's Code Property Graph implementation, some other related things. I do think there is value in seeing the intended path through the code, ideally making it even quicker to know where to look if something is broken or needs updated. And this would give SourceSpec more value that just another attempt at a static code documentation format.
+
+- I made a local copy of [Outline](https://github.com/outline/outline) as something to both test trying to implement the spec into a large-ish brownfield codebase and run some experiments to see if representing the requirements and/or scenarios as a directed graph is helpful, my example todo app isn't complex enough to really be a good test case.
+
+- Trying to generate the catalogs for Outline resurfaced the problem of things like anonymous functions and callbacks. The over simplified root idea of SourceSpec was basically "what if UML but for functions instead of classes." Sounds easy enough at first read, but I kind of forget how almost nebulous the term function is compared to classes, which are pretty rigidly defined in most programming languages and therefore easy to document and identify.
+
+- <br />
 
 9-28-26
 

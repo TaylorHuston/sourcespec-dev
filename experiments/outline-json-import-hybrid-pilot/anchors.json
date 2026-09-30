@@ -1,0 +1,38 @@
+[
+  {
+    "id": "imports-create-operation-handler",
+    "scope": "server",
+    "file": "routes/api/imports/imports.ts",
+    "selector": { "kind": "route-callback", "method": "post", "operation": "imports.create" }
+  },
+  {
+    "id": "json-import-task-bootstrap",
+    "scope": "server",
+    "file": "queues/tasks/JSONAPIImportTask.ts",
+    "selector": { "kind": "method", "class": "JSONAPIImportTask", "member": "processBootstrap" }
+  },
+  {
+    "id": "json-import-task-finalize-attachments",
+    "scope": "server",
+    "file": "queues/tasks/JSONAPIImportTask.ts",
+    "selector": { "kind": "method", "class": "JSONAPIImportTask", "member": "onAllTasksCompleted" }
+  },
+  {
+    "id": "import-task-completion-handoff",
+    "scope": "server",
+    "file": "queues/tasks/APIImportTask.ts",
+    "selector": { "kind": "method", "class": "APIImportTask", "member": "onCompletion" }
+  },
+  {
+    "id": "import-processed-persistence",
+    "scope": "server",
+    "file": "queues/processors/ImportsProcessor.ts",
+    "selector": { "kind": "method", "class": "ImportsProcessor", "member": "onProcessed" }
+  },
+  {
+    "id": "import-list-status",
+    "scope": "app",
+    "file": "scenes/Settings/components/ImportListItem.tsx",
+    "selector": { "kind": "bound-call-argument", "variable": "ImportListItem", "callee": "observer", "argument": 0 }
+  }
+]

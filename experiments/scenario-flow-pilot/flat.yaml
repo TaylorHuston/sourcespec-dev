@@ -1,0 +1,33 @@
+# Control: a snapshot of the current flat Scenario, not another canonical Requirement.
+id: add-task
+name: Add task
+requirement: A signed-in person SHALL be able to create an incomplete task from non-blank text. Blank input SHALL not create a task, and a failed save SHALL not appear to succeed.
+scenario:
+  id: task-added
+  name: Task added
+  given:
+    - A person is signed in and has entered text containing a non-whitespace character.
+  when:
+    - The person submits the new task and saving succeeds.
+  then:
+    - A new, incomplete task appears in the list with surrounding whitespace removed from its text.
+    - The remaining count increases by one and the New task field is cleared.
+    - The task remains available after a reload or local server restart.
+  implementedBy:
+    - function: add-task-submission
+      role: Displays the saved task and clears the input only after a successful request.
+    - function: todo-interface
+      role: Loads saved tasks and renders the task list and remaining count.
+    - function: client-create-task
+      role: Sends the task to the local API.
+    - function: local-api-handler
+      role: Requires the current session and validates and routes the create request.
+    - function: store-create-task
+      role: Inserts the task into SQLite for the signed-in user.
+  verifiedBy:
+    - test: add-task-trims-input
+      checks: The UI submits trimmed text and displays the new task, count, and cleared input.
+    - test: api-validates-and-persists-tasks
+      checks: The API stores trimmed task text for the signed-in account.
+    - test: sqlite-tasks-survive-reopen
+      checks: Task contents remain saved for the owner after reopening the database.

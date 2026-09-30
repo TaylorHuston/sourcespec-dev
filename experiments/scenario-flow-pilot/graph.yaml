@@ -1,0 +1,81 @@
+# Experimental authored path for one current-state Scenario. Not parsed by SourceSpec's canonical schema.
+version: 1
+modelKind: authored-scenario-flow
+id: add-task
+name: Add task
+requirement: A signed-in person SHALL be able to create an incomplete task from non-blank text. Blank input SHALL not create a task, and a failed save SHALL not appear to succeed.
+scenario:
+  id: task-added
+  name: Task added
+  given:
+    - A person is signed in and has entered text containing a non-whitespace character.
+  when:
+    - The person submits the new task and saving succeeds.
+  then:
+    - A new, incomplete task appears in the list with surrounding whitespace removed from its text.
+    - The remaining count increases by one and the New task field is cleared.
+    - The task remains available after a reload or local server restart.
+  entry: submit
+  nodes:
+    submit:
+      kind: step
+      label: Accept the non-blank draft
+      implementedBy:
+        - function: add-task-submission
+      expected: The draft is trimmed before the create request; no unsaved task is added to the list.
+    request:
+      kind: step
+      label: Request task creation
+      operation: createTodo
+      implementedBy:
+        - function: client-create-task
+      expected: The client sends the text to the local create operation and awaits its result.
+    accept:
+      kind: step
+      label: Authorize and validate the create request
+      implementedBy:
+        - function: local-api-handler
+      expected: The API requires the current session, validates the text, and routes the request to storage.
+    persist:
+      kind: step
+      label: Save the owner's incomplete task
+      implementedBy:
+        - function: store-create-task
+      expected: An incomplete task containing trimmed text is stored for the signed-in account.
+    respond:
+      kind: step
+      label: Return the saved task
+      implementedBy:
+        - function: local-api-handler
+      expected: The successful create operation returns the saved task to the client.
+    display:
+      kind: terminal
+      label: Show the saved task
+      implementedBy:
+        - function: add-task-submission
+        - function: todo-interface
+      expected: The task appears incomplete, the remaining count rises by one, and the New task field is cleared.
+  edges:
+    - from: submit
+      to: request
+      kind: next
+    - from: request
+      to: accept
+      kind: operation-handoff
+      operation: createTodo
+    - from: accept
+      to: persist
+      kind: next
+    - from: persist
+      to: respond
+      kind: next
+    - from: respond
+      to: display
+      kind: next
+  verifiedBy:
+    - test: add-task-trims-input
+      checks: The UI submits trimmed text and displays the new task, count, and cleared input.
+    - test: api-validates-and-persists-tasks
+      checks: The API stores trimmed task text for the signed-in account.
+    - test: sqlite-tasks-survive-reopen
+      checks: Task contents remain saved for the owner after reopening the database.

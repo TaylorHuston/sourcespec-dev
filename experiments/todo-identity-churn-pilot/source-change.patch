@@ -1,0 +1,14 @@
+--- a/src/App.tsx
++++ b/src/App.tsx
+@@ -25 +25,4 @@
+-  const remaining = todos.filter((todo) => !todo.completed).length
++  const remaining = (
++    todos.filter((todo) => !todo.completed).length +
++    todos.filter((todo) => !todo.completed).length
++  ) / 2
+@@ -96 +99 @@
+-  async function addTodo(event: FormEvent<HTMLFormElement>) {
++  async function submitTask(event: FormEvent<HTMLFormElement>) {
+@@ -175 +178 @@
+-      <form className="add-form" onSubmit={addTodo}>
++      <form className="add-form" onSubmit={submitTask}>

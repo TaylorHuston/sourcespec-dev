@@ -1,0 +1,50 @@
+{
+  "format": "outline-json-import-scenario-facts/v1",
+  "sourceRevision": "05ef55e38aeb3b625e819edab907c7ee2d33af8a",
+  "authority": "Experiment-only authored navigation from inspected source, not an execution trace, verified requirement, or claim that tests passed.",
+  "scenario": {
+    "id": "json-import-visible-completion",
+    "given": ["An admin has submitted a supported JSON-export ZIP containing shared attachments, and the import creation request is accepted."],
+    "when": ["The import's queued bootstrap and page tasks run, followed by the conditional processed-event persistence pass."],
+    "then": ["Shared JSON attachments are finalized before the Import becomes Processed.", "Successful persistence moves the Import from Processed to Completed; Processed still displays Processing.", "A persistence failure may be retried and may eventually mark the Import Errored; failing to remove the source archive after Completed does not roll back completion."],
+    "operation": "imports.create"
+  },
+  "checkpoints": [
+    {"id":"upload", "fact":"The client uploads the ZIP as a workspace-import attachment, then consumes imports.create; a successful create response is not proof the background import finished.", "links":[{"scope":"app","function":"fnv1-739fccdc3fc60b735d92d7975bad8c91"}], "operation":"imports.create"},
+    {"id":"accept", "fact":"The route authorizes JSON import creation and archive access and creates a Created Import with the archive storage key in scratch.", "links":[{"scope":"server","function":"fnv1-618304b13fc1210df914bce6388ef947"}], "operation":"imports.create"},
+    {"id":"bootstrap", "fact":"JSON bootstrap reads the archive and prepares page tasks and an attachment manifest.", "links":[{"scope":"server","function":"fnv1-c9d9b2e41eb3d417cdba62a8dfb831f9"}]},
+    {"id":"page-tasks", "fact":"Per-page task processing saves task output and schedules the next task; this does not itself mean the Import is Completed.", "links":[{"scope":"server","function":"fnv1-9043beea88b5f2efaf1948e7217fed60"}]},
+    {"id":"task-handoff", "fact":"A completed task looks for another Created task; if none remains, it runs the JSON finalization hook before marking the Import Processed.", "links":[{"scope":"server","function":"fnv1-8ddd15a82e089aca727ad5c4cbfeb9dc"}]},
+    {"id":"finalize-attachments", "fact":"The JSON hook creates shared attachment rows and blobs from the archive manifest before the Processed state transition; a non-duplicate failure can interrupt this handoff.", "links":[{"scope":"server","function":"fnv1-8be09ac0c104007f591c71eca4968085"}]},
+    {"id":"processed", "fact":"The task handoff saves Processed and emits the processed transition; that state still renders Processing, not Completed.", "links":[{"scope":"server","function":"fnv1-8ddd15a82e089aca727ad5c4cbfeb9dc"}]},
+    {"id":"persist", "fact":"The imports.processed handler uses attachment rows when rewriting persisted content, creates collections and documents, and saves Completed. A failure stores an error and rethrows for retry; exhausted failure can mark Errored.", "links":[{"scope":"server","function":"fnv1-ab8ac4ee4c7c4311f0afac3c5296f856"},{"scope":"server","function":"fnv1-0ce442c4e011a83a323cb5527c167011"}]},
+    {"id":"retry", "fact":"After a persistence exception, the processor records an error and rethrows; a retry may revisit the processed handler if eligible.", "links":[{"scope":"server","function":"fnv1-0ce442c4e011a83a323cb5527c167011"}]},
+    {"id":"errored", "fact":"When the processor's failure handling runs, it can mark the Import Errored; Errored displays Failed.", "links":[{"scope":"server","function":"fnv1-8be4a53b30ac70aea2f403a07630e66f"},{"scope":"app","function":"fnv1-3d66e61888db46a3a077d7f1f80d9652"}]},
+    {"id":"cleanup", "fact":"After Completed persists, the processor attempts to remove the source archive. Failure to remove it is logged without reverting Completed.", "links":[{"scope":"server","function":"fnv1-0ce442c4e011a83a323cb5527c167011"}]},
+    {"id":"display", "fact":"The list maps Created, InProgress, and Processed to Processing; Completed to Completed; Errored to Failed. The client refresh/update path that supplies this row is not mapped here.", "links":[{"scope":"app","function":"fnv1-3d66e61888db46a3a077d7f1f80d9652"}]}
+  ],
+  "transitions": [
+    {"id":"t01","from":"upload","to":"accept","kind":"operation-handoff","when":"imports.create request is accepted"},
+    {"id":"t02","from":"accept","to":"bootstrap","kind":"creation-event","when":"imports.create event is processed and bootstrap is scheduled"},
+    {"id":"t03","from":"bootstrap","to":"page-tasks","kind":"task-wave","when":"bootstrap prepares page tasks"},
+    {"id":"t03b","from":"page-tasks","to":"task-handoff","kind":"task-completed","when":"a page task completes and completion handoff runs"},
+    {"id":"t04","from":"task-handoff","to":"page-tasks","kind":"next-task","when":"a further Created page task exists; repeat page processing"},
+
+    {"id":"t05","from":"task-handoff","to":"finalize-attachments","kind":"final-task","when":"no Created task remains"},
+    {"id":"t06","from":"finalize-attachments","to":"processed","kind":"state-change","when":"JSON attachment finalization succeeds"},
+    {"id":"t07","from":"processed","to":"display","kind":"observation","when":"the list receives Processed before completion; it still says Processing"},
+    {"id":"t08","from":"processed","to":"persist","kind":"event-handoff","when":"imports.processed is delivered and persistence begins"},
+    {"id":"t09","from":"persist","to":"retry","kind":"failure","when":"persistence throws and the processor records an error and rethrows"},
+    {"id":"t10","from":"retry","to":"persist","kind":"retry","when":"the processed event receives another eligible attempt"},
+    {"id":"t11","from":"retry","to":"errored","kind":"exhaustion","when":"failure handling runs after attempts are exhausted"},
+    {"id":"t12","from":"persist","to":"cleanup","kind":"success","when":"collections and documents are saved and Completed persists"},
+    {"id":"t13","from":"cleanup","to":"display","kind":"post-completion","when":"archive removal succeeds or its failure is logged; Completed remains saved"},
+    {"id":"t14","from":"errored","to":"display","kind":"failure-display","when":"the list receives Errored; it displays Failed"}
+  ],
+  "intendedChecks": [
+    {"id":"json-fixture","file":"server/queues/tasks/JSONAPIImportTask.test.ts","declaration":"imports collections, documents and attachments from the fixture","limit":"The helper seeds a task, drives task.perform with queue scheduling mocked, and calls the processed handler directly; not an uploaded ZIP through the live queue and UI."},
+    {"id":"cleanup-failure","file":"server/queues/tasks/JSONAPIImportTask.test.ts","declaration":"completes the import when source archive cleanup fails","limit":"Checks persisted Completed despite failed source-attachment deletion, not the displayed list."},
+    {"id":"route-create","file":"server/routes/api/imports/imports.test.ts","declaration":"should create an import","limit":"Its inspected case uses Notion, not the JSON archive branch."}
+  ],
+  "gaps": ["No live queue attempts or emitted-event delivery is proven by these links.", "The client list refresh/update path after backend state changes is not modeled.", "The listed test declarations are intended checks, not a complete test catalog or proof of passing tests."]
+}
