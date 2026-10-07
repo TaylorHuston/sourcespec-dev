@@ -10,6 +10,7 @@ import { fileURLToPath } from 'node:url'
 const cliRoot = fileURLToPath(new URL('../', import.meta.url))
 const tool = join(cliRoot, 'dist/sourcespec.js')
 const YAML = createRequire(join(cliRoot, 'package.json'))('yaml')
+const { schemaEnv } = await import('./schema-fixture.ts')
 
 test('readable lexical IDs expose ownership and fail closed when a range shifts', () => {
   const sandbox = mkdtempSync(join(tmpdir(), 'sspc-readable-catalog-'))
@@ -36,7 +37,7 @@ test('readable lexical IDs expose ownership and fail closed when a range shifts'
       '',
     ].join('\n')
     const run = (mode, force = false) => spawnSync(process.execPath,
-      [tool, 'sspc-functions', mode.slice(2), '--app', sandbox, ...(force ? ['--force'] : [])], { encoding: 'utf8' })
+      [tool, 'sspc-functions', mode.slice(2), '--app', sandbox, ...(force ? ['--force'] : [])], { encoding: 'utf8', env: schemaEnv })
     writeFileSync(sourceFile, source)
     const created = run('--write')
     assert.equal(created.status, 0, created.stderr)

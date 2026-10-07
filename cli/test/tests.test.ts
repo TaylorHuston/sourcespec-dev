@@ -6,11 +6,13 @@ import { join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import YAML from 'yaml'
+import { schemaEnv } from './schema-fixture.js'
 
 const cliRoot = fileURLToPath(new URL('../', import.meta.url))
 const script = join(cliRoot, 'dist/sourcespec.js')
-const run = (app: string, mode: '--write' | '--check', force = false) =>
-  spawnSync(process.execPath, [script, 'sspc-tests', mode.slice(2), '--app', app, ...(force ? ['--force'] : [])], { encoding: 'utf8' })
+const run = (app: string, mode: '--write' | '--check', force = false) => {
+  return spawnSync(process.execPath, [script, 'sspc-tests', mode.slice(2), '--app', app, ...(force ? ['--force'] : [])], { encoding: 'utf8', env: schemaEnv })
+}
 
 const fixture = `import { beforeEach, describe, it, test } from 'vitest'
 beforeEach(() => { const helper = () => 1; helper() })

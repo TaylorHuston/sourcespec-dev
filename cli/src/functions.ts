@@ -3,7 +3,7 @@ import { builtinModules, createRequire } from 'node:module'
 import { existsSync, mkdirSync, readFileSync, readdirSync, realpathSync, renameSync, unlinkSync, writeFileSync } from 'node:fs'
 import { dirname, join, relative, resolve, sep } from 'node:path'
 import { isDeepStrictEqual } from 'node:util'
-import { fileURLToPath } from 'node:url'
+import { readInstalledSchema } from './schema.js'
 import { Ajv2020 } from 'ajv/dist/2020.js'
 import skillTs from 'typescript'
 import type * as TS from 'typescript'
@@ -65,8 +65,7 @@ try {
 }
 
 const catalogFile = join(appRoot, `.sourcespec/catalogs/functions-catalog${rootOnly ? '-root' : ''}.yaml`)
-const schemaFile = fileURLToPath(new URL('../assets/functions.schema.yaml', import.meta.url))
-const validate = new Ajv2020({ allErrors: true }).compile(YAML.parse(readFileSync(schemaFile, 'utf8')))
+const validate = new Ajv2020({ allErrors: true }).compile(readInstalledSchema('functions'))
 
 function readCatalog(): FunctionRecord[] {
   if (!existsSync(catalogFile)) return []

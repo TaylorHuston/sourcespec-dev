@@ -24,6 +24,9 @@ test('home-installed package works outside the checkout; unknown and symlinked h
     const installed = run(process.execPath, [installer], home)
     assert.equal(installed.status, 0, installed.stderr)
     const executable = join(home, '.sourcespec/bin/sourcespec')
+    assert.match(readFileSync(join(home, '.sourcespec/schema/requirements.yaml'), 'utf8'), /title: Requirement/)
+    assert.equal(run(executable, ['sspc-schemas', 'copy', '--app', app], home).status, 2,
+      'schema copies are installed in the home, not in apps')
     for (const [area, catalogName, id] of [['sspc-functions', 'functions', 'fn:src/main.ts#ready'], ['sspc-tests', 'tests', 'test:src/main.test.ts#ready']]) {
       const written = run(executable, [area, 'write', '--app', app], home)
       assert.equal(written.status, 0, written.stderr)
@@ -31,6 +34,34 @@ test('home-installed package works outside the checkout; unknown and symlinked h
       const checked = run(executable, [area, 'check', '--app', app], home)
       assert.equal(checked.status, 0, checked.stderr)
     }
+
+    mkdirSync(join(app, '.sourcespec/requirements'), { recursive: true })
+    writeFileSync(join(app, '.sourcespec/requirements/ready.yaml'), `id: ready
+name: Ready
+requirement: The app SHALL report readiness.
+scenarios:
+  - id: reports-ready
+    name: Reports readiness
+    given: [The app is running.]
+    when: [Readiness is checked.]
+    then: [Readiness is reported.]
+    implementedBy:
+      - function: fn:src/main.ts#ready
+        role: Reports readiness.
+    verifiedBy:
+      - test: test:src/main.test.ts#ready
+        checks: Readiness is reported.
+`)
+    const requirementCheck = run(executable, ['sspc-requirements', 'check', '--app', app], home)
+    assert.equal(requirementCheck.status, 0, requirementCheck.stderr)
+
+    const installedSchema = join(home, '.sourcespec/schema/requirements.yaml')
+    const originalSchema = readFileSync(installedSchema, 'utf8')
+    writeFileSync(installedSchema, originalSchema + '\n# operator change\n')
+    const refusedSchema = run(process.execPath, [installer], home)
+    assert.notEqual(refusedSchema.status, 0)
+    assert.match(refusedSchema.stderr, /Installed schema differs/)
+    writeFileSync(installedSchema, originalSchema)
 
     const unmanagedHome = join(root, 'unmanaged-home')
     mkdirSync(join(unmanagedHome, '.sourcespec'), { recursive: true })

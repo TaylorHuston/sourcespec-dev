@@ -6,16 +6,17 @@ import { spawnSync } from 'node:child_process'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import YAML from 'yaml'
+import { schemaEnv } from './schema-fixture.js'
 
 const cliRoot = fileURLToPath(new URL('../', import.meta.url))
 const script = join(cliRoot, 'dist/sourcespec.js')
 
 function run(app: string, mode: '--probe' | '--write' | '--check') {
-  return spawnSync(process.execPath, [script, 'sspc-functions', mode.slice(2), '--app', app], { encoding: 'utf8' })
+  return spawnSync(process.execPath, [script, 'sspc-functions', mode.slice(2), '--app', app], { encoding: 'utf8', env: schemaEnv })
 }
 
 function runScope(project: string, scope: string, mode: '--probe' | '--write' | '--check') {
-  return spawnSync(process.execPath, [script, 'sspc-functions', mode.slice(2), '--project', project, '--scope', scope], { encoding: 'utf8' })
+  return spawnSync(process.execPath, [script, 'sspc-functions', mode.slice(2), '--project', project, '--scope', scope], { encoding: 'utf8', env: schemaEnv })
 }
 
 test('inventories one app, preserves lexical IDs and annotations, and refuses silent removals', () => {

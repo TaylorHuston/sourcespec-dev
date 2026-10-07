@@ -8,10 +8,11 @@
   },
   "scripts": {
     "dev": "vite --host 127.0.0.1",
-    "build": "npm run catalog:check && npm run requirements:check && tsc --noEmit && vite build",
-    "test": "npm run catalog:check && npm run requirements:check && node --test ../../tools/requirements-check.test.mjs && vitest run",
+    "build": "npm run catalog:check && npm run tests-catalog:check && npm run requirements:check && tsc --noEmit && vite build",
+    "test": "npm run catalog:check && npm run tests-catalog:check && npm run requirements:check && vitest run",
     "catalog:check": "node ../../cli/dist/sourcespec.js sspc-functions check --app \"$PWD\"",
-    "requirements:check": "node ../../tools/requirements-check.mjs",
+    "requirements:check": "node ../../cli/dist/sourcespec.js sspc-requirements check --app \"$PWD\"",
+    "tests-catalog:check": "node ../../cli/dist/sourcespec.js sspc-tests check --app \"$PWD\"",
     "catalog:refresh": "node ../../cli/dist/sourcespec.js sspc-functions write --app \"$PWD\"",
     "tests-catalog:refresh": "node ../../cli/dist/sourcespec.js sspc-tests write --app \"$PWD\"",
     "preview": "vite preview --host 127.0.0.1"

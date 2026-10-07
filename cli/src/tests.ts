@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto'
 import { existsSync, mkdirSync, readFileSync, readdirSync, realpathSync, renameSync, unlinkSync, writeFileSync } from 'node:fs'
 import { dirname, join, relative, resolve } from 'node:path'
 import { isDeepStrictEqual } from 'node:util'
-import { fileURLToPath } from 'node:url'
+import { readInstalledSchema } from './schema.js'
 import { Ajv2020 } from 'ajv/dist/2020.js'
 import ts from 'typescript'
 import YAML from 'yaml'
@@ -33,8 +33,7 @@ if (!existsSync(join(appRoot, 'package.json')) || !existsSync(join(appRoot, 'tsc
 }
 
 const catalogFile = join(appRoot, '.sourcespec/catalogs/tests-catalog.yaml')
-const schemaFile = fileURLToPath(new URL('../assets/tests.schema.yaml', import.meta.url))
-const validate = new Ajv2020({ allErrors: true }).compile(YAML.parse(readFileSync(schemaFile, 'utf8')))
+const validate = new Ajv2020({ allErrors: true }).compile(readInstalledSchema('tests'))
 const identity = (entry: Pick<TestRecord, 'location' | 'suite' | 'name'>) =>
   JSON.stringify([entry.location, entry.suite ?? [], entry.name])
 const lexicalSegment = (text: string) => text.normalize('NFKC').replace(/[^A-Za-z0-9_$.-]+/g, '-')

@@ -6,13 +6,16 @@ import { join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import YAML from 'yaml'
+import { schemaEnv } from './schema-fixture.js'
 
 const cliRoot = fileURLToPath(new URL('../', import.meta.url))
 const script = join(cliRoot, 'dist/sourcespec.js')
-const run = (app: string, mode: '--write' | '--check') =>
-  spawnSync(process.execPath, [script, 'sspc-functions', mode.slice(2), '--app', app], { encoding: 'utf8' })
-const scoped = (project: string, scope: string, mode: '--write' | '--check') =>
-  spawnSync(process.execPath, [script, 'sspc-functions', mode.slice(2), '--project', project, '--scope', scope], { encoding: 'utf8' })
+const run = (app: string, mode: '--write' | '--check') => {
+  return spawnSync(process.execPath, [script, 'sspc-functions', mode.slice(2), '--app', app], { encoding: 'utf8', env: schemaEnv })
+}
+const scoped = (project: string, scope: string, mode: '--write' | '--check') => {
+  return spawnSync(process.execPath, [script, 'sspc-functions', mode.slice(2), '--project', project, '--scope', scope], { encoding: 'utf8', env: schemaEnv })
+}
 
 test('normal catalog writes lexical IDs, preserves annotations, and refuses range churn', () => {
   const app = mkdtempSync(join(tmpdir(), 'sspc-lexical-'))

@@ -6,10 +6,12 @@ import { join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import YAML from 'yaml'
+import { schemaEnv } from './schema-fixture.js'
 
 const cliRoot = fileURLToPath(new URL('../', import.meta.url))
-const run = (app: string, mode: '--write' | '--check') =>
-  spawnSync(process.execPath, [join(cliRoot, 'dist/sourcespec.js'), 'sspc-tests', mode.slice(2), '--app', app], { encoding: 'utf8' })
+const run = (app: string, mode: '--write' | '--check') => {
+  return spawnSync(process.execPath, [join(cliRoot, 'dist/sourcespec.js'), 'sspc-tests', mode.slice(2), '--app', app], { encoding: 'utf8', env: schemaEnv })
+}
 
 test('classifies only invoked boundaries and reports genuinely unresolved tests', () => {
   const app = mkdtempSync(join(tmpdir(), 'sspc-test-kinds-'))
