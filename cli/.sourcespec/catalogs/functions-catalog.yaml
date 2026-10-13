@@ -24,6 +24,645 @@ functions:
     return:
       type: any
 
+  - id: fn:src/data-models.ts#ownedDirectory
+    name: ownedDirectory
+    location: src/data-models.ts
+    sourceScope: application
+    parameters:
+      - name: path
+        type: string
+        required: true
+      - name: create
+        type: boolean
+        required: false
+    return:
+      type: boolean
+
+  - id: fn:src/data-models.ts#ownedFile
+    name: ownedFile
+    location: src/data-models.ts
+    sourceScope: application
+    parameters:
+      - name: path
+        type: string
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:src/data-models.ts#segment-variable
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: segment variable
+    parameters:
+      - name: name
+        type: string
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/data-models.ts#tableId-variable
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: tableId variable
+    parameters:
+      - name: name
+        type: string
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/data-models.ts#columnId-variable
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: columnId variable
+    parameters:
+      - name: table
+        type: string
+        required: true
+      - name: name
+        type: string
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/data-models.ts#indexId-variable
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: indexId variable
+    parameters:
+      - name: name
+        type: string
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/data-models.ts#quoted-variable
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: quoted variable
+    parameters:
+      - name: name
+        type: string
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/data-models.ts#virtualNames-variable.new-Set.db.prepare-PRAGMA-table_list-.all-.filter
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: virtualNames variable > new Set > db.prepare(PRAGMA table_list).all().filter
+    parameters:
+      - name: entry
+        type: "{ schema: string; name: string; type: string; }"
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:src/data-models.ts#virtualNames-variable.new-Set.db.prepare-PRAGMA-table_list-.all-.filter-.map
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: virtualNames variable > new Set > db.prepare(PRAGMA table_list).all().filter().map
+    parameters:
+      - name: entry
+        type: "{ schema: string; name: string; type: string; }"
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/data-models.ts#unsupported-variable.objects.filter
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: unsupported variable > objects.filter
+    parameters:
+      - name: entry
+        type: "{ name: string; type: string; sql: string | null; }"
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:src/data-models.ts#new-Error.unsupported.map
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: new Error > unsupported.map
+    parameters:
+      - name: entry
+        type: "{ name: string; type: string; sql: string | null; }"
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/data-models.ts#tableObjects-variable.objects.filter
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: tableObjects variable > objects.filter
+    parameters:
+      - name: entry
+        type: "{ name: string; type: string; sql: string | null; }"
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:src/data-models.ts#tables-variable.tableObjects.map
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: tables variable > tableObjects.map
+    parameters:
+      - name: entry
+        type: "{ name: string; type: string; sql: string | null; }"
+        required: true
+    return:
+      type: object
+
+  - id: fn:src/data-models.ts#tables-variable.tableObjects.map.columns-variable.columnRows.map
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: tables variable > tableObjects.map > columns variable > columnRows.map
+    parameters:
+      - name: row
+        type: "{ name: string; type: string; notnull: number; pk: number; hidden: number; dflt_value: string | null;
+          }"
+        required: true
+    return:
+      type: object
+
+  - id: fn:src/data-models.ts#tables-variable.tableObjects.map.foreignKeys-variable.groups-.sort
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: tables variable > tableObjects.map > foreignKeys variable > [...groups].sort
+    parameters:
+      - name: "[a]"
+        type: object
+        required: true
+      - name: "[b]"
+        type: object
+        required: true
+    return:
+      type: number
+
+  - id: fn:src/data-models.ts#tables-variable.tableObjects.map.foreignKeys-variable.groups-.sort-.map
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: tables variable > tableObjects.map > foreignKeys variable > [...groups].sort().map
+    parameters:
+      - name: "[, rows]"
+        type: object
+        required: true
+    return:
+      type: object
+
+  - id: fn:src/data-models.ts#tables-variable.tableObjects.map.foreignKeys-variable.groups-.sort-.map.rows.sort
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: tables variable > tableObjects.map > foreignKeys variable > [...groups].sort().map > rows.sort
+    parameters:
+      - name: a
+        type: "{ id: number; seq: number; table: string; from: string; to: string | null; on_update: string;
+          on_delete: string; }"
+        required: true
+      - name: b
+        type: "{ id: number; seq: number; table: string; from: string; to: string | null; on_update: string;
+          on_delete: string; }"
+        required: true
+    return:
+      type: number
+
+  - id: fn:src/data-models.ts#tables-variable.tableObjects.map.foreignKeys-variable.groups-.sort-.map.return.from-property.rows.map
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: tables variable > tableObjects.map > foreignKeys variable > [...groups].sort().map > return > from
+      property > rows.map
+    parameters:
+      - name: row
+        type: "{ id: number; seq: number; table: string; from: string; to: string | null; on_update: string;
+          on_delete: string; }"
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/data-models.ts#tables-variable.tableObjects.map.foreignKeys-variable.groups-.sort-.map.return.to-property.rows.map
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: tables variable > tableObjects.map > foreignKeys variable > [...groups].sort().map > return > to
+      property > rows.map
+    parameters:
+      - name: row
+        type: "{ id: number; seq: number; table: string; from: string; to: string | null; on_update: string;
+          on_delete: string; }"
+        required: true
+    return:
+      type: null | string
+
+  - id: fn:src/data-models.ts#tables-variable.tableObjects.map.indexes-variable.indexRows.sort
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: tables variable > tableObjects.map > indexes variable > indexRows.sort
+    parameters:
+      - name: a
+        type: "{ name: string; unique: number; origin: string; partial: number; }"
+        required: true
+      - name: b
+        type: "{ name: string; unique: number; origin: string; partial: number; }"
+        required: true
+    return:
+      type: number
+
+  - id: fn:src/data-models.ts#tables-variable.tableObjects.map.indexes-variable.indexRows.sort-.map
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: tables variable > tableObjects.map > indexes variable > indexRows.sort().map
+    parameters:
+      - name: row
+        type: "{ name: string; unique: number; origin: string; partial: number; }"
+        required: true
+    return:
+      type: object
+
+  - id: fn:src/data-models.ts#tables-variable.tableObjects.map.indexes-variable.indexRows.sort-.map.return.ddl-property.objects.find
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: tables variable > tableObjects.map > indexes variable > indexRows.sort().map > return > ddl property
+      > objects.find
+    parameters:
+      - name: object
+        type: "{ name: string; type: string; sql: string | null; }"
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:src/data-models.ts#tables-variable.tableObjects.map.indexes-variable.indexRows.sort-.map.return.columns-property.indexColumns.filter
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: tables variable > tableObjects.map > indexes variable > indexRows.sort().map > return > columns
+      property > indexColumns.filter
+    parameters:
+      - name: column
+        type: "{ name: string | null; desc: number; coll: string; key: number; }"
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:src/data-models.ts#tables-variable.tableObjects.map.indexes-variable.indexRows.sort-.map.return.columns-property.indexColumns.filter-.map
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: tables variable > tableObjects.map > indexes variable > indexRows.sort().map > return > columns
+      property > indexColumns.filter().map
+    parameters:
+      - name: column
+        type: "{ name: string | null; desc: number; coll: string; key: number; }"
+        required: true
+    return:
+      type: object
+
+  - id: fn:src/data-models.ts#readCatalog
+    name: readCatalog
+    location: src/data-models.ts
+    sourceScope: application
+    parameters: []
+    return:
+      type: null | Catalog
+
+  - id: fn:src/data-models.ts#readCatalog.table.columns.some
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: readCatalog > table.columns.some
+    parameters:
+      - name: column
+        type: Column
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:src/data-models.ts#readCatalog.table.indexes.some
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: readCatalog > table.indexes.some
+    parameters:
+      - name: index
+        type: Index
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:src/data-models.ts#readCatalog.ids-variable.prior.tables.flatMap
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: readCatalog > ids variable > prior.tables.flatMap
+    parameters:
+      - name: table
+        type: Table
+        required: true
+    return:
+      type: string[]
+
+  - id: fn:src/data-models.ts#readCatalog.ids-variable.prior.tables.flatMap.table.columns.map
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: readCatalog > ids variable > prior.tables.flatMap > table.columns.map
+    parameters:
+      - name: column
+        type: Column
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/data-models.ts#readCatalog.ids-variable.prior.tables.flatMap.table.indexes.map
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: readCatalog > ids variable > prior.tables.flatMap > table.indexes.map
+    parameters:
+      - name: index
+        type: Index
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/data-models.ts#checkModels
+    name: checkModels
+    location: src/data-models.ts
+    sourceScope: application
+    parameters: []
+    return:
+      type: number
+
+  - id: fn:src/data-models.ts#checkModels.files-variable.readdirSync-directory-.filter
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: checkModels > files variable > readdirSync(directory).filter
+    parameters:
+      - name: name
+        type: any
+        required: true
+    return:
+      type: any
+
+  - id: fn:src/data-models.ts#checkModels.names-variable.new-Set.current.tables.map
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: checkModels > names variable > new Set > current.tables.map
+    parameters:
+      - name: table
+        type: Table
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/data-models.ts#checkModels.matches-variable
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: checkModels > matches variable
+    parameters:
+      - name: ref
+        type: string
+        required: true
+    return:
+      type: object[]
+
+  - id: fn:src/data-models.ts#checkModels.matches-variable.current.tables.flatMap
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: checkModels > matches variable > current.tables.flatMap
+    parameters:
+      - name: table
+        type: Table
+        required: true
+    return:
+      type: object[]
+
+  - id: fn:src/data-models.ts#checkModels.matches-variable.current.tables.flatMap.table.columns.filter
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: checkModels > matches variable > current.tables.flatMap > table.columns.filter
+    parameters:
+      - name: column
+        type: Column
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:src/data-models.ts#checkModels.matches-variable.current.tables.flatMap.table.columns.filter-.map
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: checkModels > matches variable > current.tables.flatMap > table.columns.filter().map
+    parameters:
+      - name: column
+        type: Column
+        required: true
+    return:
+      type: object
+
+  - id: fn:src/data-models.ts#checkModels.owner-variable.current.tables.find
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: checkModels > owner variable > current.tables.find
+    parameters:
+      - name: table
+        type: Table
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:src/data-models.ts#checkModels.owner.foreignKeys.some
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: checkModels > owner.foreignKeys.some
+    parameters:
+      - name: fk
+        type: ForeignKey
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:src/data-models.ts#checkModels.owner.foreignKeys.some.fk.from.some
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: checkModels > owner.foreignKeys.some > fk.from.some
+    parameters:
+      - name: column
+        type: string
+        required: true
+      - name: i
+        type: number
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:src/data-models.ts#console.log.current.tables.reduce@utf16:10733-10779:ArrowFunction
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: console.log > current.tables.reduce > @utf16:10733-10779:ArrowFunction
+    parameters:
+      - name: count
+        type: number
+        required: true
+      - name: table
+        type: Table
+        required: true
+    return:
+      type: number
+
+  - id: fn:src/data-models.ts#console.log.current.tables.reduce@utf16:10820-10870:ArrowFunction
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: console.log > current.tables.reduce > @utf16:10820-10870:ArrowFunction
+    parameters:
+      - name: count
+        type: number
+        required: true
+      - name: table
+        type: Table
+        required: true
+    return:
+      type: number
+
+  - id: fn:src/data-models.ts#console.log.current.tables.reduce@utf16:10916-10962:ArrowFunction
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: console.log > current.tables.reduce > @utf16:10916-10962:ArrowFunction
+    parameters:
+      - name: count
+        type: number
+        required: true
+      - name: table
+        type: Table
+        required: true
+    return:
+      type: number
+
+  - id: fn:src/data-models.ts#console.log.current.tables.map
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: console.log > current.tables.map
+    parameters:
+      - name: table
+        type: Table
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/data-models.ts#oldIds-variable.prior.tables.flatMap
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: oldIds variable > prior.tables.flatMap
+    parameters:
+      - name: table
+        type: Table
+        required: true
+    return:
+      type: string[]
+
+  - id: fn:src/data-models.ts#oldIds-variable.prior.tables.flatMap.table.columns.map
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: oldIds variable > prior.tables.flatMap > table.columns.map
+    parameters:
+      - name: column
+        type: Column
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/data-models.ts#oldIds-variable.prior.tables.flatMap.table.indexes.map
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: oldIds variable > prior.tables.flatMap > table.indexes.map
+    parameters:
+      - name: index
+        type: Index
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/data-models.ts#newIds-variable.new-Set.current.tables.flatMap
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: newIds variable > new Set > current.tables.flatMap
+    parameters:
+      - name: table
+        type: Table
+        required: true
+    return:
+      type: string[]
+
+  - id: fn:src/data-models.ts#newIds-variable.new-Set.current.tables.flatMap.table.columns.map
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: newIds variable > new Set > current.tables.flatMap > table.columns.map
+    parameters:
+      - name: column
+        type: Column
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/data-models.ts#newIds-variable.new-Set.current.tables.flatMap.table.indexes.map
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: newIds variable > new Set > current.tables.flatMap > table.indexes.map
+    parameters:
+      - name: index
+        type: Index
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/data-models.ts#missing-variable.oldIds.filter
+    name: null
+    location: src/data-models.ts
+    sourceScope: application
+    context: missing variable > oldIds.filter
+    parameters:
+      - name: id
+        type: string
+        required: true
+    return:
+      type: boolean
+
   - id: fn:src/functions.ts#readCatalog
     name: readCatalog
     location: src/functions.ts
@@ -1110,7 +1749,7 @@ functions:
         type: string
         required: true
       - name: mode
-        type: '"--check" | "--write"'
+        type: '"--write" | "--check"'
         required: true
     return:
       type: any
@@ -1163,6 +1802,149 @@ functions:
     return:
       type: string
 
+  - id: fn:test/data-models.test.mjs#setup-variable
+    name: null
+    location: test/data-models.test.mjs
+    sourceScope: test
+    context: setup variable
+    parameters: []
+    return:
+      type: object
+
+  - id: fn:test/data-models.test.mjs#setup-variable.run-variable
+    name: null
+    location: test/data-models.test.mjs
+    sourceScope: test
+    context: setup variable > run variable
+    parameters:
+      - name: action
+        type: any
+        required: true
+      - name: args
+        type: any[]
+        required: false
+    return:
+      type: any
+
+  - id: fn:test/data-models.test.mjs#test-inventories-disposable-SQLite-structure-without-data-rows-and-validates-authored-maps
+    name: null
+    location: test/data-models.test.mjs
+    sourceScope: test
+    context: test(inventories disposable SQLite structure without data rows and validates authored maps)
+    parameters: []
+    return:
+      type: void
+
+  - id: fn:test/data-models.test.mjs#test-inventories-disposable-SQLite-structure-without-data-rows-and-validates-authored-maps.assert.deepEqual.tables.map
+    name: null
+    location: test/data-models.test.mjs
+    sourceScope: test
+    context: test(inventories disposable SQLite structure without data rows and validates authored maps) >
+      assert.deepEqual > tables.map
+    parameters:
+      - name: entry
+        type: any
+        required: true
+    return:
+      type: any
+
+  - id: fn:test/data-models.test.mjs#test-inventories-disposable-SQLite-structure-without-data-rows-and-validates-authored-maps.assert.tables.find@utf16:3048-3081:ArrowFunction
+    name: null
+    location: test/data-models.test.mjs
+    sourceScope: test
+    context: test(inventories disposable SQLite structure without data rows and validates authored maps) > assert
+      > tables.find > @utf16:3048-3081:ArrowFunction
+    parameters:
+      - name: entry
+        type: any
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:test/data-models.test.mjs#test-inventories-disposable-SQLite-structure-without-data-rows-and-validates-authored-maps.assert.tables.find-.columns.some
+    name: null
+    location: test/data-models.test.mjs
+    sourceScope: test
+    context: test(inventories disposable SQLite structure without data rows and validates authored maps) > assert
+      > tables.find().columns.some
+    parameters:
+      - name: column
+        type: any
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:test/data-models.test.mjs#test-inventories-disposable-SQLite-structure-without-data-rows-and-validates-authored-maps.assert.tables.find@utf16:3183-3216:ArrowFunction
+    name: null
+    location: test/data-models.test.mjs
+    sourceScope: test
+    context: test(inventories disposable SQLite structure without data rows and validates authored maps) > assert
+      > tables.find > @utf16:3183-3216:ArrowFunction
+    parameters:
+      - name: entry
+        type: any
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:test/data-models.test.mjs#test-inventories-disposable-SQLite-structure-without-data-rows-and-validates-authored-maps.assert.tables.find-.indexes.some
+    name: null
+    location: test/data-models.test.mjs
+    sourceScope: test
+    context: test(inventories disposable SQLite structure without data rows and validates authored maps) > assert
+      > tables.find().indexes.some
+    parameters:
+      - name: index
+        type: any
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:test/data-models.test.mjs#test-normal-writes-refuse-removed-identities-force-replaces-only-after-map-review
+    name: null
+    location: test/data-models.test.mjs
+    sourceScope: test
+    context: test(normal writes refuse removed identities; force replaces only after map review)
+    parameters: []
+    return:
+      type: void
+
+  - id: fn:test/data-models.test.mjs#test-read-only-input-never-creates-a-database-and-installed-schema-governs-validation
+    name: null
+    location: test/data-models.test.mjs
+    sourceScope: test
+    context: test(read-only input never creates a database and installed schema governs validation)
+    parameters: []
+    return:
+      type: void
+
+  - id: fn:test/data-models.test.mjs#test-rejects-virtual-tables-despite-SQL-comments-and-rejects-triggers
+    name: null
+    location: test/data-models.test.mjs
+    sourceScope: test
+    context: test(rejects virtual tables despite SQL comments and rejects triggers)
+    parameters: []
+    return:
+      type: void
+
+  - id: fn:test/data-models.test.mjs#test-rejects-symlinked-catalog-and-DDL-directories-outside-the-app
+    name: null
+    location: test/data-models.test.mjs
+    sourceScope: test
+    context: test(rejects symlinked catalog and DDL directories outside the app)
+    parameters: []
+    return:
+      type: void
+
+  - id: fn:test/data-models.test.mjs#test-quotes-SQLite-identifiers-from-schema-metadata
+    name: null
+    location: test/data-models.test.mjs
+    sourceScope: test
+    context: test(quotes SQLite identifiers from schema metadata)
+    parameters: []
+    return:
+      type: void
+
   - id: fn:test/functions.test.ts#run
     name: run
     location: test/functions.test.ts
@@ -1172,7 +1954,7 @@ functions:
         type: string
         required: true
       - name: mode
-        type: '"--probe" | "--check" | "--write"'
+        type: '"--write" | "--probe" | "--check"'
         required: true
     return:
       type: any
@@ -1189,7 +1971,7 @@ functions:
         type: string
         required: true
       - name: mode
-        type: '"--probe" | "--check" | "--write"'
+        type: '"--write" | "--probe" | "--check"'
         required: true
     return:
       type: any
@@ -1621,7 +2403,7 @@ functions:
         type: string
         required: true
       - name: mode
-        type: '"--check" | "--write"'
+        type: '"--write" | "--check"'
         required: true
     return:
       type: any
@@ -1639,7 +2421,7 @@ functions:
         type: string
         required: true
       - name: mode
-        type: '"--check" | "--write"'
+        type: '"--write" | "--check"'
         required: true
     return:
       type: any
@@ -1839,7 +2621,7 @@ functions:
         type: string
         required: true
       - name: mode
-        type: '"--check" | "--write"'
+        type: '"--write" | "--check"'
         required: true
       - name: force
         type: boolean

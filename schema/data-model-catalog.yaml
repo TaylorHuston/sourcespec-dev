@@ -1,0 +1,71 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: SQLite data-model catalog
+description: Generated physical schema inventory from an explicitly supplied SQLite database. No data rows or app-local file paths are recorded; the application's DDL remains authoritative.
+type: object
+additionalProperties: false
+required: [engine, tables]
+properties:
+  engine:
+    const: sqlite
+  tables:
+    type: array
+    minItems: 1
+    items:
+      type: object
+      additionalProperties: false
+      required: [id, name, ddl, columns, foreignKeys, indexes]
+      properties:
+        id: { type: string, minLength: 1 }
+        name: { type: string, minLength: 1 }
+        ddl: { type: string, minLength: 1 }
+        columns:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            additionalProperties: false
+            required: [id, name, type, notNull, primaryKeyPosition, hidden]
+            properties:
+              id: { type: string, minLength: 1 }
+              name: { type: string, minLength: 1 }
+              type: { type: string }
+              notNull: { type: boolean }
+              primaryKeyPosition: { type: integer, minimum: 0 }
+              hidden: { type: integer, minimum: 0 }
+              defaultValue: { type: [string, 'null'] }
+        foreignKeys:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [from, toTable, to, onUpdate, onDelete]
+            properties:
+              from: { type: array, minItems: 1, items: { type: string, minLength: 1 } }
+              toTable: { type: string, minLength: 1 }
+              to: { type: array, minItems: 1, items: { type: [string, 'null'] } }
+              onUpdate: { type: string, minLength: 1 }
+              onDelete: { type: string, minLength: 1 }
+        indexes:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [id, name, unique, origin, partial, columns]
+            properties:
+              id: { type: string, minLength: 1 }
+              name: { type: string, minLength: 1 }
+              unique: { type: boolean }
+              origin: { type: string, minLength: 1 }
+              partial: { type: boolean }
+              ddl: { type: [string, 'null'] }
+              columns:
+                type: array
+                minItems: 1
+                items:
+                  type: object
+                  additionalProperties: false
+                  required: [name, descending, collation]
+                  properties:
+                    name: { type: [string, 'null'] }
+                    descending: { type: boolean }
+                    collation: { type: string, minLength: 1 }

@@ -9,7 +9,7 @@ scenarios:
     when:
       - The operator explicitly runs the local installer.
     then:
-      - The executable and five shared schemas are available under the user's ~/.sourcespec directory.
+      - The executable and six shared schemas are available under the user's ~/.sourcespec directory.
       - The installed executable can write and check app catalogs and validate authored Requirements outside the checkout.
     implementedBy:
       - function: fn:src/schema.ts#readInstalledSchema

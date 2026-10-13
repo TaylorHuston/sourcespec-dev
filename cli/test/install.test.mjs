@@ -4,6 +4,7 @@ import { mkdtempSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSyn
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { test } from 'node:test'
+import { DatabaseSync } from 'node:sqlite'
 import { fileURLToPath } from 'node:url'
 
 const cliRoot = dirname(fileURLToPath(new URL('../package.json', import.meta.url)))
@@ -25,6 +26,7 @@ test('home-installed package works outside the checkout; unknown and symlinked h
     assert.equal(installed.status, 0, installed.stderr)
     const executable = join(home, '.sourcespec/bin/sourcespec')
     assert.match(readFileSync(join(home, '.sourcespec/schema/requirements.yaml'), 'utf8'), /title: Requirement/)
+    assert.match(readFileSync(join(home, '.sourcespec/schema/data-model-catalog.yaml'), 'utf8'), /title: SQLite data-model catalog/)
     assert.equal(run(executable, ['sspc-schemas', 'copy', '--app', app], home).status, 2,
       'schema copies are installed in the home, not in apps')
     for (const [area, catalogName, id] of [['sspc-functions', 'functions', 'fn:src/main.ts#ready'], ['sspc-tests', 'tests', 'test:src/main.test.ts#ready']]) {
@@ -54,6 +56,13 @@ scenarios:
 `)
     const requirementCheck = run(executable, ['sspc-requirements', 'check', '--app', app], home)
     assert.equal(requirementCheck.status, 0, requirementCheck.stderr)
+
+    const database = join(root, 'schema.sqlite')
+    const db = new DatabaseSync(database)
+    db.exec('CREATE TABLE records (id TEXT PRIMARY KEY)')
+    db.close()
+    assert.equal(run(executable, ['sspc-data-models', 'write', '--app', app, '--sqlite', database], home).status, 0)
+    assert.equal(run(executable, ['sspc-data-models', 'check', '--app', app, '--sqlite', database], home).status, 0)
 
     const installedSchema = join(home, '.sourcespec/schema/requirements.yaml')
     const originalSchema = readFileSync(installedSchema, 'utf8')

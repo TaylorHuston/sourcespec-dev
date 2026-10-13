@@ -1,0 +1,59 @@
+id: data-model-inventory
+name: SQLite physical schema inventory and authored map checks
+requirement: The SourceSpec CLI SHALL inventory SQLite physical schema from an explicitly supplied database and validate authored data-model references without reading persisted rows or generating semantic descriptions.
+scenarios:
+  - id: probe-physical-schema
+    name: Inspect the schema without writing
+    given:
+      - An operator supplies an existing disposable SQLite database for one app.
+    when:
+      - The operator runs sspc-data-models probe.
+    then:
+      - The CLI reports table, column, foreign-key, and index counts without creating or changing a catalog.
+      - Unsupported views, triggers, and virtual tables cause a failure rather than an incomplete inventory.
+    implementedBy:
+      - function: fn:src/data-models.ts#tables-variable.tableObjects.map
+        role: Inventories table structure using SQLite metadata queries.
+    verifiedBy:
+      - test: test:test/data-models.test.mjs#inventories-disposable-SQLite-structure-without-data-rows-and-validates-authored-maps
+        checks: Exercises read-only probe and confirms catalog output excludes sample row values.
+      - test: test:test/data-models.test.mjs#normal-writes-refuse-removed-identities-force-replaces-only-after-map-review
+        checks: Exercises refusal of unsupported views.
+      - test: test:test/data-models.test.mjs#rejects-virtual-tables-despite-SQL-comments-and-rejects-triggers
+        checks: Exercises metadata-based rejection of virtual tables and triggers.
+  - id: review-physical-changes
+    name: Preserve identities and detect physical drift
+    given:
+      - A physical schema catalog exists for the app.
+    when:
+      - The operator writes or checks it against a supplied SQLite schema.
+    then:
+      - Additive changes can be written, but a normal write refuses removed or renamed table, column, or index IDs.
+      - Check fails when the catalog differs; an explicit forced write may replace lost IDs after authored map review.
+    implementedBy:
+      - function: fn:src/data-models.ts#readCatalog
+        role: Validates and loads previous physical identities for reconciliation.
+    verifiedBy:
+      - test: test:test/data-models.test.mjs#inventories-disposable-SQLite-structure-without-data-rows-and-validates-authored-maps
+        checks: Exercises additive column changes and stale-catalog detection.
+      - test: test:test/data-models.test.mjs#normal-writes-refuse-removed-identities-force-replaces-only-after-map-review
+        checks: Exercises removed index refusal and explicit forced replacement.
+  - id: validate-authored-map
+    name: Resolve authored table and relationship references
+    given:
+      - The app has authored data-model YAML files and a physical SQLite catalog.
+    when:
+      - The operator checks or writes the data-model catalog.
+    then:
+      - Authored records are validated against the installed shared schema and physical tables and columns.
+      - Relationships declared as foreign keys must resolve to an actual SQLite foreign key; neither prose nor data rows are generated.
+    implementedBy:
+      - function: fn:src/data-models.ts#checkModels
+        role: Validates authored map shape, table ownership, and physical relationship references.
+    verifiedBy:
+      - test: test:test/data-models.test.mjs#inventories-disposable-SQLite-structure-without-data-rows-and-validates-authored-maps
+        checks: Exercises valid and unknown authored relationship references.
+      - test: test:test/data-models.test.mjs#read-only-input-never-creates-a-database-and-installed-schema-governs-validation
+        checks: Exercises map mismatch and installed catalog schema validation.
+      - test: test:test/data-models.test.mjs#rejects-symlinked-catalog-and-DDL-directories-outside-the-app
+        checks: Exercises owned catalog output and authored DDL-source path containment.

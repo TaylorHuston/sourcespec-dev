@@ -10,7 +10,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json && node scripts/copy-schemas.mjs",
     "typecheck": "tsc --noEmit",
-    "test": "pnpm build && tsx --test test/*.test.ts test/catalog-integration.test.mjs test/requirements.test.mjs test/schemas.test.mjs && node --test test/install.test.mjs"
+    "test": "pnpm build && tsx --test test/*.test.ts test/catalog-integration.test.mjs test/data-models.test.mjs test/requirements.test.mjs test/schemas.test.mjs && node --test test/install.test.mjs"
   },
   "dependencies": {
     "ajv": "^8.17.1",

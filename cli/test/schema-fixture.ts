@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url'
 export const schemaHome = mkdtempSync(join(tmpdir(), 'sspc-schema-home-'))
 const directory = join(schemaHome, '.sourcespec/schema')
 mkdirSync(directory, { recursive: true })
-for (const name of ['data-models', 'functions', 'operations', 'requirements', 'tests']) {
+for (const name of ['data-model-catalog', 'data-models', 'functions', 'operations', 'requirements', 'tests']) {
   copyFileSync(fileURLToPath(new URL(`../../schema/${name}.yaml`, import.meta.url)), join(directory, `${name}.yaml`))
 }
 export const schemaEnv = { ...process.env, HOME: schemaHome }

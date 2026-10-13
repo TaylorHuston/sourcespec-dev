@@ -13,6 +13,10 @@ const schemas = ['data-models', 'functions', 'operations', 'requirements', 'test
   source: join(cliRoot, '../schema', `${name}.yaml`),
   target: join(schemaDir, `${name}.yaml`),
 }))
+schemas.push({
+  source: join(cliRoot, '../schema/data-model-catalog.yaml'),
+  target: join(schemaDir, 'data-model-catalog.yaml'),
+})
 const linkTarget = '../node_modules/.bin/sourcespec'
 const stat = (path) => lstatSync(path, { throwIfNoEntry: false })
 const existing = stat(destination)

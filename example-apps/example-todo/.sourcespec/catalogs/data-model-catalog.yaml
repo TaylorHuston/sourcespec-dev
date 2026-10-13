@@ -1,0 +1,171 @@
+# Generated SQLite structure, not data rows. DDL and authored meanings live elsewhere.
+engine: sqlite
+tables:
+  - id: table:sqlite/sessions
+    name: sessions
+    ddl: |-
+      CREATE TABLE sessions (
+            token_hash TEXT PRIMARY KEY,
+            user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            expires_at INTEGER NOT NULL
+          )
+    columns:
+      - id: column:sqlite/sessions#token_hash
+        name: token_hash
+        type: TEXT
+        notNull: false
+        primaryKeyPosition: 1
+        hidden: 0
+        defaultValue: null
+      - id: column:sqlite/sessions#user_id
+        name: user_id
+        type: TEXT
+        notNull: true
+        primaryKeyPosition: 0
+        hidden: 0
+        defaultValue: null
+      - id: column:sqlite/sessions#expires_at
+        name: expires_at
+        type: INTEGER
+        notNull: true
+        primaryKeyPosition: 0
+        hidden: 0
+        defaultValue: null
+    foreignKeys:
+      - from:
+          - user_id
+        toTable: users
+        to:
+          - id
+        onUpdate: NO ACTION
+        onDelete: CASCADE
+    indexes:
+      - id: index:sqlite/sqlite_autoindex_sessions_1
+        name: sqlite_autoindex_sessions_1
+        unique: true
+        origin: pk
+        partial: false
+        ddl: null
+        columns:
+          - name: token_hash
+            descending: false
+            collation: BINARY
+  - id: table:sqlite/todos
+    name: todos
+    ddl: |-
+      CREATE TABLE todos (
+              id TEXT PRIMARY KEY,
+              user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+              text TEXT NOT NULL CHECK (length(trim(text)) > 0),
+              completed INTEGER NOT NULL DEFAULT 0 CHECK (completed IN (0, 1))
+            )
+    columns:
+      - id: column:sqlite/todos#id
+        name: id
+        type: TEXT
+        notNull: false
+        primaryKeyPosition: 1
+        hidden: 0
+        defaultValue: null
+      - id: column:sqlite/todos#user_id
+        name: user_id
+        type: TEXT
+        notNull: true
+        primaryKeyPosition: 0
+        hidden: 0
+        defaultValue: null
+      - id: column:sqlite/todos#text
+        name: text
+        type: TEXT
+        notNull: true
+        primaryKeyPosition: 0
+        hidden: 0
+        defaultValue: null
+      - id: column:sqlite/todos#completed
+        name: completed
+        type: INTEGER
+        notNull: true
+        primaryKeyPosition: 0
+        hidden: 0
+        defaultValue: "0"
+    foreignKeys:
+      - from:
+          - user_id
+        toTable: users
+        to:
+          - id
+        onUpdate: NO ACTION
+        onDelete: CASCADE
+    indexes:
+      - id: index:sqlite/sqlite_autoindex_todos_1
+        name: sqlite_autoindex_todos_1
+        unique: true
+        origin: pk
+        partial: false
+        ddl: null
+        columns:
+          - name: id
+            descending: false
+            collation: BINARY
+      - id: index:sqlite/todos_by_user
+        name: todos_by_user
+        unique: false
+        origin: c
+        partial: false
+        ddl: CREATE INDEX todos_by_user ON todos(user_id)
+        columns:
+          - name: user_id
+            descending: false
+            collation: BINARY
+  - id: table:sqlite/users
+    name: users
+    ddl: |-
+      CREATE TABLE users (
+            id TEXT PRIMARY KEY,
+            username TEXT NOT NULL UNIQUE,
+            password_hash TEXT NOT NULL
+          )
+    columns:
+      - id: column:sqlite/users#id
+        name: id
+        type: TEXT
+        notNull: false
+        primaryKeyPosition: 1
+        hidden: 0
+        defaultValue: null
+      - id: column:sqlite/users#username
+        name: username
+        type: TEXT
+        notNull: true
+        primaryKeyPosition: 0
+        hidden: 0
+        defaultValue: null
+      - id: column:sqlite/users#password_hash
+        name: password_hash
+        type: TEXT
+        notNull: true
+        primaryKeyPosition: 0
+        hidden: 0
+        defaultValue: null
+    foreignKeys: []
+    indexes:
+      - id: index:sqlite/sqlite_autoindex_users_1
+        name: sqlite_autoindex_users_1
+        unique: true
+        origin: pk
+        partial: false
+        ddl: null
+        columns:
+          - name: id
+            descending: false
+            collation: BINARY
+      - id: index:sqlite/sqlite_autoindex_users_2
+        name: sqlite_autoindex_users_2
+        unique: true
+        origin: u
+        partial: false
+        ddl: null
+        columns:
+          - name: username
+            descending: false
+            collation: BINARY
