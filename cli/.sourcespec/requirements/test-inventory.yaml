@@ -1,0 +1,69 @@
+id: test-inventory
+name: Scoped test declaration inventory
+requirement: The SourceSpec CLI SHALL inventory statically identifiable test declarations within a single application without inferring passing results or silently resolving ambiguous identities.
+scenarios:
+  - id: discover-declarations
+    name: Record declared tests and suites
+    given:
+      - A single application contains supported test runner declarations and suite titles.
+    when:
+      - The operator runs sspc-tests write.
+    then:
+      - Test IDs use normalized lexical segments derived from the source path and literal suite and test titles; the catalog retains the literal titles.
+      - Declarations from a sibling application are excluded.
+    implementedBy:
+      - function: fn:src/tests.ts#testFiles
+        role: Limits discovery to owned test-source files.
+      - function: fn:src/tests.ts#aliasesFor
+        role: Identifies supported test-runner imports and aliases.
+      - function: fn:src/tests.ts#suitesFor
+        role: Collects enclosing suite titles for each declaration.
+    verifiedBy:
+      - test: test:test/tests.test.ts#inventories-declarations-per-app-preserves-curated-lexical-IDs-and-rejects-ambiguity-removals
+        checks: Exercises runner declarations, literal suite paths, and sibling exclusion.
+  - id: refuse-ambiguous-declarations
+    name: Refuse dynamic or colliding test identities
+    given:
+      - A test title is not a static literal or two declarations normalize to the same readable ID.
+    when:
+      - The operator attempts a normal or forced catalog write.
+    then:
+      - The write fails without replacing the previous test catalog.
+    implementedBy:
+      - function: fn:src/tests.ts#titleFor
+        role: Rejects nonliteral and empty declaration titles.
+      - function: fn:src/tests.ts#lexicalId-variable
+        role: Forms IDs whose collisions are rejected before writing.
+    verifiedBy:
+      - test: test:test/tests.test.ts#inventories-declarations-per-app-preserves-curated-lexical-IDs-and-rejects-ambiguity-removals
+        checks: Checks duplicate and dynamic declarations even with --force.
+      - test: test:test/tests.test.ts#normal-generation-refuses-normalized-title-and-path-collisions
+        checks: Checks title and path normalization collisions leave the catalog intact.
+  - id: review-test-kinds
+    name: Distinguish inferred boundaries from reviewed classifications
+    given:
+      - A declared test may call a known component or API boundary, both, or neither.
+    when:
+      - Its catalog entry is generated or refreshed.
+    then:
+      - An unambiguous invoked boundary can supply a provisional kind; unresolved cases require review.
+      - A reviewed kind and description are retained on normal refresh.
+    implementedBy:
+      - function: fn:src/tests.ts#boundaryCalls
+        role: Identifies known imported boundary symbols.
+      - function: fn:src/tests.ts#kindFor
+        role: Classifies based on calls in the declaration body rather than imports alone.
+    verifiedBy:
+      - test: test:test/classification.test.ts#classifies-only-invoked-boundaries-and-reports-genuinely-unresolved-tests
+        checks: Checks single, mixed, and missing boundary calls and reviewed override retention.
+  - id: declaration-check
+    name: Detect a stale test inventory
+    given:
+      - A test catalog already exists.
+    when:
+      - The operator runs sspc-tests check after declarations or formatting change.
+    then:
+      - The check reports a stale catalog without rewriting its entries.
+    verifiedBy:
+      - test: test:test/tests.test.ts#inventories-declarations-per-app-preserves-curated-lexical-IDs-and-rejects-ambiguity-removals
+        checks: Checks missing and malformed spacing, refresh, and subsequent validation.

@@ -27,9 +27,14 @@ if (appFlag !== '--app' || !appPath || !['--check', '--write'].includes(mode ?? 
 }
 if (appPath !== resolve(appPath)) throw new Error('--app must be an absolute path')
 const appRoot = realpathSync(appPath)
-if (!existsSync(join(appRoot, 'package.json')) || !existsSync(join(appRoot, 'tsconfig.json')) ||
-    existsSync(join(appRoot, 'pnpm-workspace.yaml'))) {
+if (!existsSync(join(appRoot, 'package.json')) || !existsSync(join(appRoot, 'tsconfig.json'))) {
   throw new Error('--app needs a single application root with package.json and tsconfig.json')
+}
+if (existsSync(join(appRoot, 'pnpm-workspace.yaml'))) {
+  const workspace = YAML.parse(readFileSync(join(appRoot, 'pnpm-workspace.yaml'), 'utf8'))
+  if (!Array.isArray(workspace?.packages) || workspace.packages.length !== 1 || workspace.packages[0] !== '.') {
+    throw new Error('--app needs a single application root, not a monorepo root')
+  }
 }
 
 const catalogFile = join(appRoot, '.sourcespec/catalogs/tests-catalog.yaml')

@@ -25,4 +25,15 @@ For a monorepo with a shared manifest and TypeScript config, use `sspc-functions
 
 To install or explicitly refresh the local executable, run `node cli/scripts/install-local.mjs` **after** installing CLI dependencies. It builds a package from this checkout and installs it only into `~/.sourcespec/`, refusing to modify an unfamiliar existing directory or executable. It does not change your shell configuration. Run `~/.sourcespec/bin/sourcespec` directly, or add `~/.sourcespec/bin` to `PATH`. The installed CLI reads shared schemas from `~/.sourcespec/schema/` and reads/writes catalogs only in the chosen app. The templates bundled with the package are build artifacts from `../schema/`, not a separate source of truth.
 
+The CLI's own current-state map lives in `cli/.sourcespec/`: complete function and test inventories plus authored Requirements and Scenarios. The `cli/` package owns this scope (its pnpm workspace contains only `.`), not the whole SourceSpec repository. After building and installing the CLI, run these checks from the repository root:
+
+```bash
+app="$(pwd)/cli"
+node cli/dist/sourcespec.js sspc-functions check --app "$app"
+node cli/dist/sourcespec.js sspc-tests check --app "$app"
+node cli/dist/sourcespec.js sspc-requirements check --app "$app"
+```
+
+Catalog links are navigation pointers, not coverage or test results.
+
 The example todo app invokes the checkout's built CLI. Install it into `~/.sourcespec/` before running its checks (the checkout CLI also reads the installed schemas). CLI tests use disposable homes; they do not depend on or modify the user's installation.

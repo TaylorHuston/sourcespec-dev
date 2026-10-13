@@ -1,0 +1,43 @@
+id: requirement-check
+name: Authored Requirement validation
+requirement: The SourceSpec CLI SHALL validate authored current-state Requirements and Scenario catalog references against the installed shared schemas without generating Requirement prose or semantic mappings.
+scenarios:
+  - id: validate-authored-records
+    name: Accept valid language-neutral Requirement records
+    given:
+      - A selected app has Requirement files and function and test catalogs with valid records.
+    when:
+      - The operator runs sspc-requirements check --app for that app.
+    then:
+      - Requirement shape, filenames, unique IDs, and function and test link identities are checked.
+      - The check does not require the app's implementation language to be TypeScript or JavaScript.
+    implementedBy:
+      - function: fn:src/requirements.ts#parseFile-variable
+        role: Reads authored YAML records for schema and reference checks.
+      - function: fn:src/schema.ts#readInstalledSchema
+        role: Loads shared Requirement and catalog schemas for validation.
+    verifiedBy:
+      - test: test:test/requirements.test.mjs#Requirement-checks-use-installed-schemas-and-catalog-links-without-JS-TS-source-or-generated-mappings
+        checks: Checks linked Python records against installed schemas with no JS/TS application source.
+  - id: reject-invalid-references
+    name: Report malformed records and unknown catalog IDs
+    given:
+      - An authored Requirement is malformed or references a function or test absent from the app catalog.
+    when:
+      - The operator checks Requirements.
+    then:
+      - The check fails with the invalid record or unknown link; it does not edit the authored file.
+    verifiedBy:
+      - test: test:test/requirements.test.mjs#Requirement-checks-use-installed-schemas-and-catalog-links-without-JS-TS-source-or-generated-mappings
+        checks: Exercises missing links, schema errors, and unchanged authored files.
+  - id: no-generated-mappings
+    name: Keep semantic judgments authored
+    given:
+      - An app contains authored Requirements and catalog navigation pointers.
+    when:
+      - The operator checks those records.
+    then:
+      - The CLI neither generates Requirements nor rewrites Scenario prose or links, and it does not claim test results.
+    verifiedBy:
+      - test: test:test/requirements.test.mjs#Requirement-checks-use-installed-schemas-and-catalog-links-without-JS-TS-source-or-generated-mappings
+        checks: Checks the authored Requirement is unchanged by validation.

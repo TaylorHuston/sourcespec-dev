@@ -1,0 +1,57 @@
+id: local-installation
+name: Local CLI and shared schemas
+requirement: The SourceSpec CLI SHALL install a user-local executable with shared schemas and reject unsafe installations or unsupported CLI actions rather than modifying application-local schema copies.
+scenarios:
+  - id: install-user-local-cli
+    name: Use the installed CLI outside the checkout
+    given:
+      - CLI dependencies are installed and the installation destination is new or recognized.
+    when:
+      - The operator explicitly runs the local installer.
+    then:
+      - The executable and five shared schemas are available under the user's ~/.sourcespec directory.
+      - The installed executable can write and check app catalogs and validate authored Requirements outside the checkout.
+    implementedBy:
+      - function: fn:src/schema.ts#readInstalledSchema
+        role: Resolves shared schemas from the installed home location.
+    verifiedBy:
+      - test: test:test/install.test.mjs#home-installed-package-works-outside-the-checkout-unknown-and-symlinked-homes-are-refused
+        checks: Exercises packaged executable and shared schemas in a disposable home.
+  - id: reject-unsafe-installation
+    name: Refuse to overwrite unknown destinations or changed schemas
+    given:
+      - The user-local destination is unrecognized, symlinked, or contains an altered installed schema.
+    when:
+      - The local installer runs.
+    then:
+      - Installation is refused without overwriting that destination or the edited schema.
+    verifiedBy:
+      - test: test:test/install.test.mjs#home-installed-package-works-outside-the-checkout-unknown-and-symlinked-homes-are-refused
+        checks: Checks unfamiliar, symlinked, and changed-schema installation targets.
+  - id: no-app-local-schema-copy
+    name: Validate against installed schemas only
+    given:
+      - A CLI catalog check runs with or without its installed shared schemas.
+    when:
+      - Schema validation is attempted.
+    then:
+      - The check reads the installed schema or fails when it is missing, without creating app-local schema files.
+    implementedBy:
+      - function: fn:src/schema.ts#readInstalledSchema
+        role: Reads shared schemas and reports an absent installation.
+    verifiedBy:
+      - test: test:test/schemas.test.mjs#catalog-checks-use-shared-home-schemas-fail-when-absent-and-never-copy-schemas-into-apps
+        checks: Checks missing and modified schemas and absence of app-local schema copies.
+  - id: unsupported-action
+    name: Reject unsupported commands and force on read-only actions
+    given:
+      - An operator requests a retired or unsupported command or supplies --force to check.
+    when:
+      - The installed CLI parses the invocation.
+    then:
+      - It rejects the invocation rather than copying schemas or changing a catalog.
+    verifiedBy:
+      - test: test:test/install.test.mjs#home-installed-package-works-outside-the-checkout-unknown-and-symlinked-homes-are-refused
+        checks: Rejects the retired app-local schema copy action.
+      - test: test:test/catalog-integration.test.mjs#readable-lexical-IDs-expose-ownership-and-fail-closed-when-a-range-shifts
+        checks: Rejects --force on function check.

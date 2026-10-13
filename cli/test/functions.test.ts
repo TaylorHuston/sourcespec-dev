@@ -28,6 +28,7 @@ test('inventories one app, preserves lexical IDs and annotations, and refuses si
     mkdirSync(join(workspace, 'apps/web'), { recursive: true })
     writeFileSync(join(app, 'package.json'), '{"name":"test-api","private":true}')
     writeFileSync(join(app, 'tsconfig.json'), '{"compilerOptions":{"target":"ES2022"},"include":["src/index.ts"]}')
+    writeFileSync(join(app, 'pnpm-workspace.yaml'), "packages: ['.']\n")
     writeFileSync(join(app, 'src/index.ts'), 'export function value(input: number) { return input + 1 }\n[1].map((item) => item + 1)\nexport function withCleanup() { return () => 1 }\n')
     writeFileSync(join(app, 'src/index.test.ts'), "it('works', () => { value(1) })\n")
     writeFileSync(join(app, 'vite.config.ts'), 'export default { configure: () => true }\n')

@@ -1,0 +1,54 @@
+id: catalog-refresh
+name: Fail-closed catalog refresh
+requirement: The SourceSpec CLI SHALL preserve reviewed catalog annotations on normal refresh and refuse silent identity loss; explicit forced replacement SHALL not reconcile authored links.
+scenarios:
+  - id: preserve-reviewed-entries
+    name: Retain matching identities and annotations
+    given:
+      - A function or test catalog contains reviewed descriptions, scopes, or test kinds.
+    when:
+      - The operator performs a normal write after an additive or harmless source edit.
+    then:
+      - Matching lexical IDs and their reviewed metadata remain in the catalog.
+    implementedBy:
+      - function: fn:src/functions.ts#readCatalog
+        role: Loads validated prior function annotations for reconciliation.
+      - function: fn:src/tests.ts#readCatalog
+        role: Loads validated prior test annotations for reconciliation.
+    verifiedBy:
+      - test: test:test/functions.test.ts#inventories-one-app-preserves-lexical-IDs-and-annotations-and-refuses-silent-removals
+        checks: Checks retained function annotations through a refresh.
+      - test: test:test/tests.test.ts#inventories-declarations-per-app-preserves-curated-lexical-IDs-and-rejects-ambiguity-removals
+        checks: Checks retained test descriptions and kinds through a refresh.
+  - id: refuse-identity-churn
+    name: Do not silently prune or reassign old IDs
+    given:
+      - A prior catalog contains IDs no longer matched to declarations or callables, or a range-based ID shifts.
+    when:
+      - The operator performs a normal write or check.
+    then:
+      - The operation fails instead of transferring reviewed annotations or replacing the old catalog.
+    implementedBy:
+      - function: fn:src/functions.ts#visit
+        role: Rejects a changed identity while binding prior function annotations.
+      - function: fn:src/tests.ts#readCatalog
+        role: Validates prior test identities before reconciliation.
+    verifiedBy:
+      - test: test:test/identity.test.ts#normal-catalog-writes-lexical-IDs-preserves-annotations-and-refuses-range-churn
+        checks: Checks range shifts leave the prior function catalog intact.
+      - test: test:test/tests.test.ts#inventories-declarations-per-app-preserves-curated-lexical-IDs-and-rejects-ambiguity-removals
+        checks: Checks removed test IDs do not disappear on normal writes.
+  - id: force-replacement
+    name: Replace only by an explicit destructive request
+    given:
+      - A prior function or test catalog has stale or legacy IDs.
+    when:
+      - The operator invokes its write action with --force.
+    then:
+      - The catalog is regenerated from current source and prior IDs and curated metadata are discarded with a warning.
+      - Authored Requirement links are not rewritten; source ambiguities still prevent a write.
+    verifiedBy:
+      - test: test:test/catalog-integration.test.mjs#readable-lexical-IDs-expose-ownership-and-fail-closed-when-a-range-shifts
+        checks: Checks function --force replacement and lost annotations.
+      - test: test:test/tests.test.ts#inventories-declarations-per-app-preserves-curated-lexical-IDs-and-rejects-ambiguity-removals
+        checks: Checks test --force replacement and current-source ambiguity refusal.

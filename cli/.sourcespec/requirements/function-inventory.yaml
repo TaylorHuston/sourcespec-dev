@@ -1,0 +1,72 @@
+id: function-inventory
+name: Scoped function inventory
+requirement: The SourceSpec CLI SHALL inventory implemented TypeScript and JavaScript callables within an explicitly selected owner scope using reviewable lexical identities.
+scenarios:
+  - id: standalone-scope
+    name: Inventory a single application
+    given:
+      - A package and TypeScript config identify one application, including a single-package pnpm workspace.
+    when:
+      - The operator writes its function catalog with --app.
+    then:
+      - Callable implementations from that application are recorded with signatures, locations, and source scopes.
+      - Sibling applications, recognized ignored build/local directories, and signature-only declarations are not recorded.
+    implementedBy:
+      - function: fn:src/functions.ts#sourceFiles
+        role: Restricts the source traversal to owned, non-generated files.
+      - function: fn:src/functions.ts#visit
+        role: Discovers callable implementations and records their signatures.
+    verifiedBy:
+      - test: test:test/functions.test.ts#inventories-one-app-preserves-lexical-IDs-and-annotations-and-refuses-silent-removals
+        checks: Exercises standalone discovery, source-scope tags, and sibling exclusion.
+      - test: test:test/functions.test.ts#binds-decorated-fields-class-callbacks-and-default-exports-across-harmless-reordering
+        checks: Exercises implementation-only discovery and callable contexts.
+  - id: project-scope
+    name: Limit a shared project to an owned directory or root tooling
+    given:
+      - A project has multiple application directories and shared root configuration.
+    when:
+      - The operator specifies --project and an owned --scope, or --scope @root for direct tooling.
+    then:
+      - The function inventory is confined to the chosen scope and its catalog location.
+      - A multi-application workspace root is not accepted as a standalone app.
+    implementedBy:
+      - function: fn:src/functions.ts#sourceFiles
+        role: Traverses the selected owner without sibling application files.
+    verifiedBy:
+      - test: test:test/functions.test.ts#probes-a-monorepo-owned-scope-before-writing-including-assignment-callbacks-and-source-ownership
+        checks: Exercises scoped ownership, exclusions, and rejection of a multi-app --app root.
+      - test: test:test/identity.test.ts#direct-root-tooling-and-sibling-scopes-use-distinct-lexical-IDs
+        checks: Exercises root-only tooling and distinct IDs in sibling scopes.
+  - id: read-only-probe
+    name: Inspect a scope before writing
+    given:
+      - An application or owned project scope has TypeScript or JavaScript source.
+    when:
+      - The operator runs sspc-functions probe.
+    then:
+      - Counts, exclusions, compiler provenance, and identity issues are reported without writing a catalog.
+    implementedBy:
+      - function: fn:src/functions.ts#reportAmbiguities
+        role: Reports source-scope classifications needing review.
+    verifiedBy:
+      - test: test:test/functions.test.ts#probes-a-monorepo-owned-scope-before-writing-including-assignment-callbacks-and-source-ownership
+        checks: Checks probe counts, exclusions, and identity issue reporting.
+  - id: lexical-identity
+    name: Disambiguate repeated callables
+    given:
+      - A source file contains named callables, nested callbacks, or repeated lexical contexts.
+    when:
+      - The function catalog is generated or checked.
+    then:
+      - Readable file-and-owner IDs are used where available, with UTF-16 range suffixes for collisions and context-free anonymous callables.
+    implementedBy:
+      - function: fn:src/functions.ts#contextFor
+        role: Derives lexical ownership breadcrumbs.
+      - function: fn:src/functions.ts#lexicalId-variable
+        role: Produces the readable ID before any range disambiguation.
+    verifiedBy:
+      - test: test:test/catalog-integration.test.mjs#readable-lexical-IDs-expose-ownership-and-fail-closed-when-a-range-shifts
+        checks: Checks readable identities and UTF-16 suffixes for collisions.
+      - test: test:test/identity.test.ts#normal-catalog-writes-lexical-IDs-preserves-annotations-and-refuses-range-churn
+        checks: Checks UTF-16 offsets and refusal to silently shift IDs.

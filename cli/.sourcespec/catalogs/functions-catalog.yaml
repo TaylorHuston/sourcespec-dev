@@ -1,0 +1,1983 @@
+# Readable lexical IDs; range suffixes may change. Review links before any refresh.
+functions:
+  - id: fn:scripts/install-local.mjs#schemas-variable.data-models-functions-operations-requirements-tests-.map
+    name: null
+    location: scripts/install-local.mjs
+    sourceScope: tooling
+    context: schemas variable > ['data-models', 'functions', 'operations', 'requirements', 'tests'].map
+    parameters:
+      - name: name
+        type: string
+        required: true
+    return:
+      type: object
+
+  - id: fn:scripts/install-local.mjs#stat-variable
+    name: null
+    location: scripts/install-local.mjs
+    sourceScope: tooling
+    context: stat variable
+    parameters:
+      - name: path
+        type: any
+        required: true
+    return:
+      type: any
+
+  - id: fn:src/functions.ts#readCatalog
+    name: readCatalog
+    location: src/functions.ts
+    sourceScope: application
+    parameters: []
+    return:
+      type: FunctionRecord[]
+
+  - id: fn:src/functions.ts#sourceFiles
+    name: sourceFiles
+    location: src/functions.ts
+    sourceScope: application
+    parameters:
+      - name: directory
+        type: any
+        required: false
+    return:
+      type: string[]
+
+  - id: fn:src/functions.ts#sourceFiles.return.readdirSync-directory-withFileTypes-true-.flatMap
+    name: null
+    location: src/functions.ts
+    sourceScope: application
+    context: "sourceFiles > return > readdirSync(directory, { withFileTypes: true }).flatMap"
+    parameters:
+      - name: entry
+        type: any
+        required: true
+    return:
+      type: any[]
+
+  - id: fn:src/functions.ts#isSignatureOnly
+    name: isSignatureOnly
+    location: src/functions.ts
+    sourceScope: application
+    parameters:
+      - name: node
+        type: skillTs.Node
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:src/functions.ts#isFunction
+    name: isFunction
+    location: src/functions.ts
+    sourceScope: application
+    parameters:
+      - name: node
+        type: skillTs.Node
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:src/functions.ts#declaredName
+    name: declaredName
+    location: src/functions.ts
+    sourceScope: application
+    parameters:
+      - name: node
+        type: FunctionNode
+        required: true
+    return:
+      type: null | string
+
+  - id: fn:src/functions.ts#expressionLabel
+    name: expressionLabel
+    location: src/functions.ts
+    sourceScope: application
+    parameters:
+      - name: node
+        type: skillTs.Node
+        required: true
+      - name: source
+        type: skillTs.SourceFile
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/functions.ts#expressionLabel.argumentsHint-variable.node.arguments.filter
+    name: null
+    location: src/functions.ts
+    sourceScope: application
+    context: expressionLabel > argumentsHint variable > node.arguments.filter
+    parameters:
+      - name: argument
+        type: skillTs.Expression
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:src/functions.ts#expressionLabel.argumentsHint-variable.node.arguments.filter-.map
+    name: null
+    location: src/functions.ts
+    sourceScope: application
+    context: expressionLabel > argumentsHint variable > node.arguments.filter().map
+    parameters:
+      - name: argument
+        type: skillTs.Expression
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/functions.ts#contextFor
+    name: contextFor
+    location: src/functions.ts
+    sourceScope: application
+    parameters:
+      - name: node
+        type: FunctionNode
+        required: true
+      - name: source
+        type: skillTs.SourceFile
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/functions.ts#contextFor.id-variable.element.attributes.properties.find
+    name: null
+    location: src/functions.ts
+    sourceScope: application
+    context: contextFor > id variable > element.attributes.properties.find
+    parameters:
+      - name: attribute
+        type: skillTs.JsxAttributeLike
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:src/functions.ts#sourceScopeFor
+    name: sourceScopeFor
+    location: src/functions.ts
+    sourceScope: application
+    parameters:
+      - name: location
+        type: string
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/functions.ts#conciseType
+    name: conciseType
+    location: src/functions.ts
+    sourceScope: application
+    parameters:
+      - name: type
+        type: skillTs.Type
+        required: true
+      - name: node
+        type: skillTs.Node
+        required: true
+      - name: checker
+        type: skillTs.TypeChecker
+        required: true
+      - name: visiting
+        type: Set<skillTs.Type>
+        required: false
+      - name: depth
+        type: number
+        required: false
+    return:
+      type: string
+
+  - id: fn:src/functions.ts#conciseType.return.new-Set.invokes-conciseType.type.types.map@utf16:11340-11399:ArrowFunction
+    name: null
+    location: src/functions.ts
+    sourceScope: application
+    context: conciseType > return > new Set > invokes conciseType > type.types.map > @utf16:11340-11399:ArrowFunction
+    parameters:
+      - name: part
+        type: skillTs.Type
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/functions.ts#conciseType.return.new-Set.invokes-conciseType.type.types.map@utf16:11518-11577:ArrowFunction
+    name: null
+    location: src/functions.ts
+    sourceScope: application
+    context: conciseType > return > new Set > invokes conciseType > type.types.map > @utf16:11518-11577:ArrowFunction
+    parameters:
+      - name: part
+        type: skillTs.Type
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/functions.ts#nodeBuiltins-variable.new-Set.invokes-name.replace.builtinModules.map
+    name: null
+    location: src/functions.ts
+    sourceScope: application
+    context: nodeBuiltins variable > new Set > invokes name.replace > builtinModules.map
+    parameters:
+      - name: name
+        type: any
+        required: true
+    return:
+      type: any
+
+  - id: fn:src/functions.ts#stableParameterType
+    name: stableParameterType
+    location: src/functions.ts
+    sourceScope: application
+    parameters:
+      - name: type
+        type: string
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/functions.ts#stableParameterType.return.type.replace
+    name: null
+    location: src/functions.ts
+    sourceScope: application
+    context: stableParameterType > return > type.replace
+    parameters:
+      - name: original
+        type: string
+        required: true
+      - name: moduleName
+        type: string
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/functions.ts#conciseParameterType
+    name: conciseParameterType
+    location: src/functions.ts
+    sourceScope: application
+    parameters:
+      - name: parameter
+        type: skillTs.ParameterDeclaration
+        required: true
+      - name: node
+        type: FunctionNode
+        required: true
+      - name: source
+        type: skillTs.SourceFile
+        required: true
+      - name: checker
+        type: skillTs.TypeChecker
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/functions.ts#conciseParameterType.generic-variable.args.map
+    name: null
+    location: src/functions.ts
+    sourceScope: application
+    context: conciseParameterType > generic variable > args.map
+    parameters:
+      - name: arg
+        type: skillTs.Type
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/functions.ts#identity-variable
+    name: null
+    location: src/functions.ts
+    sourceScope: application
+    context: identity variable
+    parameters:
+      - name: entry
+        type: Pick<FunctionRecord, "location" | "name" | "context">
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/functions.ts#projectLocation-variable
+    name: null
+    location: src/functions.ts
+    sourceScope: application
+    context: projectLocation variable
+    parameters:
+      - name: location
+        type: string
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/functions.ts#lexicalSegment-variable
+    name: null
+    location: src/functions.ts
+    sourceScope: application
+    context: lexicalSegment variable
+    parameters:
+      - name: text
+        type: string
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/functions.ts#lexicalId-variable
+    name: null
+    location: src/functions.ts
+    sourceScope: application
+    context: lexicalId variable
+    parameters:
+      - name: entry
+        type: Pick<FunctionRecord, "location" | "name" | "context">
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/functions.ts#hasSeparatedEntries
+    name: hasSeparatedEntries
+    location: src/functions.ts
+    sourceScope: application
+    parameters:
+      - name: text
+        type: string
+        required: true
+      - name: count
+        type: number
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:src/functions.ts#hasSeparatedEntries.starts-variable.lines.flatMap
+    name: null
+    location: src/functions.ts
+    sourceScope: application
+    context: hasSeparatedEntries > starts variable > lines.flatMap
+    parameters:
+      - name: line
+        type: string
+        required: true
+      - name: index
+        type: number
+        required: true
+    return:
+      type: number[]
+
+  - id: fn:src/functions.ts#hasSeparatedEntries.return.starts.every
+    name: null
+    location: src/functions.ts
+    sourceScope: application
+    context: hasSeparatedEntries > return > starts.every
+    parameters:
+      - name: index
+        type: number
+        required: true
+      - name: position
+        type: number
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:src/functions.ts#formatCatalog
+    name: formatCatalog
+    location: src/functions.ts
+    sourceScope: application
+    parameters:
+      - name: records
+        type: FunctionRecord[]
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/functions.ts#formatCatalog.body-variable.YAML.stringify-functions-records-lineWidth-110-.replace
+    name: null
+    location: src/functions.ts
+    sourceScope: application
+    context: "formatCatalog > body variable > YAML.stringify({ functions: records }, { lineWidth: 110 }).replace"
+    parameters:
+      - name: line
+        type: string
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/functions.ts#visit-variable
+    name: null
+    location: src/functions.ts
+    sourceScope: application
+    context: visit variable
+    parameters:
+      - name: node
+        type: skillTs.Node
+        required: true
+    return:
+      type: void
+
+  - id: fn:src/functions.ts#visit
+    name: visit
+    location: src/functions.ts
+    sourceScope: application
+    parameters:
+      - name: node
+        type: skillTs.Node
+        required: true
+    return:
+      type: void
+
+  - id: fn:src/functions.ts#visit.parameters-variable.node.parameters.map
+    name: null
+    location: src/functions.ts
+    sourceScope: application
+    context: visit > parameters variable > node.parameters.map
+    parameters:
+      - name: parameter
+        type: skillTs.ParameterDeclaration
+        required: true
+    return:
+      type: object
+
+  - id: fn:src/functions.ts#visit.parameters-variable.node.parameters.map.oldParameter-variable.old.parameters.find
+    name: null
+    location: src/functions.ts
+    sourceScope: application
+    context: visit > parameters variable > node.parameters.map > oldParameter variable > old.parameters.find
+    parameters:
+      - name: item
+        type: Parameter
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:src/functions.ts#missing-variable.previous.filter
+    name: null
+    location: src/functions.ts
+    sourceScope: application
+    context: missing variable > previous.filter
+    parameters:
+      - name: entry
+        type: FunctionRecord
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:src/functions.ts#reportAmbiguities
+    name: reportAmbiguities
+    location: src/functions.ts
+    sourceScope: application
+    parameters:
+      - name: limit
+        type: number
+        required: false
+    return:
+      type: void
+
+  - id: fn:src/functions.ts#reportAmbiguities.unresolved-variable.records.filter
+    name: null
+    location: src/functions.ts
+    sourceScope: application
+    context: reportAmbiguities > unresolved variable > records.filter
+    parameters:
+      - name: entry
+        type: FunctionRecord
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:src/functions.ts#console.log.byDirectory-.map
+    name: null
+    location: src/functions.ts
+    sourceScope: application
+    context: console.log > [...byDirectory].map
+    parameters:
+      - name: "[name, count]"
+        type: "[string, number]"
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/functions.ts#console.log.issueKinds-.map
+    name: null
+    location: src/functions.ts
+    sourceScope: application
+    context: console.log > [...issueKinds].map
+    parameters:
+      - name: "[name, count]"
+        type: "[string, number]"
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/functions.ts#busiest-variable.issueDirectories-.sort
+    name: null
+    location: src/functions.ts
+    sourceScope: application
+    context: busiest variable > [...issueDirectories].sort
+    parameters:
+      - name: a
+        type: "[string, number]"
+        required: true
+      - name: b
+        type: "[string, number]"
+        required: true
+    return:
+      type: number
+
+  - id: fn:src/functions.ts#console.log.busiest.map
+    name: null
+    location: src/functions.ts
+    sourceScope: application
+    context: console.log > busiest.map
+    parameters:
+      - name: "[name, count]"
+        type: "[string, number]"
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/functions.ts#samples-variable.identityIssues.filter
+    name: null
+    location: src/functions.ts
+    sourceScope: application
+    context: samples variable > identityIssues.filter
+    parameters:
+      - name: issue
+        type: IdentityIssue
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:src/functions.ts#new-Set.samples.map
+    name: null
+    location: src/functions.ts
+    sourceScope: application
+    context: new Set > samples.map
+    parameters:
+      - name: issue
+        type: IdentityIssue
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/functions.ts#new-Error.identityIssues.slice-0-5-.map
+    name: null
+    location: src/functions.ts
+    sourceScope: application
+    context: new Error > identityIssues.slice(0, 5).map
+    parameters:
+      - name: issue
+        type: IdentityIssue
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/functions.ts#new-Error.missing.map
+    name: null
+    location: src/functions.ts
+    sourceScope: application
+    context: new Error > missing.map
+    parameters:
+      - name: entry
+        type: FunctionRecord
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/functions.ts#new-Set.records.map
+    name: null
+    location: src/functions.ts
+    sourceScope: application
+    context: new Set > records.map
+    parameters:
+      - name: entry
+        type: FunctionRecord
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/requirements.ts#parseFile-variable
+    name: null
+    location: src/requirements.ts
+    sourceScope: application
+    context: parseFile variable
+    parameters:
+      - name: path
+        type: string
+        required: true
+    return:
+      type: unknown
+
+  - id: fn:src/requirements.ts#files-variable.readdirSync-directory-.filter
+    name: null
+    location: src/requirements.ts
+    sourceScope: application
+    context: files variable > readdirSync(directory).filter
+    parameters:
+      - name: name
+        type: any
+        required: true
+    return:
+      type: any
+
+  - id: fn:src/requirements.ts#console.error.issues.map
+    name: null
+    location: src/requirements.ts
+    sourceScope: application
+    context: console.error > issues.map
+    parameters:
+      - name: issue
+        type: string
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/schema.ts#readInstalledSchema
+    name: readInstalledSchema
+    location: src/schema.ts
+    sourceScope: application
+    parameters:
+      - name: name
+        type: string
+        required: true
+    return:
+      type: SchemaObject
+
+  - id: fn:src/sourcespec.ts#forceCount-variable.options.filter
+    name: null
+    location: src/sourcespec.ts
+    sourceScope: application
+    context: forceCount variable > options.filter
+    parameters:
+      - name: option
+        type: any
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:src/sourcespec.ts#process.argv.splice.options.filter
+    name: null
+    location: src/sourcespec.ts
+    sourceScope: application
+    context: process.argv.splice > options.filter
+    parameters:
+      - name: option
+        type: any
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:src/tests.ts#identity-variable
+    name: null
+    location: src/tests.ts
+    sourceScope: application
+    context: identity variable
+    parameters:
+      - name: entry
+        type: Pick<TestRecord, "location" | "name" | "suite">
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/tests.ts#lexicalSegment-variable
+    name: null
+    location: src/tests.ts
+    sourceScope: application
+    context: lexicalSegment variable
+    parameters:
+      - name: text
+        type: string
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/tests.ts#lexicalId-variable
+    name: null
+    location: src/tests.ts
+    sourceScope: application
+    context: lexicalId variable
+    parameters:
+      - name: entry
+        type: Pick<TestRecord, "location" | "name" | "suite">
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/tests.ts#readCatalog
+    name: readCatalog
+    location: src/tests.ts
+    sourceScope: application
+    parameters: []
+    return:
+      type: TestRecord[]
+
+  - id: fn:src/tests.ts#testFile-variable
+    name: null
+    location: src/tests.ts
+    sourceScope: application
+    context: testFile variable
+    parameters:
+      - name: path
+        type: string
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:src/tests.ts#testFiles
+    name: testFiles
+    location: src/tests.ts
+    sourceScope: application
+    parameters:
+      - name: directory
+        type: any
+        required: false
+    return:
+      type: string[]
+
+  - id: fn:src/tests.ts#testFiles.return.readdirSync-directory-withFileTypes-true-.flatMap
+    name: null
+    location: src/tests.ts
+    sourceScope: application
+    context: "testFiles > return > readdirSync(directory, { withFileTypes: true }).flatMap"
+    parameters:
+      - name: entry
+        type: any
+        required: true
+    return:
+      type: any[]
+
+  - id: fn:src/tests.ts#calleeFor
+    name: calleeFor
+    location: src/tests.ts
+    sourceScope: application
+    parameters:
+      - name: expression
+        type: ts.Expression
+        required: true
+      - name: aliases
+        type: Map<string, "test" | "describe">
+        required: true
+    return:
+      type: null | Callee
+
+  - id: fn:src/tests.ts#aliasesFor
+    name: aliasesFor
+    location: src/tests.ts
+    sourceScope: application
+    parameters:
+      - name: source
+        type: ts.SourceFile
+        required: true
+    return:
+      type: Map
+
+  - id: fn:src/tests.ts#boundaryCalls
+    name: boundaryCalls
+    location: src/tests.ts
+    sourceScope: application
+    parameters:
+      - name: source
+        type: ts.SourceFile
+        required: true
+    return:
+      type: object
+
+  - id: fn:src/tests.ts#kindFor
+    name: kindFor
+    location: src/tests.ts
+    sourceScope: application
+    parameters:
+      - name: call
+        type: ts.CallExpression
+        required: true
+      - name: boundaries
+        type: "{ component: Set<string>; api: Set<string>; }"
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/tests.ts#kindFor.visit
+    name: visit
+    location: src/tests.ts
+    sourceScope: application
+    context: kindFor
+    parameters:
+      - name: node
+        type: ts.Node
+        required: true
+    return:
+      type: void
+
+  - id: fn:src/tests.ts#titleFor
+    name: titleFor
+    location: src/tests.ts
+    sourceScope: application
+    parameters:
+      - name: call
+        type: ts.CallExpression
+        required: true
+      - name: source
+        type: ts.SourceFile
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/tests.ts#prior-variable.new-Map.previous.map
+    name: null
+    location: src/tests.ts
+    sourceScope: application
+    context: prior variable > new Map > previous.map
+    parameters:
+      - name: entry
+        type: TestRecord
+        required: true
+    return:
+      type: object
+
+  - id: fn:src/tests.ts#suitesFor
+    name: suitesFor
+    location: src/tests.ts
+    sourceScope: application
+    parameters:
+      - name: node
+        type: ts.Node
+        required: true
+    return:
+      type: string[]
+
+  - id: fn:src/tests.ts#visit
+    name: visit
+    location: src/tests.ts
+    sourceScope: application
+    parameters:
+      - name: node
+        type: ts.Node
+        required: true
+    return:
+      type: void
+
+  - id: fn:src/tests.ts#missing-variable.previous.filter
+    name: null
+    location: src/tests.ts
+    sourceScope: application
+    context: missing variable > previous.filter
+    parameters:
+      - name: entry
+        type: TestRecord
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:src/tests.ts#new-Error.missing.map
+    name: null
+    location: src/tests.ts
+    sourceScope: application
+    context: new Error > missing.map
+    parameters:
+      - name: entry
+        type: TestRecord
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/tests.ts#hasSeparatedEntries
+    name: hasSeparatedEntries
+    location: src/tests.ts
+    sourceScope: application
+    parameters:
+      - name: text
+        type: string
+        required: true
+      - name: count
+        type: number
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:src/tests.ts#hasSeparatedEntries.starts-variable.lines.flatMap
+    name: null
+    location: src/tests.ts
+    sourceScope: application
+    context: hasSeparatedEntries > starts variable > lines.flatMap
+    parameters:
+      - name: line
+        type: string
+        required: true
+      - name: index
+        type: number
+        required: true
+    return:
+      type: number[]
+
+  - id: fn:src/tests.ts#hasSeparatedEntries.return.starts.every
+    name: null
+    location: src/tests.ts
+    sourceScope: application
+    context: hasSeparatedEntries > return > starts.every
+    parameters:
+      - name: index
+        type: number
+        required: true
+      - name: position
+        type: number
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:src/tests.ts#formatCatalog
+    name: formatCatalog
+    location: src/tests.ts
+    sourceScope: application
+    parameters:
+      - name: entries
+        type: TestRecord[]
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/tests.ts#formatCatalog.body-variable.YAML.stringify-tests-entries-lineWidth-110-.replace
+    name: null
+    location: src/tests.ts
+    sourceScope: application
+    context: "formatCatalog > body variable > YAML.stringify({ tests: entries }, { lineWidth: 110 }).replace"
+    parameters:
+      - name: line
+        type: string
+        required: true
+    return:
+      type: string
+
+  - id: fn:src/tests.ts#reportAmbiguities
+    name: reportAmbiguities
+    location: src/tests.ts
+    sourceScope: application
+    parameters: []
+    return:
+      type: void
+
+  - id: fn:src/tests.ts#reportAmbiguities.unresolved-variable.records.filter
+    name: null
+    location: src/tests.ts
+    sourceScope: application
+    context: reportAmbiguities > unresolved variable > records.filter
+    parameters:
+      - name: entry
+        type: TestRecord
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:test/catalog-integration.test.mjs#test-readable-lexical-IDs-expose-ownership-and-fail-closed-when-a-range-shifts
+    name: null
+    location: test/catalog-integration.test.mjs
+    sourceScope: test
+    context: test(readable lexical IDs expose ownership and fail closed when a range shifts)
+    parameters: []
+    return:
+      type: void
+
+  - id: fn:test/catalog-integration.test.mjs#test-readable-lexical-IDs-expose-ownership-and-fail-closed-when-a-range-shifts.run-variable
+    name: null
+    location: test/catalog-integration.test.mjs
+    sourceScope: test
+    context: test(readable lexical IDs expose ownership and fail closed when a range shifts) > run variable
+    parameters:
+      - name: mode
+        type: any
+        required: true
+      - name: force
+        type: boolean
+        required: false
+    return:
+      type: any
+
+  - id: fn:test/catalog-integration.test.mjs#test-readable-lexical-IDs-expose-ownership-and-fail-closed-when-a-range-shifts.assert.entries.some@utf16:2678-2729:ArrowFunction
+    name: null
+    location: test/catalog-integration.test.mjs
+    sourceScope: test
+    context: test(readable lexical IDs expose ownership and fail closed when a range shifts) > assert >
+      entries.some > @utf16:2678-2729:ArrowFunction
+    parameters:
+      - name: entry
+        type: any
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:test/catalog-integration.test.mjs#test-readable-lexical-IDs-expose-ownership-and-fail-closed-when-a-range-shifts.assert.entries.some@utf16:2756-2808:ArrowFunction
+    name: null
+    location: test/catalog-integration.test.mjs
+    sourceScope: test
+    context: test(readable lexical IDs expose ownership and fail closed when a range shifts) > assert >
+      entries.some > @utf16:2756-2808:ArrowFunction
+    parameters:
+      - name: entry
+        type: any
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:test/catalog-integration.test.mjs#test-readable-lexical-IDs-expose-ownership-and-fail-closed-when-a-range-shifts.assert.equal-Store.entries.find
+    name: null
+    location: test/catalog-integration.test.mjs
+    sourceScope: test
+    context: test(readable lexical IDs expose ownership and fail closed when a range shifts) > assert.equal(Store)
+      > entries.find
+    parameters:
+      - name: entry
+        type: any
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:test/catalog-integration.test.mjs#test-readable-lexical-IDs-expose-ownership-and-fail-closed-when-a-range-shifts.assert.match.entries.find@utf16:2955-3009:ArrowFunction
+    name: null
+    location: test/catalog-integration.test.mjs
+    sourceScope: test
+    context: test(readable lexical IDs expose ownership and fail closed when a range shifts) > assert.match >
+      entries.find > @utf16:2955-3009:ArrowFunction
+    parameters:
+      - name: entry
+        type: any
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:test/catalog-integration.test.mjs#test-readable-lexical-IDs-expose-ownership-and-fail-closed-when-a-range-shifts.assert.match.entries.find@utf16:3076-3131:ArrowFunction
+    name: null
+    location: test/catalog-integration.test.mjs
+    sourceScope: test
+    context: test(readable lexical IDs expose ownership and fail closed when a range shifts) > assert.match >
+      entries.find > @utf16:3076-3131:ArrowFunction
+    parameters:
+      - name: entry
+        type: any
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:test/catalog-integration.test.mjs#test-readable-lexical-IDs-expose-ownership-and-fail-closed-when-a-range-shifts.assert.equal.new-Set.entries.map
+    name: null
+    location: test/catalog-integration.test.mjs
+    sourceScope: test
+    context: test(readable lexical IDs expose ownership and fail closed when a range shifts) > assert.equal > new
+      Set > entries.map
+    parameters:
+      - name: entry
+        type: any
+        required: true
+    return:
+      type: any
+
+  - id: fn:test/catalog-integration.test.mjs#test-readable-lexical-IDs-expose-ownership-and-fail-closed-when-a-range-shifts.assert.equal-get-set-two-normalized-property-collisions-two-callbacks-and-one-context-free-callback.entries.filter
+    name: null
+    location: test/catalog-integration.test.mjs
+    sourceScope: test
+    context: test(readable lexical IDs expose ownership and fail closed when a range shifts) >
+      assert.equal(get/set, two normalized property collisions, two callbacks, and one context-free callback)
+      > entries.filter
+    parameters:
+      - name: entry
+        type: any
+        required: true
+    return:
+      type: any
+
+  - id: fn:test/catalog-integration.test.mjs#test-readable-lexical-IDs-expose-ownership-and-fail-closed-when-a-range-shifts.first-variable.entries.find
+    name: null
+    location: test/catalog-integration.test.mjs
+    sourceScope: test
+    context: test(readable lexical IDs expose ownership and fail closed when a range shifts) > first variable >
+      entries.find
+    parameters:
+      - name: entry
+        type: any
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:test/catalog-integration.test.mjs#test-readable-lexical-IDs-expose-ownership-and-fail-closed-when-a-range-shifts.assert.replaced.some
+    name: null
+    location: test/catalog-integration.test.mjs
+    sourceScope: test
+    context: test(readable lexical IDs expose ownership and fail closed when a range shifts) > assert > replaced.some
+    parameters:
+      - name: entry
+        type: any
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:test/classification.test.ts#run-variable
+    name: null
+    location: test/classification.test.ts
+    sourceScope: test
+    context: run variable
+    parameters:
+      - name: app
+        type: string
+        required: true
+      - name: mode
+        type: '"--check" | "--write"'
+        required: true
+    return:
+      type: any
+
+  - id: fn:test/classification.test.ts#test-classifies-only-invoked-boundaries-and-reports-genuinely-unresolved-tests
+    name: null
+    location: test/classification.test.ts
+    sourceScope: test
+    context: test(classifies only invoked boundaries and reports genuinely unresolved tests)
+    parameters: []
+    return:
+      type: void
+
+  - id: fn:test/classification.test.ts#test-classifies-only-invoked-boundaries-and-reports-genuinely-unresolved-tests.assert.deepEqual.entries.map
+    name: null
+    location: test/classification.test.ts
+    sourceScope: test
+    context: test(classifies only invoked boundaries and reports genuinely unresolved tests) > assert.deepEqual >
+      entries.map
+    parameters:
+      - name: entry
+        type: "{ kind: string; }"
+        required: true
+    return:
+      type: string
+
+  - id: fn:test/classification.test.ts#test-classifies-only-invoked-boundaries-and-reports-genuinely-unresolved-tests.ids-variable.entries.map
+    name: null
+    location: test/classification.test.ts
+    sourceScope: test
+    context: test(classifies only invoked boundaries and reports genuinely unresolved tests) > ids variable >
+      entries.map
+    parameters:
+      - name: entry
+        type: "{ id: string; }"
+        required: true
+    return:
+      type: string
+
+  - id: fn:test/classification.test.ts#test-classifies-only-invoked-boundaries-and-reports-genuinely-unresolved-tests.assert.deepEqual.refreshed.map
+    name: null
+    location: test/classification.test.ts
+    sourceScope: test
+    context: test(classifies only invoked boundaries and reports genuinely unresolved tests) > assert.deepEqual >
+      refreshed.map
+    parameters:
+      - name: entry
+        type: "{ id: string; }"
+        required: true
+    return:
+      type: string
+
+  - id: fn:test/functions.test.ts#run
+    name: run
+    location: test/functions.test.ts
+    sourceScope: test
+    parameters:
+      - name: app
+        type: string
+        required: true
+      - name: mode
+        type: '"--probe" | "--check" | "--write"'
+        required: true
+    return:
+      type: any
+
+  - id: fn:test/functions.test.ts#runScope
+    name: runScope
+    location: test/functions.test.ts
+    sourceScope: test
+    parameters:
+      - name: project
+        type: string
+        required: true
+      - name: scope
+        type: string
+        required: true
+      - name: mode
+        type: '"--probe" | "--check" | "--write"'
+        required: true
+    return:
+      type: any
+
+  - id: fn:test/functions.test.ts#test-inventories-one-app-preserves-lexical-IDs-and-annotations-and-refuses-silent-removals
+    name: null
+    location: test/functions.test.ts
+    sourceScope: test
+    context: test(inventories one app, preserves lexical IDs and annotations, and refuses silent removals)
+    parameters: []
+    return:
+      type: void
+
+  - id: fn:test/functions.test.ts#test-inventories-one-app-preserves-lexical-IDs-and-annotations-and-refuses-silent-removals.initialIds-variable.YAML.parse-text-.functions.map
+    name: null
+    location: test/functions.test.ts
+    sourceScope: test
+    context: test(inventories one app, preserves lexical IDs and annotations, and refuses silent removals) >
+      initialIds variable > YAML.parse(text).functions.map
+    parameters:
+      - name: entry
+        type: "{ id: string; }"
+        required: true
+    return:
+      type: string
+
+  - id: fn:test/functions.test.ts#test-inventories-one-app-preserves-lexical-IDs-and-annotations-and-refuses-silent-removals.assert.deepEqual.entries.map@utf16:3140-3175:ArrowFunction
+    name: null
+    location: test/functions.test.ts
+    sourceScope: test
+    context: test(inventories one app, preserves lexical IDs and annotations, and refuses silent removals) >
+      assert.deepEqual > entries.map > @utf16:3140-3175:ArrowFunction
+    parameters:
+      - name: entry
+        type: "{ id: string; }"
+        required: true
+    return:
+      type: string
+
+  - id: fn:test/functions.test.ts#test-inventories-one-app-preserves-lexical-IDs-and-annotations-and-refuses-silent-removals.assert.entries.some@utf16:3250-3313:ArrowFunction
+    name: null
+    location: test/functions.test.ts
+    sourceScope: test
+    context: test(inventories one app, preserves lexical IDs and annotations, and refuses silent removals) >
+      assert > entries.some > @utf16:3250-3313:ArrowFunction
+    parameters:
+      - name: entry
+        type: "{ id: string; }"
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:test/functions.test.ts#test-inventories-one-app-preserves-lexical-IDs-and-annotations-and-refuses-silent-removals.scopeOf-variable
+    name: null
+    location: test/functions.test.ts
+    sourceScope: test
+    context: test(inventories one app, preserves lexical IDs and annotations, and refuses silent removals) >
+      scopeOf variable
+    parameters:
+      - name: location
+        type: string
+        required: true
+    return:
+      type: any
+
+  - id: fn:test/functions.test.ts#test-inventories-one-app-preserves-lexical-IDs-and-annotations-and-refuses-silent-removals.scopeOf-variable.entries.find
+    name: null
+    location: test/functions.test.ts
+    sourceScope: test
+    context: test(inventories one app, preserves lexical IDs and annotations, and refuses silent removals) >
+      scopeOf variable > entries.find
+    parameters:
+      - name: entry
+        type: "{ location: string; }"
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:test/functions.test.ts#test-inventories-one-app-preserves-lexical-IDs-and-annotations-and-refuses-silent-removals.assert.deepEqual.YAML.parse-readFileSync-catalog-utf8-.functions.map
+    name: null
+    location: test/functions.test.ts
+    sourceScope: test
+    context: test(inventories one app, preserves lexical IDs and annotations, and refuses silent removals) >
+      assert.deepEqual > YAML.parse(readFileSync(catalog, utf8)).functions.map
+    parameters:
+      - name: entry
+        type: "{ id: string; }"
+        required: true
+    return:
+      type: string
+
+  - id: fn:test/functions.test.ts#test-inventories-one-app-preserves-lexical-IDs-and-annotations-and-refuses-silent-removals.assert.entries.some@utf16:4398-4478:ArrowFunction
+    name: null
+    location: test/functions.test.ts
+    sourceScope: test
+    context: test(inventories one app, preserves lexical IDs and annotations, and refuses silent removals) >
+      assert > entries.some > @utf16:4398-4478:ArrowFunction
+    parameters:
+      - name: entry
+        type: "{ context?: string; }"
+        required: true
+    return:
+      type: undefined | boolean
+
+  - id: fn:test/functions.test.ts#test-inventories-one-app-preserves-lexical-IDs-and-annotations-and-refuses-silent-removals.assert.entries.some@utf16:4505-4574:ArrowFunction
+    name: null
+    location: test/functions.test.ts
+    sourceScope: test
+    context: test(inventories one app, preserves lexical IDs and annotations, and refuses silent removals) >
+      assert > entries.some > @utf16:4505-4574:ArrowFunction
+    parameters:
+      - name: entry
+        type: "{ context?: string; }"
+        required: true
+    return:
+      type: undefined | boolean
+
+  - id: fn:test/functions.test.ts#test-inventories-one-app-preserves-lexical-IDs-and-annotations-and-refuses-silent-removals.assert.entries.some@utf16:4601-4669:ArrowFunction
+    name: null
+    location: test/functions.test.ts
+    sourceScope: test
+    context: test(inventories one app, preserves lexical IDs and annotations, and refuses silent removals) >
+      assert > entries.some > @utf16:4601-4669:ArrowFunction
+    parameters:
+      - name: entry
+        type: "{ location: string; }"
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:test/functions.test.ts#test-inventories-one-app-preserves-lexical-IDs-and-annotations-and-refuses-silent-removals.assert.entries.every
+    name: null
+    location: test/functions.test.ts
+    sourceScope: test
+    context: test(inventories one app, preserves lexical IDs and annotations, and refuses silent removals) >
+      assert > entries.every
+    parameters:
+      - name: entry
+        type: "{ location: string; }"
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:test/functions.test.ts#test-inventories-one-app-preserves-lexical-IDs-and-annotations-and-refuses-silent-removals.ids-variable.entries.map
+    name: null
+    location: test/functions.test.ts
+    sourceScope: test
+    context: test(inventories one app, preserves lexical IDs and annotations, and refuses silent removals) > ids
+      variable > entries.map
+    parameters:
+      - name: entry
+        type: "{ id: string; }"
+        required: true
+    return:
+      type: string
+
+  - id: fn:test/functions.test.ts#test-inventories-one-app-preserves-lexical-IDs-and-annotations-and-refuses-silent-removals.assert.deepEqual.entries.map@utf16:5256-5291:ArrowFunction
+    name: null
+    location: test/functions.test.ts
+    sourceScope: test
+    context: test(inventories one app, preserves lexical IDs and annotations, and refuses silent removals) >
+      assert.deepEqual > entries.map > @utf16:5256-5291:ArrowFunction
+    parameters:
+      - name: entry
+        type: "{ id: string; }"
+        required: true
+    return:
+      type: string
+
+  - id: fn:test/functions.test.ts#test-binds-decorated-fields-class-callbacks-and-default-exports-across-harmless-reordering
+    name: null
+    location: test/functions.test.ts
+    sourceScope: test
+    context: test(binds decorated fields, class callbacks, and default exports across harmless reordering)
+    parameters: []
+    return:
+      type: void
+
+  - id: fn:test/functions.test.ts#test-binds-decorated-fields-class-callbacks-and-default-exports-across-harmless-reordering.source-variable
+    name: null
+    location: test/functions.test.ts
+    sourceScope: test
+    context: test(binds decorated fields, class callbacks, and default exports across harmless reordering) >
+      source variable
+    parameters:
+      - name: lines
+        type: string[]
+        required: true
+    return:
+      type: string
+
+  - id: fn:test/functions.test.ts#test-binds-decorated-fields-class-callbacks-and-default-exports-across-harmless-reordering.assert.equal.entries.filter
+    name: null
+    location: test/functions.test.ts
+    sourceScope: test
+    context: test(binds decorated fields, class callbacks, and default exports across harmless reordering) >
+      assert.equal > entries.filter
+    parameters:
+      - name: entry
+        type: "{ id: string; name?: string; context?: string; parameters: { name: string; type: string; }[]; }"
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:test/functions.test.ts#test-binds-decorated-fields-class-callbacks-and-default-exports-across-harmless-reordering.assert.equal-Store.entries.find
+    name: null
+    location: test/functions.test.ts
+    sourceScope: test
+    context: test(binds decorated fields, class callbacks, and default exports across harmless reordering) >
+      assert.equal(Store) > entries.find
+    parameters:
+      - name: entry
+        type: "{ id: string; name?: string; context?: string; parameters: { name: string; type: string; }[]; }"
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:test/functions.test.ts#test-binds-decorated-fields-class-callbacks-and-default-exports-across-harmless-reordering.assert.equal-Changed-string.entries.flatMap
+    name: null
+    location: test/functions.test.ts
+    sourceScope: test
+    context: test(binds decorated fields, class callbacks, and default exports across harmless reordering) >
+      assert.equal(Changed<string>) > entries.flatMap
+    parameters:
+      - name: entry
+        type: "{ id: string; name?: string; context?: string; parameters: { name: string; type: string; }[]; }"
+        required: true
+    return:
+      type: object[]
+
+  - id: fn:test/functions.test.ts#test-binds-decorated-fields-class-callbacks-and-default-exports-across-harmless-reordering.assert.equal-Changed-string.entries.flatMap-.find
+    name: null
+    location: test/functions.test.ts
+    sourceScope: test
+    context: test(binds decorated fields, class callbacks, and default exports across harmless reordering) >
+      assert.equal(Changed<string>) > entries.flatMap().find
+    parameters:
+      - name: parameter
+        type: "{ name: string; type: string; }"
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:test/functions.test.ts#test-binds-decorated-fields-class-callbacks-and-default-exports-across-harmless-reordering.assert.entries.some@utf16:9090-9163:ArrowFunction
+    name: null
+    location: test/functions.test.ts
+    sourceScope: test
+    context: test(binds decorated fields, class callbacks, and default exports across harmless reordering) >
+      assert > entries.some > @utf16:9090-9163:ArrowFunction
+    parameters:
+      - name: entry
+        type: "{ id: string; name?: string; context?: string; parameters: { name: string; type: string; }[]; }"
+        required: true
+    return:
+      type: undefined | boolean
+
+  - id: fn:test/functions.test.ts#test-binds-decorated-fields-class-callbacks-and-default-exports-across-harmless-reordering.assert.entries.some@utf16:9190-9271:ArrowFunction
+    name: null
+    location: test/functions.test.ts
+    sourceScope: test
+    context: test(binds decorated fields, class callbacks, and default exports across harmless reordering) >
+      assert > entries.some > @utf16:9190-9271:ArrowFunction
+    parameters:
+      - name: entry
+        type: "{ id: string; name?: string; context?: string; parameters: { name: string; type: string; }[]; }"
+        required: true
+    return:
+      type: undefined | boolean
+
+  - id: fn:test/functions.test.ts#test-binds-decorated-fields-class-callbacks-and-default-exports-across-harmless-reordering.assert.entries.some@utf16:9298-9343:ArrowFunction
+    name: null
+    location: test/functions.test.ts
+    sourceScope: test
+    context: test(binds decorated fields, class callbacks, and default exports across harmless reordering) >
+      assert > entries.some > @utf16:9298-9343:ArrowFunction
+    parameters:
+      - name: entry
+        type: "{ id: string; name?: string; context?: string; parameters: { name: string; type: string; }[]; }"
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:test/functions.test.ts#test-binds-decorated-fields-class-callbacks-and-default-exports-across-harmless-reordering.assert.deepEqual.Object.fromEntries.refreshed.map
+    name: null
+    location: test/functions.test.ts
+    sourceScope: test
+    context: test(binds decorated fields, class callbacks, and default exports across harmless reordering) >
+      assert.deepEqual > Object.fromEntries > refreshed.map
+    parameters:
+      - name: entry
+        type: "{ id: string; context?: string; }"
+        required: true
+    return:
+      type: object
+
+  - id: fn:test/functions.test.ts#test-binds-decorated-fields-class-callbacks-and-default-exports-across-harmless-reordering.assert.deepEqual.Object.fromEntries.entries.map
+    name: null
+    location: test/functions.test.ts
+    sourceScope: test
+    context: test(binds decorated fields, class callbacks, and default exports across harmless reordering) >
+      assert.deepEqual > Object.fromEntries > entries.map
+    parameters:
+      - name: entry
+        type: "{ id: string; name?: string; context?: string; parameters: { name: string; type: string; }[]; }"
+        required: true
+    return:
+      type: object
+
+  - id: fn:test/functions.test.ts#test-probes-a-monorepo-owned-scope-before-writing-including-assignment-callbacks-and-source-ownership
+    name: null
+    location: test/functions.test.ts
+    sourceScope: test
+    context: test(probes a monorepo-owned scope before writing, including assignment callbacks and source ownership)
+    parameters: []
+    return:
+      type: void
+
+  - id: fn:test/functions.test.ts#test-probes-a-monorepo-owned-scope-before-writing-including-assignment-callbacks-and-source-ownership.assert.equal-global.console.warn-assignment.entries.find
+    name: null
+    location: test/functions.test.ts
+    sourceScope: test
+    context: test(probes a monorepo-owned scope before writing, including assignment callbacks and source
+      ownership) > assert.equal(global.console.warn assignment) > entries.find
+    parameters:
+      - name: entry
+        type: "{ location: string; }"
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:test/functions.test.ts#test-probes-a-monorepo-owned-scope-before-writing-including-assignment-callbacks-and-source-ownership.assert.equal-test.entries.find
+    name: null
+    location: test/functions.test.ts
+    sourceScope: test
+    context: test(probes a monorepo-owned scope before writing, including assignment callbacks and source
+      ownership) > assert.equal(test) > entries.find
+    parameters:
+      - name: entry
+        type: "{ location: string; }"
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:test/functions.test.ts#test-probes-a-monorepo-owned-scope-before-writing-including-assignment-callbacks-and-source-ownership.assert.equal-tooling.entries.find
+    name: null
+    location: test/functions.test.ts
+    sourceScope: test
+    context: test(probes a monorepo-owned scope before writing, including assignment callbacks and source
+      ownership) > assert.equal(tooling) > entries.find
+    parameters:
+      - name: entry
+        type: "{ location: string; }"
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:test/functions.test.ts#test-probes-a-monorepo-owned-scope-before-writing-including-assignment-callbacks-and-source-ownership.assert.equal-application.entries.find
+    name: null
+    location: test/functions.test.ts
+    sourceScope: test
+    context: test(probes a monorepo-owned scope before writing, including assignment callbacks and source
+      ownership) > assert.equal(application) > entries.find
+    parameters:
+      - name: entry
+        type: "{ location: string; }"
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:test/functions.test.ts#test-probes-a-monorepo-owned-scope-before-writing-including-assignment-callbacks-and-source-ownership.assert.entries.every
+    name: null
+    location: test/functions.test.ts
+    sourceScope: test
+    context: test(probes a monorepo-owned scope before writing, including assignment callbacks and source
+      ownership) > assert > entries.every
+    parameters:
+      - name: entry
+        type: "{ location: string; }"
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:test/functions.test.ts#test-probes-a-monorepo-owned-scope-before-writing-including-assignment-callbacks-and-source-ownership.assert.equal.withRanges.filter
+    name: null
+    location: test/functions.test.ts
+    sourceScope: test
+    context: test(probes a monorepo-owned scope before writing, including assignment callbacks and source
+      ownership) > assert.equal > withRanges.filter
+    parameters:
+      - name: entry
+        type: "{ id: string; location: string; }"
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:test/functions.test.ts#test-probes-a-monorepo-owned-scope-before-writing-including-assignment-callbacks-and-source-ownership.assert.withRanges.filter
+    name: null
+    location: test/functions.test.ts
+    sourceScope: test
+    context: test(probes a monorepo-owned scope before writing, including assignment callbacks and source
+      ownership) > assert > withRanges.filter
+    parameters:
+      - name: entry
+        type: "{ id: string; location: string; }"
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:test/functions.test.ts#test-probes-a-monorepo-owned-scope-before-writing-including-assignment-callbacks-and-source-ownership.assert.withRanges.filter-.every
+    name: null
+    location: test/functions.test.ts
+    sourceScope: test
+    context: test(probes a monorepo-owned scope before writing, including assignment callbacks and source
+      ownership) > assert > withRanges.filter().every
+    parameters:
+      - name: entry
+        type: "{ id: string; location: string; }"
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:test/identity.test.ts#run-variable
+    name: null
+    location: test/identity.test.ts
+    sourceScope: test
+    context: run variable
+    parameters:
+      - name: app
+        type: string
+        required: true
+      - name: mode
+        type: '"--check" | "--write"'
+        required: true
+    return:
+      type: any
+
+  - id: fn:test/identity.test.ts#scoped-variable
+    name: null
+    location: test/identity.test.ts
+    sourceScope: test
+    context: scoped variable
+    parameters:
+      - name: project
+        type: string
+        required: true
+      - name: scope
+        type: string
+        required: true
+      - name: mode
+        type: '"--check" | "--write"'
+        required: true
+    return:
+      type: any
+
+  - id: fn:test/identity.test.ts#test-normal-catalog-writes-lexical-IDs-preserves-annotations-and-refuses-range-churn
+    name: null
+    location: test/identity.test.ts
+    sourceScope: test
+    context: test(normal catalog writes lexical IDs, preserves annotations, and refuses range churn)
+    parameters: []
+    return:
+      type: void
+
+  - id: fn:test/identity.test.ts#test-normal-catalog-writes-lexical-IDs-preserves-annotations-and-refuses-range-churn.assert.equal.new-Set.entries.map
+    name: null
+    location: test/identity.test.ts
+    sourceScope: test
+    context: test(normal catalog writes lexical IDs, preserves annotations, and refuses range churn) >
+      assert.equal > new Set > entries.map
+    parameters:
+      - name: entry
+        type: "{ id: string; context?: string; name?: string; }"
+        required: true
+    return:
+      type: string
+
+  - id: fn:test/identity.test.ts#test-normal-catalog-writes-lexical-IDs-preserves-annotations-and-refuses-range-churn.assert.entries.every
+    name: null
+    location: test/identity.test.ts
+    sourceScope: test
+    context: test(normal catalog writes lexical IDs, preserves annotations, and refuses range churn) > assert >
+      entries.every
+    parameters:
+      - name: entry
+        type: "{ id: string; context?: string; name?: string; }"
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:test/identity.test.ts#test-normal-catalog-writes-lexical-IDs-preserves-annotations-and-refuses-range-churn.assert.equal.entries.filter
+    name: null
+    location: test/identity.test.ts
+    sourceScope: test
+    context: test(normal catalog writes lexical IDs, preserves annotations, and refuses range churn) >
+      assert.equal > entries.filter
+    parameters:
+      - name: entry
+        type: "{ id: string; context?: string; name?: string; }"
+        required: true
+    return:
+      type: undefined | boolean
+
+  - id: fn:test/identity.test.ts#test-normal-catalog-writes-lexical-IDs-preserves-annotations-and-refuses-range-churn.assert-fallback-ranges-count-UTF-16-positions.entries.some
+    name: null
+    location: test/identity.test.ts
+    sourceScope: test
+    context: test(normal catalog writes lexical IDs, preserves annotations, and refuses range churn) >
+      assert(fallback ranges count UTF-16 positions) > entries.some
+    parameters:
+      - name: entry
+        type: "{ id: string; context?: string; name?: string; }"
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:test/identity.test.ts#test-direct-root-tooling-and-sibling-scopes-use-distinct-lexical-IDs
+    name: null
+    location: test/identity.test.ts
+    sourceScope: test
+    context: test(direct root tooling and sibling scopes use distinct lexical IDs)
+    parameters: []
+    return:
+      type: void
+
+  - id: fn:test/identity.test.ts#test-direct-root-tooling-and-sibling-scopes-use-distinct-lexical-IDs.serverTwin-variable.YAML.parse-readFileSync-join-project-server-.sourcespec-catalogs-functions-catalog.yaml-utf8-.functions.find
+    name: null
+    location: test/identity.test.ts
+    sourceScope: test
+    context: test(direct root tooling and sibling scopes use distinct lexical IDs) > serverTwin variable >
+      YAML.parse(readFileSync(join(project, server/.sourcespec/catalogs/functions-catalog.yaml),
+      utf8)).functions.find
+    parameters:
+      - name: entry
+        type: "{ name: string; }"
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:test/identity.test.ts#test-direct-root-tooling-and-sibling-scopes-use-distinct-lexical-IDs.appTwin-variable.YAML.parse-readFileSync-join-project-app-.sourcespec-catalogs-functions-catalog.yaml-utf8-.functions.find
+    name: null
+    location: test/identity.test.ts
+    sourceScope: test
+    context: test(direct root tooling and sibling scopes use distinct lexical IDs) > appTwin variable >
+      YAML.parse(readFileSync(join(project, app/.sourcespec/catalogs/functions-catalog.yaml),
+      utf8)).functions.find
+    parameters:
+      - name: entry
+        type: "{ name: string; }"
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:test/install.test.mjs#run-variable
+    name: null
+    location: test/install.test.mjs
+    sourceScope: test
+    context: run variable
+    parameters:
+      - name: command
+        type: any
+        required: true
+      - name: args
+        type: any
+        required: true
+      - name: home
+        type: any
+        required: true
+    return:
+      type: any
+
+  - id: fn:test/install.test.mjs#test-home-installed-package-works-outside-the-checkout-unknown-and-symlinked-homes-are-refused
+    name: null
+    location: test/install.test.mjs
+    sourceScope: test
+    context: test(home-installed package works outside the checkout; unknown and symlinked homes are refused)
+    parameters: []
+    return:
+      type: void
+
+  - id: fn:test/requirements.test.mjs#test-Requirement-checks-use-installed-schemas-and-catalog-links-without-JS-TS-source-or-generated-mappings
+    name: null
+    location: test/requirements.test.mjs
+    sourceScope: test
+    context: test(Requirement checks use installed schemas and catalog links without JS/TS source or generated
+      mappings)
+    parameters: []
+    return:
+      type: void
+
+  - id: fn:test/requirements.test.mjs#test-Requirement-checks-use-installed-schemas-and-catalog-links-without-JS-TS-source-or-generated-mappings.run-variable
+    name: null
+    location: test/requirements.test.mjs
+    sourceScope: test
+    context: test(Requirement checks use installed schemas and catalog links without JS/TS source or generated
+      mappings) > run variable
+    parameters:
+      - name: area
+        type: any
+        required: true
+      - name: action
+        type: any
+        required: true
+    return:
+      type: any
+
+  - id: fn:test/schema-fixture.ts#process.on-exit
+    name: null
+    location: test/schema-fixture.ts
+    sourceScope: test
+    context: process.on(exit)
+    parameters: []
+    return:
+      type: any
+
+  - id: fn:test/schemas.test.mjs#test-catalog-checks-use-shared-home-schemas-fail-when-absent-and-never-copy-schemas-into-apps
+    name: null
+    location: test/schemas.test.mjs
+    sourceScope: test
+    context: test(catalog checks use shared home schemas, fail when absent, and never copy schemas into apps)
+    parameters: []
+    return:
+      type: void
+
+  - id: fn:test/schemas.test.mjs#test-catalog-checks-use-shared-home-schemas-fail-when-absent-and-never-copy-schemas-into-apps.run-variable
+    name: null
+    location: test/schemas.test.mjs
+    sourceScope: test
+    context: test(catalog checks use shared home schemas, fail when absent, and never copy schemas into apps) >
+      run variable
+    parameters:
+      - name: env
+        type: any
+        required: true
+      - name: action
+        type: any
+        required: true
+    return:
+      type: any
+
+  - id: fn:test/tests.test.ts#run-variable
+    name: null
+    location: test/tests.test.ts
+    sourceScope: test
+    context: run variable
+    parameters:
+      - name: app
+        type: string
+        required: true
+      - name: mode
+        type: '"--check" | "--write"'
+        required: true
+      - name: force
+        type: boolean
+        required: false
+    return:
+      type: any
+
+  - id: fn:test/tests.test.ts#test-inventories-declarations-per-app-preserves-curated-lexical-IDs-and-rejects-ambiguity-removals
+    name: null
+    location: test/tests.test.ts
+    sourceScope: test
+    context: test(inventories declarations per app, preserves curated lexical IDs, and rejects ambiguity/removals)
+    parameters: []
+    return:
+      type: void
+
+  - id: fn:test/tests.test.ts#test-inventories-declarations-per-app-preserves-curated-lexical-IDs-and-rejects-ambiguity-removals.assert.deepEqual.entries.filter
+    name: null
+    location: test/tests.test.ts
+    sourceScope: test
+    context: test(inventories declarations per app, preserves curated lexical IDs, and rejects ambiguity/removals)
+      > assert.deepEqual > entries.filter
+    parameters:
+      - name: entry
+        type: "{ location: string; }"
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:test/tests.test.ts#test-inventories-declarations-per-app-preserves-curated-lexical-IDs-and-rejects-ambiguity-removals.assert.deepEqual.entries.filter-.map
+    name: null
+    location: test/tests.test.ts
+    sourceScope: test
+    context: test(inventories declarations per app, preserves curated lexical IDs, and rejects ambiguity/removals)
+      > assert.deepEqual > entries.filter().map
+    parameters:
+      - name: entry
+        type: "{ name: string; }"
+        required: true
+    return:
+      type: string
+
+  - id: fn:test/tests.test.ts#test-inventories-declarations-per-app-preserves-curated-lexical-IDs-and-rejects-ambiguity-removals.assert.entries.slice-0-4-.every
+    name: null
+    location: test/tests.test.ts
+    sourceScope: test
+    context: test(inventories declarations per app, preserves curated lexical IDs, and rejects ambiguity/removals)
+      > assert > entries.slice(0, 4).every
+    parameters:
+      - name: entry
+        type: "{ suite?: string[]; }"
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:test/tests.test.ts#test-inventories-declarations-per-app-preserves-curated-lexical-IDs-and-rejects-ambiguity-removals.assert.entries.every@utf16:3059-3191:ArrowFunction
+    name: null
+    location: test/tests.test.ts
+    sourceScope: test
+    context: test(inventories declarations per app, preserves curated lexical IDs, and rejects ambiguity/removals)
+      > assert > entries.every > @utf16:3059-3191:ArrowFunction
+    parameters:
+      - name: entry
+        type: "{ kind: string; description: string; }"
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:test/tests.test.ts#test-inventories-declarations-per-app-preserves-curated-lexical-IDs-and-rejects-ambiguity-removals.assert.entries.every@utf16:3219-3272:ArrowFunction
+    name: null
+    location: test/tests.test.ts
+    sourceScope: test
+    context: test(inventories declarations per app, preserves curated lexical IDs, and rejects ambiguity/removals)
+      > assert > entries.every > @utf16:3219-3272:ArrowFunction
+    parameters:
+      - name: entry
+        type: "{ name: string; }"
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:test/tests.test.ts#test-inventories-declarations-per-app-preserves-curated-lexical-IDs-and-rejects-ambiguity-removals.ids-variable.entries.map
+    name: null
+    location: test/tests.test.ts
+    sourceScope: test
+    context: test(inventories declarations per app, preserves curated lexical IDs, and rejects ambiguity/removals)
+      > ids variable > entries.map
+    parameters:
+      - name: entry
+        type: "{ id: string; }"
+        required: true
+    return:
+      type: string
+
+  - id: fn:test/tests.test.ts#test-inventories-declarations-per-app-preserves-curated-lexical-IDs-and-rejects-ambiguity-removals.assert.deepEqual.YAML.parse-readFileSync-catalog-utf8-.tests.map
+    name: null
+    location: test/tests.test.ts
+    sourceScope: test
+    context: test(inventories declarations per app, preserves curated lexical IDs, and rejects ambiguity/removals)
+      > assert.deepEqual > YAML.parse(readFileSync(catalog, utf8)).tests.map
+    parameters:
+      - name: entry
+        type: "{ id: string; }"
+        required: true
+    return:
+      type: string
+
+  - id: fn:test/tests.test.ts#test-inventories-declarations-per-app-preserves-curated-lexical-IDs-and-rejects-ambiguity-removals.assert.deepEqual.entries.map
+    name: null
+    location: test/tests.test.ts
+    sourceScope: test
+    context: test(inventories declarations per app, preserves curated lexical IDs, and rejects ambiguity/removals)
+      > assert.deepEqual > entries.map
+    parameters:
+      - name: entry
+        type: "{ id: string; }"
+        required: true
+    return:
+      type: string
+
+  - id: fn:test/tests.test.ts#test-inventories-declarations-per-app-preserves-curated-lexical-IDs-and-rejects-ambiguity-removals.assert.replaced.some
+    name: null
+    location: test/tests.test.ts
+    sourceScope: test
+    context: test(inventories declarations per app, preserves curated lexical IDs, and rejects ambiguity/removals)
+      > assert > replaced.some
+    parameters:
+      - name: entry
+        type: "{ id: string; description: string; kind: string; }"
+        required: true
+    return:
+      type: boolean
+
+  - id: fn:test/tests.test.ts#test-normal-generation-refuses-normalized-title-and-path-collisions
+    name: null
+    location: test/tests.test.ts
+    sourceScope: test
+    context: test(normal generation refuses normalized title and path collisions)
+    parameters: []
+    return:
+      type: void

@@ -40,7 +40,10 @@ if (!existsSync(join(projectRoot, 'package.json')) || !existsSync(join(projectRo
   throw new Error('The project needs a package.json and tsconfig.json')
 }
 if (standalone && existsSync(join(projectRoot, 'pnpm-workspace.yaml'))) {
-  throw new Error('Pass a single app root (such as apps/api), not the monorepo root')
+  const workspace = YAML.parse(readFileSync(join(projectRoot, 'pnpm-workspace.yaml'), 'utf8'))
+  if (!Array.isArray(workspace?.packages) || workspace.packages.length !== 1 || workspace.packages[0] !== '.') {
+    throw new Error('Pass a single app root (such as apps/api), not the monorepo root')
+  }
 }
 const scopePath = scoped ? args[3] : '.'
 const rootOnly = scoped && scopePath === '@root'

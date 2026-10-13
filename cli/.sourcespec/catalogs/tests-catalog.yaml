@@ -1,0 +1,73 @@
+# Readable lexical test-declaration inventory. Curate descriptions and kinds before using as evidence pointers.
+tests:
+  - id: test:test/catalog-integration.test.mjs#readable-lexical-IDs-expose-ownership-and-fail-closed-when-a-range-shifts
+    name: readable lexical IDs expose ownership and fail closed when a range shifts
+    description: Exercises lexical IDs, UTF-16 fallbacks, annotation retention, fail-closed refreshes, and forced replacement through the CLI.
+    kind: integration
+    location: test/catalog-integration.test.mjs
+
+  - id: test:test/classification.test.ts#classifies-only-invoked-boundaries-and-reports-genuinely-unresolved-tests
+    name: classifies only invoked boundaries and reports genuinely unresolved tests
+    description: Exercises test-kind inference for invoked UI/API boundaries and review of mixed or unresolved cases.
+    kind: integration
+    location: test/classification.test.ts
+
+  - id: test:test/functions.test.ts#inventories-one-app-preserves-lexical-IDs-and-annotations-and-refuses-silent-removals
+    name: inventories one app, preserves lexical IDs and annotations, and refuses silent removals
+    description: Exercises single-app function discovery, catalog formatting, reviewed metadata, and refusal of stale IDs.
+    kind: integration
+    location: test/functions.test.ts
+
+  - id: test:test/functions.test.ts#binds-decorated-fields-class-callbacks-and-default-exports-across-harmless-reordering
+    name: binds decorated fields, class callbacks, and default exports across harmless reordering
+    description: Exercises callable contexts, signature-only exclusion, and stable lexical IDs after reordering.
+    kind: integration
+    location: test/functions.test.ts
+
+  - id: test:test/functions.test.ts#probes-a-monorepo-owned-scope-before-writing-including-assignment-callbacks-and-source-ownership
+    name: probes a monorepo-owned scope before writing, including assignment callbacks and source ownership
+    description: Exercises scoped discovery, exclusions, provenance, range fallbacks, and refusal of a multi-app root.
+    kind: integration
+    location: test/functions.test.ts
+
+  - id: test:test/identity.test.ts#normal-catalog-writes-lexical-IDs-preserves-annotations-and-refuses-range-churn
+    name: normal catalog writes lexical IDs, preserves annotations, and refuses range churn
+    description: Exercises lexical IDs, UTF-16 range fallback, preserved annotations, and refusal of shifted IDs.
+    kind: integration
+    location: test/identity.test.ts
+
+  - id: test:test/identity.test.ts#direct-root-tooling-and-sibling-scopes-use-distinct-lexical-IDs
+    name: direct root tooling and sibling scopes use distinct lexical IDs
+    description: Exercises root-only tooling and distinct sibling-scope function identities.
+    kind: integration
+    location: test/identity.test.ts
+
+  - id: test:test/install.test.mjs#home-installed-package-works-outside-the-checkout-unknown-and-symlinked-homes-are-refused
+    name: home-installed package works outside the checkout; unknown and symlinked homes are refused
+    description: Installs into a disposable home, exercises the packaged CLI, and rejects unsafe installation targets.
+    kind: integration
+    location: test/install.test.mjs
+
+  - id: test:test/requirements.test.mjs#Requirement-checks-use-installed-schemas-and-catalog-links-without-JS-TS-source-or-generated-mappings
+    name: Requirement checks use installed schemas and catalog links without JS/TS source or generated mappings
+    description: Exercises schema validation and link resolution against language-neutral catalogs without rewriting Requirements.
+    kind: integration
+    location: test/requirements.test.mjs
+
+  - id: test:test/schemas.test.mjs#catalog-checks-use-shared-home-schemas-fail-when-absent-and-never-copy-schemas-into-apps
+    name: catalog checks use shared home schemas, fail when absent, and never copy schemas into apps
+    description: Exercises missing, installed, and changed shared schemas for catalog validation without app-local schema copies.
+    kind: integration
+    location: test/schemas.test.mjs
+
+  - id: test:test/tests.test.ts#inventories-declarations-per-app-preserves-curated-lexical-IDs-and-rejects-ambiguity-removals
+    name: inventories declarations per app, preserves curated lexical IDs, and rejects ambiguity/removals
+    description: Exercises static test discovery, suite IDs, curation, fail-closed refresh, and explicit forced replacement.
+    kind: integration
+    location: test/tests.test.ts
+
+  - id: test:test/tests.test.ts#normal-generation-refuses-normalized-title-and-path-collisions
+    name: normal generation refuses normalized title and path collisions
+    description: Exercises normalized test-title and path collisions and preservation of the prior catalog.
+    kind: integration
+    location: test/tests.test.ts
